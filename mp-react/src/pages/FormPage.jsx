@@ -232,11 +232,16 @@ export default function FormPage() {
       setUploadingFoto(true)
       const tempId = osId || `temp_${Date.now()}`
       try {
-        const uploaded = await Promise.all(fotos.map(f => uploadFoto(f.file, tempId)))
+        const timeout = new Promise((_, rej) =>
+          setTimeout(() => rej(new Error('timeout')), 15000)
+        )
+        const uploaded = await Promise.race([
+          Promise.all(fotos.map(f => uploadFoto(f.file, tempId))),
+          timeout,
+        ])
         photoUrls = [...photoUrls, ...uploaded]
       } catch (e) {
-        console.warn('Foto upload failed:', e.message)
-        // Continue without photos
+        console.warn('Foto upload falhou, continuando sem fotos:', e.message)
       }
       setUploadingFoto(false)
     }
