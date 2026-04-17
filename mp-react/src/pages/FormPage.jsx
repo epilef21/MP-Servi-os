@@ -101,11 +101,13 @@ export default function FormPage() {
   const [cepLoading,   setCepLoading]   = useState(false)
   const enderecoRef    = useRef(null)
 
-  // Signatures — use refs only, no state on draw
+  // Signatures
   const sigPrestRef    = useRef(null)
   const sigSegRef      = useRef(null)
   const [hasSigPrest,  setHasSigPrest]  = useState(false)
   const [hasSigSeg,    setHasSigSeg]    = useState(false)
+  const [sigPrestData, setSigPrestData] = useState('')
+  const [sigSegData,   setSigSegData]   = useState('')
 
   // ── Online/offline detection ─────────────────────────────────
   useEffect(() => {
@@ -255,8 +257,8 @@ export default function FormPage() {
       endereco: form.endereco + (form.numero ? ', ' + form.numero : ''),
       checkup:              checkupList,
       fotos:                photoUrls,
-      assinatura_prestador: hasSigPrest ? sigPrestRef.current.toDataURL('image/png') : '',
-      assinatura_segurado:  hasSigSeg   ? sigSegRef.current.toDataURL('image/png')   : '',
+      assinatura_prestador: sigPrestData,
+      assinatura_segurado:  sigSegData,
       status:               'pendente',
     })
 
@@ -300,6 +302,7 @@ export default function FormPage() {
     setForm(INITIAL); setCheckup({}); setFotos([]); setFotosUrls([])
     setSubmitted(false); setSubmitting(false); setProgress(0)
     setHasSigPrest(false); setHasSigSeg(false)
+    setSigPrestData(''); setSigSegData('')
     sigPrestRef.current?.clear(); sigSegRef.current?.clear()
     window.history.replaceState({},'','/')
   }
@@ -640,7 +643,7 @@ export default function FormPage() {
                 ref={sigPrestRef}
                 penColor="#1a3a5c"
                 canvasProps={{ style:{ width:'100%', height:'100%' } }}
-                onEnd={() => setHasSigPrest(true)}   /* ← só atualiza no fim do traço */
+                onEnd={() => { setHasSigPrest(true); setSigPrestData(sigPrestRef.current.toDataURL('image/png')) }}
               />
               {!hasSigPrest && (
                 <div className="sig-placeholder"><span>✍️</span><span>Assine com o dedo ou mouse</span></div>
@@ -659,7 +662,7 @@ export default function FormPage() {
                 ref={sigSegRef}
                 penColor="#1a3a5c"
                 canvasProps={{ style:{ width:'100%', height:'100%' } }}
-                onEnd={() => setHasSigSeg(true)}   /* ← só atualiza no fim do traço */
+                onEnd={() => { setHasSigSeg(true); setSigSegData(sigSegRef.current.toDataURL('image/png')) }}
               />
               {!hasSigSeg && (
                 <div className="sig-placeholder"><span>✍️</span><span>Assine com o dedo ou mouse</span></div>
