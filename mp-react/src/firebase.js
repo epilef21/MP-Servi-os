@@ -29,6 +29,13 @@ const firebaseConfig = {
   appId:             import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  throw new Error(
+    'Variáveis de ambiente do Firebase não encontradas. ' +
+    'Configure VITE_FIREBASE_API_KEY e VITE_FIREBASE_PROJECT_ID no painel da Vercel.'
+  )
+}
+
 const app = initializeApp(firebaseConfig)
 
 export const db      = getFirestore(app)
