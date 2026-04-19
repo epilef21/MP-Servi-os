@@ -1,0 +1,120 @@
+// ============================================================
+// REGRAS DE SEGURANÇA DO FIRESTORE — Multi-tenant
+// Versão: v3 (Firebase Auth + isolamento por empresa)
+//
+// Estrutura de coleções:
+//   empresas/{empresaId}/                → dados da empresa
+//   empresas/{empresaId}/checklist/{id}  → OS da empresa
+//   empresas/{empresaId}/config/geral    → config/personalização
+//   usuarios/{uid}                       → vínculo uid → empresaId
+// ============================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Funções auxiliares ─────────────────────────────────
+
+    // Verifica se o usuário está autenticado
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    // Verifica se o usuário autenticado é o superadmin
+    // O e-mail do superadmin é comparado com o valor gravado
+    // no documento /config/superadmin para evitar hardcode nas regras
+    function eSuperAdmin() {
+      return estaAutenticado() &&
+        request.auth.token.email == get(/databases/$(database)/documents/config/superadmin).data.email;
+    }
+
+    // Verifica se o uid autenticado é o dono da empresa
+    // (uid do Auth == empresaId, conforme definido no cadastro)
+    function eDonoEmpresa(empresaId) {
+      return estaAutenticado() && request.auth.uid == empresaId;
+    }
+
+    // ── /config — documento de configuração do superadmin ──
+    // Apenas o superadmin lê/escreve.
+    // Esse documento deve ser criado manualmente no console Firebase:
+    //   /config/superadmin → { email: "tvf23407@gmail.com" }
+    match /config/{docId} {
+      allow read:  if eSuperAdmin();
+      allow write: if eSuperAdmin();
+    }
+
+    // ── /usuarios/{uid} ────────────────────────────────────
+    // Criado no cadastro para vincular uid → empresaId.
+    // O próprio usuário pode criar e ler o seu documento.
+    // SuperAdmin pode ler todos.
+    match /usuarios/{uid} {
+      allow read:   if estaAutenticado() && (request.auth.uid == uid || eSuperAdmin());
+      allow create: if estaAutenticado() && request.auth.uid == uid;
+      allow update: if eSuperAdmin();
+      allow delete: if eSuperAdmin();
+    }
+
+    // ── /empresas/{empresaId} ──────────────────────────────
+    match /empresas/{empresaId} {
+
+      // Documento raiz da empresa
+      // - Qualquer um pode ler (necessário para o useEmpresa buscar pelo slug)
+      // - Apenas o dono ou superadmin pode criar/atualizar
+      // - Apenas o superadmin pode excluir
+      allow read:   if true;
+      allow create: if estaAutenticado() && request.auth.uid == empresaId;
+      allow update: if eDonoEmpresa(empresaId) || eSuperAdmin();
+      allow delete: if eSuperAdmin();
+
+      // ── /empresas/{empresaId}/config/{docId} ────────────
+      // Configurações de personalização da empresa.
+      // - Qualquer um pode ler (FormPage usa para exibir nome, telefone, cor)
+      // - Apenas o dono ou superadmin pode escrever
+      match /config/{docId} {
+        allow read:   if true;
+        allow create: if estaAutenticado() && request.auth.uid == empresaId;
+        allow update: if eDonoEmpresa(empresaId) || eSuperAdmin();
+        allow delete: if eSuperAdmin();
+      }
+
+      // ── /empresas/{empresaId}/checklist/{osId} ──────────
+      match /checklist/{osId} {
+
+        // Leitura: apenas o dono da empresa ou superadmin
+        // O técnico NÃO precisa ler OS — só cria/atualiza
+        allow read: if eDonoEmpresa(empresaId) || eSuperAdmin();
+
+        // Criação: qualquer um pode criar (formulário público do técnico)
+        // Garante que o campo "status" inicial seja "pendente" ou "aguardando_tecnico"
+        // e que não venha com campos financeiros preenchidos
+        allow create: if
+          !('mo_seguradora'      in request.resource.data) &&
+          !('valor_prestador'    in request.resource.data) &&
+          !('valor_deslocamento' in request.resource.data) &&
+          (
+            !('status' in request.resource.data) ||
+            request.resource.data.status in ['pendente', 'aguardando_tecnico']
+          );
+
+        // Atualização pelo técnico (sem autenticação):
+        // Só pode atualizar campos do formulário — não campos financeiros nem status admin
+        // Atualização pelo admin/superadmin: irrestrita dentro da empresa
+        allow update: if
+          // Admin da empresa ou superadmin podem atualizar qualquer campo
+          eDonoEmpresa(empresaId) || eSuperAdmin()
+          ||
+          // Técnico (sem auth) pode atualizar apenas se NÃO tocar em campos sensíveis
+          (
+            !('mo_seguradora'      in request.resource.data) &&
+            !('valor_prestador'    in request.resource.data) &&
+            !('valor_deslocamento' in request.resource.data) &&
+            request.resource.data.status in ['pendente', 'aguardando_tecnico']
+          );
+
+        // Exclusão: apenas superadmin
+        allow delete: if eSuperAdmin();
+      }
+    }
+  }
+}

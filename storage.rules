@@ -1,0 +1,24 @@
+// ============================================================
+// REGRAS DO FIREBASE STORAGE — Multi-tenant
+// Fotos isoladas por empresa: empresas/{empresaId}/fotos/...
+// ============================================================
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Fotos das OS por empresa ───────────────────────────
+    // Qualquer um pode fazer upload (técnico sem login)
+    // Qualquer um pode ler (necessário para exibir no admin e no PDF)
+    // Apenas o dono da empresa ou superadmin pode excluir
+    match /empresas/{empresaId}/fotos/{allPaths=**} {
+      allow read:   if true;
+      allow create: if true;
+      allow delete: if
+        request.auth != null &&
+        (request.auth.uid == empresaId ||
+         request.auth.token.email == 'tvf23407@gmail.com');
+    }
+  }
+}

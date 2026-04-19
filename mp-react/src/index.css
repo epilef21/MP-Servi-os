@@ -386,10 +386,26 @@ body {
 .login-box p { color:var(--muted); font-size:.88rem; margin-bottom:28px; }
 .login-box .field { text-align:left; margin-bottom:14px; }
 .login-btn { width:100%; background:var(--primary); color:#fff; border:none; border-radius:var(--r-sm); padding:14px; font-family:'Barlow Condensed',sans-serif; font-size:1.1rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; cursor:pointer; transition:all .2s; }
-.login-btn:hover { background:var(--primary-h); }
+.login-btn:hover:not(:disabled) { background:var(--primary-h); }
+.login-btn:disabled { opacity:.65; cursor:not-allowed; }
 .login-err { color:var(--danger); font-size:.82rem; margin-top:10px; }
 .login-back { display:block; margin-top:18px; color:var(--muted); font-size:.82rem; text-decoration:none; }
 .login-back:hover { color:var(--primary); }
+
+/* ── LOGIN / CADASTRO — classes utilitárias das novas páginas ── */
+.login-container { min-height:100vh; background:linear-gradient(135deg,#0f2236,#1a3a5c); display:flex; align-items:center; justify-content:center; padding:20px; }
+.login-card { background:#fff; border-radius:var(--r-lg); padding:40px 36px; width:100%; max-width:420px; box-shadow:0 24px 64px rgba(0,0,0,.3); }
+.login-header { text-align:center; margin-bottom:28px; }
+.login-icon { font-size:48px; margin-bottom:10px; }
+.login-title { font-family:'Barlow Condensed',sans-serif; font-size:1.7rem; font-weight:900; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+.login-subtitle { color:var(--muted); font-size:.88rem; }
+.form-group { margin-bottom:16px; }
+.form-label { display:block; font-size:.78rem; font-weight:700; color:var(--text); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
+.form-input { width:100%; border:1.5px solid var(--border); border-radius:var(--r-sm); padding:10px 13px; font-size:.93rem; font-family:'Barlow',sans-serif; color:var(--text); background:var(--light); outline:none; transition:border-color .2s; box-sizing:border-box; }
+.form-input:focus { border-color:var(--primary); background:#fff; }
+.form-input:disabled { opacity:.6; cursor:not-allowed; }
+.alert { border-radius:var(--r-sm); padding:11px 14px; font-size:.87rem; font-weight:600; }
+.alert-danger { background:var(--danger-bg); border:1px solid #fcc; color:var(--danger); }
 
 /* ── MISC ── */
 .err-msg { background:var(--danger-bg); border:1px solid #fcc; border-radius:var(--r-sm); padding:10px 14px; color:var(--danger); font-size:.85rem; margin-bottom:14px; }
