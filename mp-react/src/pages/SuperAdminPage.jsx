@@ -146,9 +146,11 @@ export default function SuperAdminPage() {
       {/* ── Topbar ── */}
       <div className="topbar">
         <div className="topbar-left">
-          <div className="topbar-icon">👑</div>
+          <div className="topbar-icon" style={{ background: 'transparent', padding: 0 }}>
+            <img src="/logo.png" height="32" alt="AssistHub" style={{ display: 'block' }} />
+          </div>
           <div>
-            <div className="topbar-title">SuperAdmin</div>
+            <div className="topbar-title">AssistHub <span style={{ fontSize: '0.75rem', opacity: 0.6 }}>SuperAdmin</span></div>
             <div className="topbar-sub">Painel geral de empresas</div>
           </div>
         </div>

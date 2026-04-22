@@ -20,5 +20,18 @@ service firebase.storage {
         (request.auth.uid == empresaId ||
          request.auth.token.email == 'tvf23407@gmail.com');
     }
+
+    // ── Logo da empresa ────────────────────────────────────
+    // Apenas o dono autenticado pode fazer upload e atualizar
+    // Qualquer um pode ler (exibida na sidebar e no formulário público)
+    match /empresas/{empresaId}/{fileName} {
+      allow read:   if true;
+      allow create: if request.auth != null && request.auth.uid == empresaId;
+      allow update: if request.auth != null && request.auth.uid == empresaId;
+      allow delete: if
+        request.auth != null &&
+        (request.auth.uid == empresaId ||
+         request.auth.token.email == 'tvf23407@gmail.com');
+    }
   }
 }

@@ -12,6 +12,7 @@ import {
   getDoc,
   updateDoc,
   setDoc,
+  deleteDoc,
   doc,
   serverTimestamp,
   query,
@@ -64,7 +65,7 @@ export const auth    = getAuth(app)
 
 // ── Re-exportações do Firestore ──────────────────────────────
 export {
-  collection, addDoc, getDocs, getDoc, updateDoc, setDoc,
+  collection, addDoc, getDocs, getDoc, updateDoc, setDoc, deleteDoc,
   doc, serverTimestamp, query, orderBy, where, limit, getCountFromServer,
   storageRef, uploadBytes, getDownloadURL,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,

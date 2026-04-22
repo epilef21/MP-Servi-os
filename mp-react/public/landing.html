@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AssistHub — Do acionamento da seguradora ao relatório assinado em menos de 5 minutos. Digitalize o fluxo de atendimento do seu prestador de serviços." />
+  <title>AssistHub — Gestão de OS para Prestadores de Serviços</title>
+  <link rel="icon" type="image/png" href="/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:      #1a3fa8;
+      --primary-h:    #2550c8;
+      --primary-dark: #0d2470;
+      --accent:       #f05a1a;
+      --accent-h:     #ff6b2b;
+      --bg-dark:      #0B1F3A;
+      --bg-dark2:     #0F2A52;
+      --text-light:   rgba(255,255,255,0.85);
+      --text-muted:   rgba(255,255,255,0.55);
+      --glass:        rgba(255,255,255,0.05);
+      --glass-border: rgba(255,255,255,0.10);
+      --r:            16px;
+      --r-sm:         10px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      background: rgba(11,31,58,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 0 5%;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .header-logo img { height: 36px; width: auto; }
+    .header-logo span {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+
+    .nav { display: flex; align-items: center; gap: 32px; }
+    .nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav a:hover { color: #fff; }
+
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .btn-login {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .btn-login:hover { color: #fff; }
+
+    .btn-cta-header {
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-cta-header:hover {
+      background: var(--accent-h);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(240,90,26,0.4);
+    }
+
+    /* hamburger */
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 68px; left: 0; right: 0;
+      background: rgba(11,31,58,0.98);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 20px 5%;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 999;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--glass-border);
+      transition: color 0.2s;
+    }
+    .mobile-menu a:hover { color: #fff; }
+    .mobile-menu .btn-cta-header { text-align: center; border-radius: 8px; }
+
+    /* ── SECTIONS ── */
+    section { padding: 96px 5%; }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 160px 5% 96px;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-dark2) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px; right: -200px;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(26,63,168,0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -100px; left: -100px;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(240,90,26,0.10) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(240,90,26,0.12);
+      border: 1px solid rgba(240,90,26,0.3);
+      color: #ff8c5a;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 900;
+      line-height: 1.15;
+      color: #fff;
+      margin-bottom: 20px;
+      letter-spacing: -0.5px;
+    }
+    .hero h1 span { color: var(--accent); }
+
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 32px;
+      max-width: 520px;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .btn-primary-lg {
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      padding: 15px 30px;
+      border-radius: var(--r-sm);
+      font-size: 1rem;
+      font-weight: 700;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 24px rgba(240,90,26,0.4);
+    }
+    .btn-primary-lg:hover {
+      background: var(--accent-h);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(240,90,26,0.5);
+    }
+
+    .btn-outline-lg {
+      background: transparent;
+      color: #fff;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: var(--r-sm);
+      font-size: 1rem;
+      font-weight: 600;
+      border: 1.5px solid rgba(255,255,255,0.25);
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-outline-lg:hover {
+      border-color: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .hero-badges {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .hero-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .hero-badge i { color: #4ade80; font-size: 0.85rem; }
+
+    /* ── MOCKUP ── */
+    .mockup {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+    .mockup-bar {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 16px;
+    }
+    .mockup-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .mockup-dot:nth-child(1) { background: #ff5f57; }
+    .mockup-dot:nth-child(2) { background: #febc2e; }
+    .mockup-dot:nth-child(3) { background: #28c840; }
+
+    .mockup-stats {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .mock-stat {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .mock-stat-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .mock-stat-value {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #fff;
+    }
+    .mock-stat-value.green { color: #4ade80; }
+    .mock-stat-value.orange { color: var(--accent); }
+
+    .mockup-os-list { display: flex; flex-direction: column; gap: 8px; }
+    .mock-os {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .mock-os-info { flex: 1; min-width: 0; }
+    .mock-os-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mock-os-seg {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .mock-badge {
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .mock-badge.pend  { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+    .mock-badge.proc  { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+    .mock-badge.env   { background: rgba(96,165,250,0.15); color: #60a5fa; border: 1px solid rgba(96,165,250,0.3); }
+    .mock-badge.agua  { background: rgba(240,90,26,0.15);  color: #ff8c5a; border: 1px solid rgba(240,90,26,0.3); }
+
+    /* ── SECTION TITLES ── */
+    .section-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(26,63,168,0.2);
+      border: 1px solid rgba(26,63,168,0.4);
+      color: #7eb3ff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: clamp(1.7rem, 3vw, 2.5rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 14px;
+      letter-spacing: -0.3px;
+    }
+    .section-title span { color: var(--accent); }
+    .section-sub {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 560px;
+    }
+    .section-head { margin-bottom: 56px; }
+    .section-head.center { text-align: center; }
+    .section-head.center .section-sub { margin: 0 auto; }
+
+    /* ── COMO FUNCIONA ── */
+    .steps-section {
+      background: linear-gradient(180deg, var(--bg-dark2) 0%, var(--bg-dark) 100%);
+    }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 28px;
+      margin-top: 56px;
+    }
+    .step-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r);
+      padding: 32px 28px;
+      backdrop-filter: blur(10px);
+      position: relative;
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .step-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(26,63,168,0.5);
+    }
+    .step-number {
+      width: 48px; height: 48px;
+      background: var(--accent);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 16px rgba(240,90,26,0.35);
+    }
+    .step-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .step-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .step-connector {
+      display: none;
+    }
+
+    /* ── FUNCIONALIDADES ── */
+    .features-section {
+      background: var(--bg-dark);
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(5,1fr);
+      gap: 16px;
+    }
+    .feature-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r);
+      padding: 24px 20px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s;
+      cursor: default;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(26,63,168,0.5);
+      background: rgba(255,255,255,0.08);
+    }
+    .feature-icon {
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .feature-card h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .feature-card p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* ── PARA QUEM É ── */
+    .forwhom-section {
+      background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-dark2) 100%);
+    }
+    .seguradoras-grid {
+      display: grid;
+      grid-template-columns: repeat(5,1fr);
+      gap: 16px;
+      margin-top: 56px;
+    }
+    .seguradora-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r);
+      padding: 28px 20px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s;
+    }
+    .seguradora-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(240,90,26,0.4);
+    }
+    .seguradora-card .seg-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    .seguradora-card h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .seguradora-card p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── DEPOIMENTO ── */
+    .testimonial-section {
+      background: var(--bg-dark2);
+      padding: 80px 5%;
+    }
+    .testimonial-card {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r);
+      padding: 48px;
+      backdrop-filter: blur(10px);
+      text-align: center;
+      position: relative;
+    }
+    .testimonial-card::before {
+      content: '"';
+      position: absolute;
+      top: -20px; left: 40px;
+      font-size: 8rem;
+      color: var(--accent);
+      opacity: 0.3;
+      font-family: Georgia, serif;
+      line-height: 1;
+    }
+    .testimonial-text {
+      font-size: 1.2rem;
+      color: var(--text-light);
+      line-height: 1.8;
+      font-style: italic;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 1;
+    }
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .author-avatar {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .author-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .author-role {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .testimonial-stars {
+      color: #fbbf24;
+      font-size: 1rem;
+      margin-bottom: 20px;
+    }
+
+    /* ── PREÇOS ── */
+    .pricing-section {
+      background: var(--bg-dark);
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 24px;
+      margin-top: 56px;
+    }
+    .pricing-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r);
+      padding: 36px 28px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s;
+      position: relative;
+    }
+    .pricing-card:hover { transform: translateY(-5px); }
+    .pricing-card.popular {
+      border-color: var(--accent);
+      background: rgba(240,90,26,0.06);
+    }
+    .popular-badge {
+      position: absolute;
+      top: -13px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #fff;
+      padding: 4px 18px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .pricing-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .pricing-price {
+      margin-bottom: 4px;
+    }
+    .pricing-price .currency {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      vertical-align: top;
+      margin-top: 8px;
+      display: inline-block;
+    }
+    .pricing-price .amount {
+      font-size: 3rem;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1;
+    }
+    .pricing-price .period {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .pricing-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      line-height: 1.5;
+      min-height: 40px;
+    }
+    .pricing-divider {
+      height: 1px;
+      background: var(--glass-border);
+      margin-bottom: 24px;
+    }
+    .pricing-features {
+      list-style: none;
+      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .pricing-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.875rem;
+      color: var(--text-light);
+    }
+    .pricing-features li i {
+      color: #4ade80;
+      font-size: 0.8rem;
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+    .btn-pricing {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      padding: 13px;
+      border-radius: var(--r-sm);
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+    .btn-pricing.outline {
+      border: 1.5px solid rgba(255,255,255,0.2);
+      color: #fff;
+    }
+    .btn-pricing.outline:hover {
+      border-color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.05);
+    }
+    .btn-pricing.filled {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(240,90,26,0.4);
+    }
+    .btn-pricing.filled:hover {
+      background: var(--accent-h);
+      transform: translateY(-1px);
+    }
+
+    .pricing-note {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .pricing-note i { color: #4ade80; margin-right: 5px; }
+
+    /* ── FAQ ── */
+    .faq-section {
+      background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-dark2) 100%);
+    }
+    .faq-list {
+      max-width: 720px;
+      margin: 56px auto 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .faq-item {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      color: #fff;
+      text-align: left;
+      padding: 20px 24px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      transition: background 0.2s;
+    }
+    .faq-question:hover { background: rgba(255,255,255,0.04); }
+    .faq-question i {
+      color: var(--accent);
+      font-size: 0.9rem;
+      transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-question i { transform: rotate(180deg); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+    .faq-item.open .faq-answer { max-height: 200px; }
+    .faq-answer p {
+      padding: 0 24px 20px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* ── CTA FINAL ── */
+    .cta-section {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      text-align: center;
+      padding: 96px 5%;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: -100px; right: -100px;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(240,90,26,0.2) 0%, transparent 70%);
+    }
+    .cta-section h2 {
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .cta-section p {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 36px;
+      position: relative;
+    }
+    .cta-btns {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: #070f1e;
+      padding: 40px 5%;
+      border-top: 1px solid var(--glass-border);
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .footer-logo img { height: 30px; }
+    .footer-logo span {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: #fff; }
+    .footer-copy {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      width: 100%;
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    /* ── WHATSAPP FLUTUANTE ── */
+    .whatsapp-float {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 9999;
+      width: 56px;
+      height: 56px;
+      background: #25D366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: #fff;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(37,211,102,0.5);
+      transition: all 0.3s;
+      animation: pulse-green 2.5s infinite;
+    }
+    .whatsapp-float:hover {
+      transform: scale(1.12);
+      box-shadow: 0 6px 28px rgba(37,211,102,0.7);
+    }
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 4px 20px rgba(37,211,102,0.5); }
+      50% { box-shadow: 0 4px 32px rgba(37,211,102,0.8); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(3,1fr); }
+      .seguradoras-grid { grid-template-columns: repeat(3,1fr); }
+    }
+
+    @media (max-width: 768px) {
+      section { padding: 72px 5%; }
+      .hero { padding: 120px 5% 72px; }
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+      .mockup { display: none; }
+      .nav { display: none; }
+      .hamburger { display: block; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: repeat(2,1fr); }
+      .seguradoras-grid { grid-template-columns: repeat(2,1fr); }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 420px; margin-left: auto; margin-right: auto; }
+      .testimonial-card { padding: 32px 24px; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 1.8rem; }
+      .features-grid { grid-template-columns: 1fr; }
+      .seguradoras-grid { grid-template-columns: repeat(2,1fr); }
+      .hero-btns { flex-direction: column; }
+      .btn-primary-lg, .btn-outline-lg { justify-content: center; }
+      .header-actions .btn-cta-header { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header class="header" id="header">
+    <a href="/landing.html" class="header-logo">
+      <img src="/logo.png" alt="AssistHub" />
+      <span>AssistHub</span>
+    </a>
+
+    <nav class="nav">
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#funcionalidades">Funcionalidades</a>
+      <a href="#precos">Preços</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+
+    <div class="header-actions">
+      <a href="/login" class="btn-login">Entrar</a>
+      <a href="/cadastro" class="btn-cta-header">Teste grátis por 15 dias</a>
+    </div>
+
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </header>
+
+  <!-- MENU MOBILE -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#como-funciona" class="mobile-link">Como funciona</a>
+    <a href="#funcionalidades" class="mobile-link">Funcionalidades</a>
+    <a href="#precos" class="mobile-link">Preços</a>
+    <a href="#faq" class="mobile-link">FAQ</a>
+    <a href="/login" class="mobile-link">Entrar</a>
+    <a href="/cadastro" class="btn-cta-header">Teste grátis por 15 dias</a>
+  </div>
+
+  <!-- ── HERO ── -->
+  <section class="hero" id="inicio">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-tag">
+          <i class="fa-solid fa-bolt"></i>
+          Para prestadores de serviços de seguradoras
+        </div>
+
+        <h1>Do acionamento da seguradora ao relatório assinado em <span>menos de 5 minutos</span></h1>
+
+        <p class="hero-sub">
+          Chega de papel, foto no WhatsApp e planilha. O AssistHub digitaliza todo o fluxo
+          de atendimento do seu prestador de serviços.
+        </p>
+
+        <div class="hero-btns">
+          <a href="/cadastro" class="btn-primary-lg">
+            <i class="fa-solid fa-rocket"></i>
+            Começar teste grátis
+          </a>
+          <a href="#como-funciona" class="btn-outline-lg">
+            <i class="fa-solid fa-play"></i>
+            Ver demonstração
+          </a>
+        </div>
+
+        <div class="hero-badges">
+          <div class="hero-badge">
+            <i class="fa-solid fa-circle-check"></i>
+            15 dias grátis
+          </div>
+          <div class="hero-badge">
+            <i class="fa-solid fa-circle-check"></i>
+            Sem instalação
+          </div>
+          <div class="hero-badge">
+            <i class="fa-solid fa-circle-check"></i>
+            Funciona offline
+          </div>
+        </div>
+      </div>
+
+      <!-- MOCKUP VISUAL -->
+      <div class="mockup">
+        <div class="mockup-bar">
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+          <div class="mockup-dot"></div>
+          <span style="margin-left:8px;font-size:0.7rem;color:rgba(255,255,255,0.3);">AssistHub — Painel Admin</span>
+        </div>
+
+        <div class="mockup-stats">
+          <div class="mock-stat">
+            <div class="mock-stat-label">OS este mês</div>
+            <div class="mock-stat-value">38</div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-label">Hoje</div>
+            <div class="mock-stat-value orange">5</div>
+          </div>
+          <div class="mock-stat">
+            <div class="mock-stat-label">Lucro</div>
+            <div class="mock-stat-value green">R$4.2k</div>
+          </div>
+        </div>
+
+        <div class="mockup-os-list">
+          <div class="mock-os">
+            <div class="mock-os-info">
+              <div class="mock-os-name">Maria Aparecida S.</div>
+              <div class="mock-os-seg">Mapfre · #10542</div>
+            </div>
+            <div class="mock-badge proc">Processado</div>
+          </div>
+          <div class="mock-os">
+            <div class="mock-os-info">
+              <div class="mock-os-name">José Carlos Lima</div>
+              <div class="mock-os-seg">Tempo · #10543</div>
+            </div>
+            <div class="mock-badge pend">Pendente</div>
+          </div>
+          <div class="mock-os">
+            <div class="mock-os-info">
+              <div class="mock-os-name">Ana Paula Rodrigues</div>
+              <div class="mock-os-seg">Allianz · #10544</div>
+            </div>
+            <div class="mock-badge agua">Ag. Técnico</div>
+          </div>
+          <div class="mock-os">
+            <div class="mock-os-info">
+              <div class="mock-os-name">Roberto Fonseca</div>
+              <div class="mock-os-seg">Maxpar · #10545</div>
+            </div>
+            <div class="mock-badge env">Enviado</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── COMO FUNCIONA ── -->
+  <section class="steps-section" id="como-funciona">
+    <div class="container">
+      <div class="section-head center">
+        <div class="section-tag"><i class="fa-solid fa-map"></i> Passo a passo</div>
+        <h2 class="section-title">Como funciona o <span>AssistHub</span></h2>
+        <p class="section-sub">Três passos simples para digitalizar seu atendimento do início ao fim.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <h3>Você cria a OS</h3>
+          <p>Recebeu o acionamento da seguradora? Cadastre a OS em segundos e gere um link exclusivo para o técnico com todos os dados já preenchidos.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <h3>Técnico preenche no celular</h3>
+          <p>O técnico abre o link, já encontra os dados do cliente preenchidos, registra o serviço realizado, tira fotos e assina digitalmente na tela.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <h3>Relatório pronto</h3>
+          <p>PDF profissional gerado automaticamente com todas as informações, fotos e assinaturas. Envie para a seguradora com um clique.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FUNCIONALIDADES ── -->
+  <section class="features-section" id="funcionalidades">
+    <div class="container">
+      <div class="section-head center">
+        <div class="section-tag"><i class="fa-solid fa-star"></i> Funcionalidades</div>
+        <h2 class="section-title">Tudo que você precisa em <span>um só lugar</span></h2>
+        <p class="section-sub">Do celular do técnico até o relatório na mão da seguradora, sem complicação.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <span class="feature-icon">📱</span>
+          <h4>Mobile First</h4>
+          <p>Funciona perfeitamente no celular do técnico, sem app para instalar.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🔗</span>
+          <h4>Link Inteligente</h4>
+          <p>Dados do cliente pré-preenchidos. O técnico só descreve e assina.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📸</span>
+          <h4>Fotos do Serviço</h4>
+          <p>Registre tudo com imagens direto do celular no sistema.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">✍️</span>
+          <h4>Assinatura Digital</h4>
+          <p>Prestador e segurado assinam diretamente na tela do celular.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📄</span>
+          <h4>PDF Profissional</h4>
+          <p>Relatório completo gerado automaticamente, pronto para enviar.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🖼️</span>
+          <h4>PNG para WhatsApp</h4>
+          <p>Compartilhe o resumo do atendimento em uma imagem no WhatsApp.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">💰</span>
+          <h4>Lucro Real</h4>
+          <p>Saiba exatamente quanto sobra por atendimento com dashboard financeiro.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📶</span>
+          <h4>Funciona Offline</h4>
+          <p>Sem internet? Os dados são salvos localmente e enviados depois.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">⭐</span>
+          <h4>Avaliação do Segurado</h4>
+          <p>Colete feedback automaticamente após cada atendimento.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🏢</span>
+          <h4>Multi-empresa</h4>
+          <p>Gerencie várias equipes e filiais em um único painel centralizado.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PARA QUEM É ── -->
+  <section class="forwhom-section" id="para-quem">
+    <div class="container">
+      <div class="section-head center">
+        <div class="section-tag"><i class="fa-solid fa-handshake"></i> Para quem é</div>
+        <h2 class="section-title">Integrado ao fluxo de prestadores que atendem</h2>
+        <p class="section-sub">O AssistHub funciona com qualquer seguradora. Você configura as suas.</p>
+      </div>
+
+      <div class="seguradoras-grid">
+        <div class="seguradora-card">
+          <div class="seg-icon">🛡️</div>
+          <h4>Mapfre</h4>
+          <p>Seguros residencial e auto</p>
+        </div>
+        <div class="seguradora-card">
+          <div class="seg-icon">⏱️</div>
+          <h4>Tempo</h4>
+          <p>Assistência 24h</p>
+        </div>
+        <div class="seguradora-card">
+          <div class="seg-icon">🔧</div>
+          <h4>Maxpar</h4>
+          <p>Serviços técnicos</p>
+        </div>
+        <div class="seguradora-card">
+          <div class="seg-icon">🏠</div>
+          <h4>Allianz</h4>
+          <p>Seguro residencial</p>
+        </div>
+        <div class="seguradora-card">
+          <div class="seg-icon">➕</div>
+          <h4>E outras</h4>
+          <p>Você configura qualquer seguradora</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── DEPOIMENTO ── -->
+  <section class="testimonial-section">
+    <div class="container">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+        </div>
+        <p class="testimonial-text">
+          "Antes eu perdia 2 horas por dia com papel e WhatsApp.
+          Hoje são 5 minutos por OS. O técnico preenche tudo pelo celular,
+          eu recebo o relatório pronto e envio direto para a seguradora."
+        </p>
+        <div class="testimonial-author">
+          <div class="author-avatar">C</div>
+          <div>
+            <div class="author-name">Carlos M.</div>
+            <div class="author-role">Prestador de serviços há 8 anos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PREÇOS ── -->
+  <section class="pricing-section" id="precos">
+    <div class="container">
+      <div class="section-head center">
+        <div class="section-tag"><i class="fa-solid fa-tag"></i> Preços</div>
+        <h2 class="section-title">Planos para todo <span>tamanho de operação</span></h2>
+        <p class="section-sub">Comece grátis por 15 dias. Sem cartão de crédito.</p>
+      </div>
+
+      <div class="pricing-grid">
+
+        <!-- BÁSICO -->
+        <div class="pricing-card">
+          <div class="pricing-name">Básico</div>
+          <div class="pricing-price">
+            <span class="currency">R$</span>
+            <span class="amount">97</span>
+            <span class="period">/mês</span>
+          </div>
+          <p class="pricing-desc">Ideal para prestadores individuais que estão começando a digitalizar.</p>
+          <div class="pricing-divider"></div>
+          <ul class="pricing-features">
+            <li><i class="fa-solid fa-check"></i> Até 50 OS por mês</li>
+            <li><i class="fa-solid fa-check"></i> 1 usuário admin</li>
+            <li><i class="fa-solid fa-check"></i> PDF e PNG automáticos</li>
+            <li><i class="fa-solid fa-check"></i> Assinatura digital</li>
+            <li><i class="fa-solid fa-check"></i> Fotos do serviço</li>
+            <li><i class="fa-solid fa-check"></i> Suporte por e-mail</li>
+          </ul>
+          <a href="/cadastro" class="btn-pricing outline">Começar grátis</a>
+        </div>
+
+        <!-- PRO (DESTACADO) -->
+        <div class="pricing-card popular">
+          <div class="popular-badge">Mais popular</div>
+          <div class="pricing-name">Pro</div>
+          <div class="pricing-price">
+            <span class="currency">R$</span>
+            <span class="amount">197</span>
+            <span class="period">/mês</span>
+          </div>
+          <p class="pricing-desc">Para prestadores em crescimento que precisam de mais controle.</p>
+          <div class="pricing-divider"></div>
+          <ul class="pricing-features">
+            <li><i class="fa-solid fa-check"></i> OS ilimitadas</li>
+            <li><i class="fa-solid fa-check"></i> Múltiplos técnicos</li>
+            <li><i class="fa-solid fa-check"></i> Dashboard financeiro</li>
+            <li><i class="fa-solid fa-check"></i> Avaliação de segurados</li>
+            <li><i class="fa-solid fa-check"></i> Histórico por segurado</li>
+            <li><i class="fa-solid fa-check"></i> Suporte prioritário</li>
+          </ul>
+          <a href="/cadastro" class="btn-pricing filled">Começar grátis</a>
+        </div>
+
+        <!-- ENTERPRISE -->
+        <div class="pricing-card">
+          <div class="pricing-name">Enterprise</div>
+          <div class="pricing-price">
+            <span class="currency">R$</span>
+            <span class="amount">397</span>
+            <span class="period">/mês</span>
+          </div>
+          <p class="pricing-desc">Para empresas com múltiplas equipes e necessidade de personalização.</p>
+          <div class="pricing-divider"></div>
+          <ul class="pricing-features">
+            <li><i class="fa-solid fa-check"></i> Tudo do Pro</li>
+            <li><i class="fa-solid fa-check"></i> Multi-empresa</li>
+            <li><i class="fa-solid fa-check"></i> Painel SuperAdmin</li>
+            <li><i class="fa-solid fa-check"></i> Personalização de marca</li>
+            <li><i class="fa-solid fa-check"></i> Relatórios avançados</li>
+            <li><i class="fa-solid fa-check"></i> Suporte dedicado</li>
+          </ul>
+          <a href="/cadastro" class="btn-pricing outline">Começar grátis</a>
+        </div>
+
+      </div>
+
+      <p class="pricing-note">
+        <i class="fa-solid fa-circle-check"></i>
+        Todos os planos incluem 15 dias grátis. Cancele quando quiser, sem multa.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── FAQ ── -->
+  <section class="faq-section" id="faq">
+    <div class="container">
+      <div class="section-head center">
+        <div class="section-tag"><i class="fa-solid fa-circle-question"></i> Dúvidas</div>
+        <h2 class="section-title">Perguntas <span>frequentes</span></h2>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <button class="faq-question">
+            Precisa instalar alguma coisa?
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>Não. O AssistHub funciona direto no navegador, em qualquer dispositivo. Sem app para instalar, sem configuração complicada. O técnico acessa pelo celular com o link que você envia.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            O técnico precisa ter uma conta?
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>Não. O técnico acessa pelo link gerado pelo admin. Não precisa de login, cadastro ou app. Ele abre o link, preenche o formulário, tira as fotos e assina — tudo em segundos.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            Funciona com qual seguradora?
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>Com qualquer uma. Você cadastra as seguradoras que atende no painel de configuração. O sistema já vem com Mapfre, Tempo, Maxpar e Allianz, mas você pode adicionar e remover à vontade.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question">
+            Posso cancelar a qualquer momento?
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <div class="faq-answer">
+            <p>Sim. Não há fidelidade ou multa. Você pode cancelar quando quiser pelo painel. Seus dados ficam disponíveis por 30 dias após o cancelamento para exportação.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA FINAL ── -->
+  <section class="cta-section">
+    <div class="container">
+      <h2>Pronto para digitalizar seu atendimento?</h2>
+      <p>Comece hoje. Os primeiros 15 dias são por nossa conta.</p>
+      <div class="cta-btns">
+        <a href="/cadastro" class="btn-primary-lg">
+          <i class="fa-solid fa-rocket"></i>
+          Criar conta grátis
+        </a>
+        <a href="https://wa.me/5514996095296" target="_blank" rel="noopener" class="btn-outline-lg">
+          <i class="fa-brands fa-whatsapp"></i>
+          Falar no WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <a href="/landing.html" class="footer-logo">
+        <img src="/logo.png" alt="AssistHub" />
+        <span>AssistHub</span>
+      </a>
+      <div class="footer-links">
+        <a href="#">Termos de uso</a>
+        <a href="#">Privacidade</a>
+        <a href="https://wa.me/5514996095296" target="_blank" rel="noopener">Contato</a>
+      </div>
+      <p class="footer-copy">© 2026 AssistHub. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+
+  <!-- ── WHATSAPP FLUTUANTE ── -->
+  <a href="https://wa.me/5514996095296" target="_blank" rel="noopener" class="whatsapp-float" aria-label="WhatsApp">
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
+
+  <script>
+    // ── Hamburger menu ──
+    const hamburger = document.getElementById('hamburger')
+    const mobileMenu = document.getElementById('mobileMenu')
+
+    hamburger.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open')
+      const icon = hamburger.querySelector('i')
+      icon.classList.toggle('fa-bars')
+      icon.classList.toggle('fa-xmark')
+    })
+
+    document.querySelectorAll('.mobile-link').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.remove('open')
+        const icon = hamburger.querySelector('i')
+        icon.classList.add('fa-bars')
+        icon.classList.remove('fa-xmark')
+      })
+    })
+
+    // ── FAQ accordion ──
+    document.querySelectorAll('.faq-question').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.faq-item')
+        const isOpen = item.classList.contains('open')
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'))
+        if (!isOpen) item.classList.add('open')
+      })
+    })
+
+    // ── Header scroll shadow ──
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('header')
+      if (window.scrollY > 20) {
+        header.style.background = 'rgba(7,15,30,0.98)'
+      } else {
+        header.style.background = 'rgba(11,31,58,0.92)'
+      }
+    })
+
+    // ── Smooth scroll for anchor links ──
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const id = a.getAttribute('href')
+        if (id === '#') return
+        const el = document.querySelector(id)
+        if (el) {
+          e.preventDefault()
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      })
+    })
+  </script>
+</body>
+</html>

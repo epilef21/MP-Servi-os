@@ -7,7 +7,7 @@ import { useSearchParams } from 'react-router-dom'
 import SignatureCanvas from 'react-signature-canvas'
 import {
   db, criarOS, atualizarOS,
-  doc, serverTimestamp, uploadFoto,
+  doc, getDoc, serverTimestamp, uploadFoto,
 } from '../firebase.js'
 import { useEmpresa } from '../hooks/useEmpresa.js'
 
@@ -59,7 +59,7 @@ export default function FormPage() {
   // Seguradoras e personalização vindas da config da empresa
   const nomeEmpresa  = config?.nome     || empresa?.nome || 'Checklist'
   const telefoneRodape = config?.telefone || ''
-  const corPrimaria  = config?.corPrimaria || '#1a3a5c'
+  const corPrimaria  = config?.corPrimaria || '#1a3fa8'
 
   // ── Modo OS pré-preenchida (link do admin) ───────────────
   const osId       = searchParams.get('os') || null
@@ -102,6 +102,8 @@ export default function FormPage() {
   const [submitting,   setSubmitting]   = useState(false)
   const [submitted,    setSubmitted]    = useState(false)
   const [submitId,     setSubmitId]     = useState('')
+  const [submitOsId,   setSubmitOsId]   = useState('')   // ID completo para link de avaliação
+  const [tecnicoNome,  setTecnicoNome]  = useState('')   // nome do técnico salvo na OS
   const [progress,     setProgress]     = useState(0)
   const [hasDraft,     setHasDraft]     = useState(false)
   const [isOnline,     setIsOnline]     = useState(navigator.onLine)
@@ -302,6 +304,14 @@ export default function FormPage() {
 
       localStorage.removeItem(DRAFT_KEY)
       setSubmitId(id.slice(0, 8).toUpperCase())
+      setSubmitOsId(id)
+
+      // Busca técnico salvo na OS para incluir na mensagem ao segurado
+      try {
+        const osSnap = await getDoc(doc(db, 'empresas', empresaId, 'checklist', id))
+        if (osSnap.exists()) setTecnicoNome(osSnap.data().tecnico_nome || '')
+      } catch { /* silencioso — campo é opcional */ }
+
       setSubmitted(true)
     } catch (err) {
       console.error(err)
@@ -315,6 +325,33 @@ export default function FormPage() {
     localStorage.removeItem(DRAFT_KEY)
     setForm(INITIAL)
     setHasDraft(false)
+  }
+
+  // ── Formata data YYYY-MM-DD → DD/MM/YYYY ────────────────
+  function fmtDateLocal(d) {
+    if (!d) return '—'
+    if (typeof d === 'string' && d.includes('-')) {
+      const [y, m, day] = d.split('-')
+      return `${day}/${m}/${y}`
+    }
+    return d
+  }
+
+  // ── Monta mensagem WhatsApp para o segurado ──────────────
+  function buildNotifSegurado() {
+    const avaliacaoUrl = `${window.location.origin}/avaliacao/${slug}/${submitOsId}`
+    const msg =
+      `Olá ${form.nome_segurado}! 😊\n\n` +
+      `Seu atendimento foi concluído com sucesso! ✅\n\n` +
+      `📋 OS: ${form.num_assist || '—'}\n` +
+      `🔧 Serviço: ${form.servico || '—'}\n` +
+      `📅 Data: ${fmtDateLocal(form.data_chegada)}\n` +
+      `👷 Técnico: ${tecnicoNome || 'Não informado'}\n\n` +
+      `Para avaliar o atendimento, clique no link:\n` +
+      `🔗 ${avaliacaoUrl}\n\n` +
+      `Obrigado pela preferência!`
+    const phone = form.tel_segurado.replace(/\D/g, '')
+    return `https://wa.me/55${phone}?text=${encodeURIComponent(msg)}`
   }
 
   // ── Reset após envio ─────────────────────────────────────
@@ -356,8 +393,22 @@ export default function FormPage() {
           <strong>{nomeEmpresa}</strong>.
         </p>
         <div className="success-badge">Protocolo: {submitId}</div>
+
+        {/* Botão de notificação ao segurado — só aparece se tel_segurado preenchido */}
+        {form.tel_segurado && submitOsId && (
+          <a
+            href={buildNotifSegurado()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-whatsapp"
+            style={{ display: 'inline-block', marginTop: 16, textDecoration: 'none' }}
+          >
+            📩 Enviar confirmação ao segurado
+          </a>
+        )}
+
         {!isPrefilled && (
-          <button className="btn-primary" style={{ marginTop: 16 }} onClick={reset}>
+          <button className="btn-primary" style={{ marginTop: 12 }} onClick={reset}>
             📋 Novo Relatório
           </button>
         )}
@@ -399,7 +450,9 @@ export default function FormPage() {
 
       {/* HEADER — nome da empresa vem da config do Firestore */}
       <div className="form-header">
-        <div className="header-icon">🏠</div>
+        <div className="header-icon" style={{ background: 'transparent', padding: 0 }}>
+          <img src="/logo.png" height="32" alt="AssistHub" style={{ display: 'block' }} />
+        </div>
         <div className="header-text">
           <h1>Checklist — {nomeEmpresa}</h1>
           <p>Relatório técnico de atendimento ao segurado</p>
@@ -493,7 +546,7 @@ export default function FormPage() {
               {cepLoading && (
                 <span style={{
                   position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                  width: 14, height: 14, border: '2px solid #ccc', borderTopColor: '#1a3a5c',
+                  width: 14, height: 14, border: '2px solid #ccc', borderTopColor: '#1a3fa8',
                   borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite',
                 }} />
               )}
@@ -670,7 +723,7 @@ export default function FormPage() {
           <div className="field">
             <label>Assinatura do Prestador <span className="req">*</span></label>
             <div className={`sig-container${hasSigPrest ? ' has-sig' : ''}${errors.sig_prest ? ' error-sig' : ''}`}>
-              <SignatureCanvas ref={sigPrestRef} penColor="#1a3a5c"
+              <SignatureCanvas ref={sigPrestRef} penColor="#1a3fa8"
                 canvasProps={{ style: { width: '100%', height: '100%' } }}
                 onEnd={() => { setHasSigPrest(true); setSigPrestData(sigPrestRef.current.toDataURL('image/png')) }} />
               {!hasSigPrest && (
@@ -686,7 +739,7 @@ export default function FormPage() {
           <div className="field">
             <label>Assinatura do Segurado <span className="req">*</span></label>
             <div className={`sig-container${hasSigSeg ? ' has-sig' : ''}${errors.sig_seg ? ' error-sig' : ''}`}>
-              <SignatureCanvas ref={sigSegRef} penColor="#1a3a5c"
+              <SignatureCanvas ref={sigSegRef} penColor="#1a3fa8"
                 canvasProps={{ style: { width: '100%', height: '100%' } }}
                 onEnd={() => { setHasSigSeg(true); setSigSegData(sigSegRef.current.toDataURL('image/png')) }} />
               {!hasSigSeg && (

@@ -29,10 +29,15 @@ service cloud.firestore {
         request.auth.token.email == get(/databases/$(database)/documents/config/superadmin).data.email;
     }
 
-    // Verifica se o uid autenticado é o dono da empresa
-    // (uid do Auth == empresaId, conforme definido no cadastro)
+    // Verifica se o uid autenticado é o dono da empresa.
+    // Tenta duas formas:
+    // 1. uid == empresaId (caminho direto — quando cadastrado pelo CadastroPage)
+    // 2. usuarios/{uid}.empresaId == empresaId (caminho via vínculo — fallback)
     function eDonoEmpresa(empresaId) {
-      return estaAutenticado() && request.auth.uid == empresaId;
+      return estaAutenticado() && (
+        request.auth.uid == empresaId ||
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.empresaId == empresaId
+      );
     }
 
     // ── /config — documento de configuração do superadmin ──
@@ -78,12 +83,23 @@ service cloud.firestore {
         allow delete: if eSuperAdmin();
       }
 
+      // ── /empresas/{empresaId}/tecnicos/{tecnicoId} ──────
+      // Gerenciamento de técnicos da equipe.
+      // Apenas o dono da empresa ou superadmin pode ler e escrever.
+      match /tecnicos/{tecnicoId} {
+        allow read:   if eDonoEmpresa(empresaId) || eSuperAdmin();
+        allow create: if eDonoEmpresa(empresaId) || eSuperAdmin();
+        allow update: if eDonoEmpresa(empresaId) || eSuperAdmin();
+        allow delete: if eDonoEmpresa(empresaId) || eSuperAdmin();
+      }
+
       // ── /empresas/{empresaId}/checklist/{osId} ──────────
       match /checklist/{osId} {
 
-        // Leitura: apenas o dono da empresa ou superadmin
-        // O técnico NÃO precisa ler OS — só cria/atualiza
-        allow read: if eDonoEmpresa(empresaId) || eSuperAdmin();
+        // Leitura: dono, superadmin, ou público para página de avaliação.
+        // O osId é um ID aleatório longo, só compartilhado com o segurado
+        // via WhatsApp, portanto o risco de acesso indevido é baixo.
+        allow read: if eDonoEmpresa(empresaId) || eSuperAdmin() || true;
 
         // Criação: qualquer um pode criar (formulário público do técnico)
         // Garante que o campo "status" inicial seja "pendente" ou "aguardando_tecnico"
@@ -97,19 +113,29 @@ service cloud.firestore {
             request.resource.data.status in ['pendente', 'aguardando_tecnico']
           );
 
-        // Atualização pelo técnico (sem autenticação):
-        // Só pode atualizar campos do formulário — não campos financeiros nem status admin
         // Atualização pelo admin/superadmin: irrestrita dentro da empresa
+        // Atualização pelo técnico (sem auth): apenas campos do formulário
+        // Atualização pelo segurado (sem auth): apenas campos de avaliação,
+        //   somente uma vez (bloqueia se já existir avaliacao_nota)
         allow update: if
-          // Admin da empresa ou superadmin podem atualizar qualquer campo
           eDonoEmpresa(empresaId) || eSuperAdmin()
           ||
-          // Técnico (sem auth) pode atualizar apenas se NÃO tocar em campos sensíveis
+          // Técnico sem auth — campos do formulário, sem financeiro
           (
             !('mo_seguradora'      in request.resource.data) &&
             !('valor_prestador'    in request.resource.data) &&
             !('valor_deslocamento' in request.resource.data) &&
             request.resource.data.status in ['pendente', 'aguardando_tecnico']
+          )
+          ||
+          // Segurado sem auth — apenas avaliação (1-5), apenas uma vez
+          (
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['avaliacao_nota', 'avaliacao_comentario', 'avaliacao_em']) &&
+            request.resource.data.avaliacao_nota is int &&
+            request.resource.data.avaliacao_nota >= 1 &&
+            request.resource.data.avaliacao_nota <= 5 &&
+            !('avaliacao_nota' in resource.data)
           );
 
         // Exclusão: apenas superadmin

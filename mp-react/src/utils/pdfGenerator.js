@@ -43,15 +43,15 @@ export function generatePDF(r) {
   let y = 0
 
   // ── HEADER ───────────────────────────────────────────────────
-  doc.setFillColor(26,58,92)
+  doc.setFillColor(26,63,168)
   doc.rect(0,0,W,38,'F')
-  doc.setFillColor(232,160,32)
+  doc.setFillColor(240,90,26)
   doc.rect(0,38,W,2,'F')
 
   doc.setTextColor(255,255,255)
   doc.setFont('helvetica','bold')
   doc.setFontSize(20)
-  doc.text('MP SERVICOS',M,16)
+  doc.text('ASSISTHUB',M,16)
 
   doc.setFontSize(9); doc.setFont('helvetica','normal')
   doc.text('Relatorio Tecnico de Atendimento ao Segurado',M,24)
@@ -73,7 +73,7 @@ export function generatePDF(r) {
     doc.rect(M,y,W-M*2,7,'F')
     doc.setDrawColor(208,218,232)
     doc.rect(M,y,W-M*2,7,'S')
-    doc.setTextColor(26,58,92); doc.setFont('helvetica','bold'); doc.setFontSize(8)
+    doc.setTextColor(26,63,168); doc.setFont('helvetica','bold'); doc.setFontSize(8)
     doc.text(title.toUpperCase(),M+3,y+4.8)
     y += 11
   }
@@ -130,7 +130,7 @@ export function generatePDF(r) {
       checkPage(12)
       doc.setFillColor(232,240,251); doc.rect(xPos,y,itemW-3,6,'F')
       doc.setDrawColor(192,208,232); doc.rect(xPos,y,itemW-3,6,'S')
-      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(26,58,92)
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(26,63,168)
       const lbl = item.quant ? `${s(item.item)}  (Qtd: ${item.quant})` : s(item.item)
       doc.text(lbl,xPos+3,y+4.2)
     })
@@ -180,9 +180,9 @@ export function generatePDF(r) {
   const pages = doc.internal.getNumberOfPages()
   for(let i=1;i<=pages;i++) {
     doc.setPage(i)
-    doc.setFillColor(26,58,92); doc.rect(0,H-12,W,12,'F')
+    doc.setFillColor(26,63,168); doc.rect(0,H-12,W,12,'F')
     doc.setTextColor(255,255,255); doc.setFont('helvetica','normal'); doc.setFontSize(7)
-    doc.text('MP Servicos  |  (14) 99609-5296 / 98833-6561',M,H-4.5)
+    doc.text('AssistHub  |  assisthub.com.br',M,H-4.5)
     doc.text(`Pagina ${i} de ${pages}`,W-M,H-4.5,{align:'right'})
   }
 

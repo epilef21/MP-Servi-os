@@ -86,7 +86,7 @@ export default function CadastroPage() {
           telefone:    form.telefone.trim(),
           seguradoras: SEGURADORAS_PADRAO,
           logoUrl:     '',
-          corPrimaria: '#1a3a5c',
+          corPrimaria: '#1a3fa8',
         }
       )
 
@@ -146,7 +146,10 @@ export default function CadastroPage() {
 
         {/* Cabeçalho */}
         <div className="login-header">
-          <h1 className="login-title">Criar Conta</h1>
+          <div className="login-icon">
+            <img src="/logo.png" height="48" alt="AssistHub" style={{ display: 'block' }} />
+          </div>
+          <h1 className="login-title">AssistHub</h1>
           <p className="login-subtitle">Cadastre sua empresa no sistema</p>
         </div>
 
@@ -167,7 +170,7 @@ export default function CadastroPage() {
               name="nome"
               value={form.nome}
               onChange={handleChange}
-              placeholder="Ex: MP Serviços"
+              placeholder="Ex: AssistHub Serviços"
               required
             />
             {slugPreview && (
@@ -263,7 +266,7 @@ export default function CadastroPage() {
 
         <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem', color: '#666' }}>
           Já tem conta?{' '}
-          <Link to="/login" style={{ color: '#1a3a5c', fontWeight: '600' }}>
+          <Link to="/login" style={{ color: '#1a3fa8', fontWeight: '600' }}>
             Entrar
           </Link>
         </p>

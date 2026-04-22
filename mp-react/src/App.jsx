@@ -9,10 +9,11 @@ import FormPage    from './pages/FormPage.jsx'
 import AdminPage   from './pages/AdminPage.jsx'
 import LoginPage   from './pages/LoginPage.jsx'
 
-// Páginas novas
-import CadastroPage      from './pages/CadastroPage.jsx'
-import SuperAdminPage    from './pages/SuperAdminPage.jsx'
+// Páginas novas e auxiliares
+import CadastroPage         from './pages/CadastroPage.jsx'
+import SuperAdminPage       from './pages/SuperAdminPage.jsx'
 import EmpresaNaoEncontrada from './pages/EmpresaNaoEncontrada.jsx'
+import AvaliacaoPage        from './pages/AvaliacaoPage.jsx'
 
 // ── Guarda de rota para admin da empresa ─────────────────────
 // Redireciona para /login se o usuário não estiver autenticado
@@ -37,6 +38,9 @@ export default function App() {
       <Route path="/login"    element={<LoginPage />} />
       <Route path="/cadastro" element={<CadastroPage />} />
       <Route path="/empresa-nao-encontrada" element={<EmpresaNaoEncontrada />} />
+
+      {/* Pesquisa de satisfação — pública, sem auth */}
+      <Route path="/avaliacao/:slug/:osId" element={<AvaliacaoPage />} />
 
       {/* ── Superadmin ─────────────────────────────────────── */}
       <Route

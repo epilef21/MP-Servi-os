@@ -76,8 +76,10 @@ export default function LoginPage() {
 
         {/* Cabeçalho */}
         <div className="login-header">
-          <div className="login-icon">🏠</div>
-          <h1 className="login-title">MP Serviços</h1>
+          <div className="login-icon">
+            <img src="/logo.png" height="48" alt="AssistHub" style={{ display: 'block' }} />
+          </div>
+          <h1 className="login-title">AssistHub</h1>
           <p className="login-subtitle">Painel administrativo — acesso restrito</p>
         </div>
 
@@ -129,7 +131,7 @@ export default function LoginPage() {
 
         <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem', color: '#666' }}>
           Ainda não tem conta?{' '}
-          <Link to="/cadastro" style={{ color: '#1a3a5c', fontWeight: '600' }}>
+          <Link to="/cadastro" style={{ color: '#1a3fa8', fontWeight: '600' }}>
             Criar empresa
           </Link>
         </p>
