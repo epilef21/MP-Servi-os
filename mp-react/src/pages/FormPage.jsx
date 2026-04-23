@@ -69,10 +69,14 @@ export default function FormPage() {
        'endereco', 'cidade', 'data_chegada', 'hora_chegada', 'servico', 'desc_problema']
     : []
 
+  // Se a URL tem parâmetros inline (links antigos), usa eles como seed inicial.
+  // Links novos passam só ?os=ID — o fetch do Firestore preenche o resto.
   function buildFromParams() {
     if (!osId) return null
+    const seg = searchParams.get('seguradora')
+    if (!seg) return null // link novo — dados virão do Firestore
     return {
-      seguradora:    searchParams.get('seguradora')    || '',
+      seguradora:    seg,
       num_assist:    searchParams.get('num_assist')    || '',
       nome_segurado: searchParams.get('nome_segurado') || '',
       tel_segurado:  searchParams.get('tel_segurado')  || '',
@@ -89,11 +93,14 @@ export default function FormPage() {
   const DRAFT_KEY = getDraftKey(slug || 'default')
 
   const [form, setForm] = useState(() => {
-    if (osId) return { ...INITIAL, ...buildFromParams() }
-    try {
-      const saved = localStorage.getItem(DRAFT_KEY)
-      if (saved) return { ...INITIAL, ...JSON.parse(saved) }
-    } catch {}
+    const fromParams = buildFromParams()
+    if (fromParams) return { ...INITIAL, ...fromParams }
+    if (!osId) {
+      try {
+        const saved = localStorage.getItem(DRAFT_KEY)
+        if (saved) return { ...INITIAL, ...JSON.parse(saved) }
+      } catch {}
+    }
     return INITIAL
   })
 
@@ -146,6 +153,32 @@ export default function FormPage() {
       window.removeEventListener('offline', off)
     }
   }, [])
+
+  // ── Busca OS do Firestore quando link é curto (?os=ID só) ──
+  // Links antigos com todos os params continuam funcionando via buildFromParams.
+  useEffect(() => {
+    if (!osId || !empresaId) return
+    if (buildFromParams()) return // link antigo com params inline — não precisa buscar
+    getDoc(doc(db, 'empresas', empresaId, 'checklist', osId))
+      .then(snap => {
+        if (!snap.exists()) return
+        const d = snap.data()
+        setForm(prev => ({
+          ...prev,
+          seguradora:    d.seguradora    || '',
+          num_assist:    d.num_assist    || '',
+          nome_segurado: d.nome_segurado || '',
+          tel_segurado:  d.tel_segurado  || '',
+          endereco:      d.endereco      || '',
+          cidade:        d.cidade        || '',
+          data_chegada:  d.data_chegada  || '',
+          hora_chegada:  d.hora_chegada  || '',
+          servico:       d.servico       || '',
+          desc_problema: d.desc_problema || '',
+        }))
+      })
+      .catch(() => { /* silencioso — form fica em branco mas funcional */ })
+  }, [osId, empresaId])
 
   // ── Auto-save do rascunho (isolado por slug/empresa) ─────
   useEffect(() => {

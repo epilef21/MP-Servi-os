@@ -452,15 +452,10 @@ export default function AdminPage() {
     return !Object.keys(errs).length
   }
 
+  // Link curto — só o ID da OS. O FormPage busca os dados do Firestore.
+  // Resolve URLs gigantes no WhatsApp que cortavam o texto da mensagem.
   function buildLink(r) {
-    const p = new URLSearchParams({
-      os: r.id, seguradora: r.seguradora || '', num_assist: r.num_assist || '',
-      nome_segurado: r.nome_segurado || '', tel_segurado: r.tel_segurado || '',
-      endereco: r.endereco || '', cidade: r.cidade || '',
-      data_chegada: r.data_chegada || '', hora_chegada: r.hora_chegada || '',
-      servico: r.servico || '', desc_problema: r.desc_problema || '',
-    })
-    return `${window.location.origin}/${slug}?${p.toString()}`
+    return `${window.location.origin}/${slug}?os=${r.id}`
   }
 
   async function saveOs() {
