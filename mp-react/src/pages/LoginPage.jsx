@@ -12,35 +12,22 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const { login, estaLogado, isSuperAdmin, empresaId, emailUsuario } = useAuth()
 
-  const [email,   setEmail]   = useState('')
-  const [senha,   setSenha]   = useState('')
-  const [erro,    setErro]    = useState('')
-  const [loading, setLoading] = useState(false)
+  const [email,     setEmail]     = useState('')
+  const [senha,     setSenha]     = useState('')
+  const [erro,      setErro]      = useState('')
+  const [loading,   setLoading]   = useState(false)
+  const [showSenha, setShowSenha] = useState(false)
 
-  // Se já estiver logado, redireciona direto sem mostrar o form
+  // Redireciona quem já estava logado ao acessar /login (ex: refresh de página)
+  // Não tem fallback para /cadastro — evita corrida com o AuthContext assíncrono
   useEffect(() => {
     if (!estaLogado) return
-
-    async function redirecionar() {
-      if (isSuperAdmin) {
-        navigate('/superadmin', { replace: true })
-        return
-      }
-
-      if (empresaId) {
-        // Busca o slug da empresa para montar a rota /:slug/admin
-        const snap = await getDoc(doc(db, 'empresas', empresaId))
-        if (snap.exists()) {
-          navigate(`/${snap.data().slug}/admin`, { replace: true })
-          return
-        }
-      }
-
-      // Fallback: usuário logado mas sem empresa vinculada
-      navigate('/cadastro', { replace: true })
+    if (isSuperAdmin) { navigate('/superadmin', { replace: true }); return }
+    if (empresaId) {
+      getDoc(doc(db, 'empresas', empresaId))
+        .then(snap => { if (snap.exists()) navigate(`/${snap.data().slug}/admin`, { replace: true }) })
+        .catch(() => {})
     }
-
-    redirecionar()
   }, [estaLogado, isSuperAdmin, empresaId, navigate])
 
   async function handleSubmit(e) {
@@ -49,13 +36,37 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      await login(email.trim(), senha)
-      // O useEffect acima cuida do redirecionamento
-      // após o AuthContext atualizar o estado
+      // login() retorna o user do Firebase Auth imediatamente
+      const user = await login(email.trim(), senha)
+
+      // Superadmin — redireciona direto
+      if (user.email === SUPERADMIN_EMAIL) {
+        navigate('/superadmin', { replace: true })
+        return
+      }
+
+      // Tentativa primária: empresas/{uid} (convenção: empresaId === uid)
+      const snapEmpresa = await getDoc(doc(db, 'empresas', user.uid))
+      if (snapEmpresa.exists()) {
+        navigate(`/${snapEmpresa.data().slug}/admin`, { replace: true })
+        return
+      }
+
+      // Fallback: usuarios/{uid} → empresaId (compatibilidade com cadastros antigos)
+      const snapUsuario = await getDoc(doc(db, 'usuarios', user.uid))
+      if (snapUsuario.exists() && snapUsuario.data().empresaId) {
+        const eid     = snapUsuario.data().empresaId
+        const snapEmp = await getDoc(doc(db, 'empresas', eid))
+        if (snapEmp.exists()) {
+          navigate(`/${snapEmp.data().slug}/admin`, { replace: true })
+          return
+        }
+      }
+
+      // Empresa não encontrada — mostra erro, sem redirecionar para /cadastro
+      setErro('Empresa não encontrada para este usuário. Contate o suporte.')
     } catch (err) {
       console.error('[LoginPage] Erro no login:', err)
-
-      // Traduz os erros mais comuns do Firebase Auth
       const mensagens = {
         'auth/user-not-found':      'E-mail não encontrado.',
         'auth/wrong-password':      'Senha incorreta.',
@@ -107,15 +118,25 @@ export default function LoginPage() {
 
           <div className="form-group">
             <label className="form-label">Senha</label>
-            <input
-              className="form-input"
-              type="password"
-              value={senha}
-              onChange={e => setSenha(e.target.value)}
-              placeholder="••••••••"
-              required
-              disabled={loading}
-            />
+            <div className="password-field">
+              <input
+                className="form-input"
+                type={showSenha ? 'text' : 'password'}
+                value={senha}
+                onChange={e => setSenha(e.target.value)}
+                placeholder="••••••••"
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowSenha(p => !p)}
+                tabIndex={-1}
+              >
+                {showSenha ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
 
           <button

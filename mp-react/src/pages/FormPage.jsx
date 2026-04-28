@@ -64,8 +64,9 @@ export default function FormPage() {
   // ── Modo OS pré-preenchida (link do admin) ───────────────
   const osId       = searchParams.get('os') || null
   const isPrefilled = !!osId
+  // tel_segurado nunca é bloqueado — técnico sempre pode preencher/editar
   const LOCKED = isPrefilled
-    ? ['seguradora', 'num_assist', 'nome_segurado', 'tel_segurado',
+    ? ['seguradora', 'num_assist', 'nome_segurado',
        'endereco', 'cidade', 'data_chegada', 'hora_chegada', 'servico', 'desc_problema']
     : []
 
@@ -553,7 +554,9 @@ export default function FormPage() {
         <div className="section-title">
           <div className="s-ico">👤</div><h2>Dados do Segurado</h2><div className="section-divider" />
         </div>
-        <div className="row col-2">
+
+        {/* Linha 1: Nome (flex 2) + Telefone (flex 1) */}
+        <div className="row col-2" style={{ gridTemplateColumns: '2fr 1fr' }}>
           <div className="field">
             <label>Nome Completo <span className="req">*</span></label>
             <input value={form.nome_segurado} readOnly={isLocked('nome_segurado')}
@@ -563,50 +566,38 @@ export default function FormPage() {
           </div>
           <div className="field">
             <label>Telefone</label>
-            <input type="tel" value={form.tel_segurado} readOnly={isLocked('tel_segurado')}
-              className={isLocked('tel_segurado') ? 'locked' : ''}
-              onChange={e => !isLocked('tel_segurado') && setField('tel_segurado', e.target.value)}
+            {/* tel_segurado nunca bloqueado — técnico sempre pode preencher */}
+            <input type="tel" value={form.tel_segurado}
+              onChange={e => setField('tel_segurado', e.target.value)}
               placeholder="(XX) XXXXX-XXXX" />
           </div>
         </div>
-        <div className="row col-2">
-          <div className="field" style={{ maxWidth: 160 }}>
-            <label>CEP</label>
-            <div style={{ position: 'relative' }}>
-              <input value={form.cep} onChange={handleCEPChange}
-                placeholder="00000-000" maxLength={8} inputMode="numeric"
-                style={{ paddingRight: cepLoading ? 32 : undefined }} />
-              {cepLoading && (
-                <span style={{
-                  position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                  width: 14, height: 14, border: '2px solid #ccc', borderTopColor: '#1a3fa8',
-                  borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite',
-                }} />
-              )}
-            </div>
-          </div>
-          <div className="field">
-            <label>Cidade <span className="req">*</span></label>
-            <input value={form.cidade} readOnly={isLocked('cidade')}
-              className={`${errors.cidade ? 'error' : ''}${isLocked('cidade') ? ' locked' : ''}`}
-              onChange={e => !isLocked('cidade') && setField('cidade', e.target.value)}
-              placeholder="Preenchida pelo CEP" />
-          </div>
-        </div>
-        <div className="row col-2">
+
+        {/* Linha 2: Endereço (3fr) + Número (1fr) — juntos para clareza visual */}
+        <div className="row" style={{ display: 'grid', gridTemplateColumns: '3fr 1fr', gap: 14 }}>
           <div className="field">
             <label>Endereço Completo <span className="req">*</span></label>
             <input ref={enderecoRef} value={form.endereco} readOnly={isLocked('endereco')}
               className={`${errors.endereco ? 'error' : ''}${isLocked('endereco') ? ' locked' : ''}`}
               onChange={e => !isLocked('endereco') && setField('endereco', e.target.value)}
-              placeholder="Rua e bairro (preenchidos pelo CEP)" />
+              placeholder="Rua, bairro" />
           </div>
-          <div className="field" style={{ maxWidth: 130 }}>
+          <div className="field">
             <label>Número</label>
-            <input value={form.numero} readOnly={isLocked('endereco')}
-              className={isLocked('endereco') ? 'locked' : ''}
-              onChange={e => !isLocked('endereco') && setField('numero', e.target.value)}
+            <input value={form.numero}
+              onChange={e => setField('numero', e.target.value)}
               placeholder="Ex: 123" />
+          </div>
+        </div>
+
+        {/* Linha 3: Cidade */}
+        <div className="row col-1">
+          <div className="field">
+            <label>Cidade <span className="req">*</span></label>
+            <input value={form.cidade} readOnly={isLocked('cidade')}
+              className={`${errors.cidade ? 'error' : ''}${isLocked('cidade') ? ' locked' : ''}`}
+              onChange={e => !isLocked('cidade') && setField('cidade', e.target.value)}
+              placeholder="Cidade — Estado" />
           </div>
         </div>
       </div>

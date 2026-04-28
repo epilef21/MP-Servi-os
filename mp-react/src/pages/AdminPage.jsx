@@ -25,12 +25,17 @@ import {
   storageRef,
   uploadBytes,
   getDownloadURL,
+  getDoc,
+  query,
+  orderBy,
+  limit,
 } from '../firebase.js'
 import { sendPasswordResetEmail, updateProfile } from 'firebase/auth'
 import { useAuth }    from '../contexts/AuthContext.jsx'
 import { useEmpresa } from '../hooks/useEmpresa.js'
 import { generatePDF } from '../utils/pdfGenerator.js'
 import { generatePNG } from '../utils/pngGenerator.js'
+import { generatePDFCliente, generatePDFSeguradora } from '../utils/orcamentoPdfGenerator.js'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer, PieChart, Pie, Cell,
@@ -43,7 +48,12 @@ function fmtDate(d) {
     const [y, m, day] = d.split('-')
     return `${day}/${m}/${y}`
   }
-  return d
+  // Firestore Timestamp (criado_em dos orçamentos)
+  if (d?.toDate) {
+    const dt = d.toDate()
+    return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`
+  }
+  return '—'
 }
 function fmtDatetime(ts) {
   if (!ts) return '—'
@@ -108,6 +118,46 @@ const PIE_COLORS = {
 
 const TECNICO_FORM_INITIAL = {
   nome: '', telefone: '', email: '', especialidade: '', ativo: true,
+}
+
+const ORC_INITIAL = {
+  tipo: '', cenario: '', seguradora: '', num_assist: '',
+  nome_cliente: '', tel_cliente: '', email_cliente: '',
+  endereco: '', cidade: '',
+  tipo_equipamento: '', marca: '', modelo: '', voltagem: '', defeito: '',
+  tipo_emergencia: '', desc_problema: '',
+  validade: '', prazo_execucao: '', garantia: '90 dias',
+  forma_pagamento: 'pix', observacoes: '', tecnico_id: '',
+}
+
+const STATUS_ORC_META = {
+  aguardando_tecnico: { label: '🟠 Aguardando',       cls: 'orc-aguardando' },
+  em_revisao:         { label: '🟡 Em Revisão',        cls: 'orc-revisao'    },
+  enviado_cliente:    { label: '🔵 Enviado ao Cliente', cls: 'orc-enviado-c'  },
+  enviado_seguradora: { label: '🟣 Enviado à Seg.',     cls: 'orc-enviado-s'  },
+  aprovado:           { label: '🟢 Aprovado',           cls: 'orc-aprovado'   },
+  reprovado:          { label: '🔴 Reprovado',          cls: 'orc-reprovado'  },
+  executado:          { label: '⚫ Executado',           cls: 'orc-executado'  },
+  cancelado:          { label: '⚫ Cancelado',           cls: 'orc-cancelado'  },
+}
+
+function orcCardCls(status) {
+  const m = {
+    aguardando_tecnico: 'aguardando', em_revisao: 'revisao',
+    enviado_cliente: 'enviado', enviado_seguradora: 'enviado',
+    aprovado: 'aprovado', reprovado: 'reprovado',
+    executado: 'executado', cancelado: 'executado',
+  }
+  return m[status] || 'aguardando'
+}
+
+function novoItemOrc() {
+  return {
+    id: `item_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+    descricao: '', quantidade: 1,
+    valor_unit: 0, valor_total: 0,
+    paga_seguradora: 0, paga_cliente: 0,
+  }
 }
 
 // ── Tooltip customizado para o BarChart ─────────────────────
@@ -186,6 +236,10 @@ export default function AdminPage() {
   // modo técnico no detalhe da OS
   const [detTecnicoMode, setDetTecnicoMode] = useState('select')
 
+  // ── Anotações internas (visível só pelo admin, nunca vai ao PDF/PNG) ──
+  const [anotacaoInterna, setAnotacaoInterna] = useState('')
+  const [savingAnotacao,  setSavingAnotacao]  = useState(false)
+
   // ── Segurados ────────────────────────────────────────────
   const [selectedSegurado, setSelectedSegurado] = useState(null)
 
@@ -215,6 +269,35 @@ export default function AdminPage() {
   const [logoUploading, setLogoUploading] = useState(false)
   const [logoPreview,   setLogoPreview]   = useState(null)
   const logoInputRef = useRef(null)
+
+  // ── Orçamentos ───────────────────────────────────────────
+  const [orcamentos,      setOrcamentos]      = useState([])
+  const [loadingOrc,      setLoadingOrc]      = useState(false)
+  const [orcBusca,        setOrcBusca]        = useState('')
+  const [orcFiltTipo,     setOrcFiltTipo]     = useState('')
+  const [orcFiltStatus,   setOrcFiltStatus]   = useState('')
+
+  // Modal novo orçamento (3 etapas)
+  const [showNovoOrc,     setShowNovoOrc]     = useState(false)
+  const [orcEtapa,        setOrcEtapa]        = useState(1)
+  const [orcForm,         setOrcForm]         = useState({ ...ORC_INITIAL })
+  const [orcErrors,       setOrcErrors]       = useState({})
+  const [savingOrc,       setSavingOrc]       = useState(false)
+
+  // Modal links gerados (orçamento)
+  const [orcLinks,        setOrcLinks]        = useState(null)
+  const [orcLinkCopied,   setOrcLinkCopied]   = useState(false)
+
+  // Modal revisar orçamento
+  const [showRevisarOrc,  setShowRevisarOrc]  = useState(false)
+  const [revisarOrc,      setRevisarOrc]      = useState(null)
+  const [revisarItens,    setRevisarItens]    = useState([])
+  const [savingRevisar,   setSavingRevisar]   = useState(false)
+  const [orcGarantiaObs,  setOrcGarantiaObs]  = useState('')
+
+  // Modal converter em OS
+  const [showConverterOS, setShowConverterOS] = useState(false)
+  const [converterOrc,    setConverterOrc]    = useState(null)
 
   // ── Toast ────────────────────────────────────────────────
   const [toast, setToast] = useState({ msg: '', visible: false, type: 'success' })
@@ -312,6 +395,8 @@ export default function AdminPage() {
     })
     // detecta modo: se tem tecnico_id salvo, usa select; senão manual
     setDetTecnicoMode(selected.tecnico_id ? 'select' : 'manual')
+    // carrega anotação interna (campo exclusivo do admin)
+    setAnotacaoInterna(selected.anotacao_interna || '')
   }, [selected?.id])
 
   // ── Métricas ─────────────────────────────────────────────
@@ -405,6 +490,23 @@ export default function AdminPage() {
   }, [reports])
 
   const limite = verificarLimite(totalMes)
+
+  // Filtro dos orçamentos
+  const orcFiltered = useMemo(() => {
+    const b = orcBusca.toLowerCase()
+    return orcamentos.filter(o => {
+      const txt = `${o.nome_cliente||''} ${o.numero||''} ${o.tel_cliente||''}`.toLowerCase()
+      return (!b || txt.includes(b))
+        && (!orcFiltTipo   || o.tipo   === orcFiltTipo)
+        && (!orcFiltStatus || o.status === orcFiltStatus)
+    })
+  }, [orcamentos, orcBusca, orcFiltTipo, orcFiltStatus])
+
+  // Badge da sidebar com quantidade em revisão
+  const orcEmRevisaoCount = useMemo(
+    () => orcamentos.filter(o => o.status === 'em_revisao').length,
+    [orcamentos]
+  )
 
   // ── Handlers de OS ───────────────────────────────────────
   async function changeStatus(id, newStatus) {
@@ -627,6 +729,20 @@ export default function AdminPage() {
     } catch (e) { showToast('Erro: ' + e.message, 'error') }
   }
 
+  // ── Salva anotação interna da OS (nunca vai ao PDF nem PNG) ──
+  async function saveAnotacao() {
+    if (!empresaId || !selected) return
+    setSavingAnotacao(true)
+    try {
+      await updateDoc(doc(db, 'empresas', empresaId, 'checklist', selected.id), {
+        anotacao_interna: anotacaoInterna,
+      })
+      setReports(p => p.map(r => r.id === selected.id ? { ...r, anotacao_interna: anotacaoInterna } : r))
+      showToast('✅ Anotação salva!')
+    } catch (e) { showToast('Erro ao salvar: ' + e.message, 'error') }
+    finally { setSavingAnotacao(false) }
+  }
+
   // ── Salva configurações da empresa ───────────────────────
   async function saveConfig() {
     if (!empresaId) return
@@ -692,6 +808,285 @@ export default function AdminPage() {
     } catch (e) { alert('Erro: ' + e.message) }
   }
 
+  // ── Orçamentos: load ─────────────────────────────────────
+  async function loadOrcamentos() {
+    if (!empresaId) return
+    setLoadingOrc(true)
+    try {
+      const q = query(
+        collection(db, `empresas/${empresaId}/orcamentos`),
+        orderBy('criado_em', 'desc')
+      )
+      const snap = await getDocs(q)
+      setOrcamentos(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    } catch (e) {
+      showToast('Erro ao carregar orçamentos: ' + e.message, 'error')
+    } finally {
+      setLoadingOrc(false)
+    }
+  }
+
+  useEffect(() => { if (empresaId) loadOrcamentos() }, [empresaId]) // eslint-disable-line
+
+  // Gera número sequencial do orçamento (ORC-AAAA-NNNN)
+  async function gerarNumeroOrcamento() {
+    if (!empresaId) return `ORC-${new Date().getFullYear()}-0001`
+    try {
+      const q = query(
+        collection(db, `empresas/${empresaId}/orcamentos`),
+        orderBy('criado_em', 'desc'),
+        limit(1)
+      )
+      const snap = await getDocs(q)
+      if (snap.empty) return `ORC-${new Date().getFullYear()}-0001`
+      const ultimo = snap.docs[0].data().numero || 'ORC-2026-0000'
+      const seq = parseInt(ultimo.split('-')[2] || '0') + 1
+      return `ORC-${new Date().getFullYear()}-${String(seq).padStart(4, '0')}`
+    } catch {
+      return `ORC-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`
+    }
+  }
+
+  function buildLinkTecnicoOrc(orcId) {
+    return `${window.location.origin}/orcamento/${slug}/${orcId}`
+  }
+  function buildLinkClienteOrc(orcId) {
+    return `${window.location.origin}/aprovar/${slug}/${orcId}`
+  }
+
+  async function copyOrcLink(link) {
+    try { await navigator.clipboard.writeText(link) } catch {
+      const el = document.createElement('textarea')
+      el.value = link; document.body.appendChild(el); el.select()
+      document.execCommand('copy'); document.body.removeChild(el)
+    }
+    setOrcLinkCopied(true)
+    setTimeout(() => setOrcLinkCopied(false), 2500)
+  }
+
+  // Valida e salva novo orçamento
+  async function saveNovoOrcamento() {
+    const e = {}
+    if (!orcForm.tipo)                      e.tipo           = true
+    if (!orcForm.nome_cliente?.trim())      e.nome_cliente   = true
+    if (!orcForm.tel_cliente?.trim())       e.tel_cliente    = true
+    if (!orcForm.endereco?.trim())          e.endereco       = true
+    if (!orcForm.cidade?.trim())            e.cidade         = true
+    if (orcForm.tipo === 'linha_branca') {
+      if (!orcForm.tipo_equipamento)        e.tipo_equipamento = true
+      if (!orcForm.marca?.trim())           e.marca          = true
+      if (!orcForm.modelo?.trim())          e.modelo         = true
+      if (!orcForm.defeito?.trim())         e.defeito        = true
+    }
+    if (orcForm.tipo === 'emergencial') {
+      if (!orcForm.tipo_emergencia)         e.tipo_emergencia = true
+      if (!orcForm.desc_problema?.trim())   e.desc_problema  = true
+    }
+    if (Object.keys(e).length) { setOrcErrors(e); return }
+
+    setSavingOrc(true)
+    try {
+      const numero  = await gerarNumeroOrcamento()
+      const cenario = orcForm.tipo === 'particular' ? 'particular' : (orcForm.cenario || 'particular')
+      let tecNome = ''
+      let tecTel  = ''
+      if (orcForm.tecnico_id) {
+        const tec = tecnicos.find(t => t.id === orcForm.tecnico_id)
+        if (tec) { tecNome = tec.nome; tecTel = tec.telefone }
+      }
+
+      // Padrão validade: +30 dias
+      const validade = orcForm.validade || (() => {
+        const d = new Date(); d.setDate(d.getDate() + 30)
+        return d.toISOString().slice(0, 10)
+      })()
+
+      const payload = {
+        numero,
+        tipo:             orcForm.tipo || '',
+        status:           'aguardando_tecnico',
+        criado_em:        serverTimestamp(),
+        validade,
+        os_vinculada:     null,
+        seguradora:       orcForm.tipo !== 'particular' ? (orcForm.seguradora || '') : '',
+        num_assist:       orcForm.tipo !== 'particular' ? (orcForm.num_assist  || '') : '',
+        cenario,
+        nome_cliente:     orcForm.nome_cliente?.trim()     || '',
+        tel_cliente:      orcForm.tel_cliente?.trim()      || '',
+        email_cliente:    orcForm.email_cliente?.trim()    || '',
+        endereco:         orcForm.endereco?.trim()         || '',
+        cidade:           orcForm.cidade?.trim()           || '',
+        tipo_equipamento: orcForm.tipo_equipamento         || '',
+        marca:            orcForm.marca?.trim()            || '',
+        modelo:           orcForm.modelo?.trim()           || '',
+        voltagem:         orcForm.voltagem                 || '',
+        defeito:          orcForm.defeito?.trim()          || '',
+        tipo_emergencia:  orcForm.tipo_emergencia          || '',
+        desc_problema:    orcForm.desc_problema?.trim()    || '',
+        itens:            [],
+        total_geral:      0, total_seguradora: 0, total_cliente: 0,
+        desconto_pct:     0, desconto_valor:   0,
+        forma_pagamento:  orcForm.forma_pagamento          || 'pix',
+        prazo_execucao:   orcForm.prazo_execucao           || '',
+        garantia:         orcForm.garantia                 || '90 dias',
+        garantia_obs:     '',
+        observacoes:      orcForm.observacoes?.trim()      || '',
+        tecnico_id:       orcForm.tecnico_id               || '',
+        tecnico_nome:     tecNome,
+        diagnostico:      '',
+        preenchido_em:    null,
+        aprovado_por:     '', assinatura_cliente: '',
+        aprovado_em:      null, motivo_reprovacao: '',
+        aprovado_seguradora_em: null,
+      }
+
+      const ref    = await addDoc(collection(db, `empresas/${empresaId}/orcamentos`), payload)
+      const newOrc = { id: ref.id, ...payload, criado_em: { toDate: () => new Date() } }
+      setOrcamentos(p => [newOrc, ...p])
+      setShowNovoOrc(false)
+      setOrcForm({ ...ORC_INITIAL })
+      setOrcErrors({})
+      setOrcEtapa(1)
+      setOrcLinks({ id: ref.id, numero, tecnico: buildLinkTecnicoOrc(ref.id), tecnicoNome: tecNome, tecnicoTel: tecTel, payload })
+      showToast('✅ Orçamento criado!')
+    } catch (e) {
+      showToast('Erro ao criar orçamento: ' + e.message, 'error')
+    } finally {
+      setSavingOrc(false)
+    }
+  }
+
+  // Abre modal de revisão
+  function openRevisarOrcamento(orc) {
+    setRevisarOrc(orc)
+    setRevisarItens((orc.itens?.length ? orc.itens : [novoItemOrc()]).map(it => ({ ...it })))
+    setOrcGarantiaObs(orc.garantia_obs || '')
+    setShowRevisarOrc(true)
+  }
+
+  function addItemRevisar() {
+    setRevisarItens(p => [...p, novoItemOrc()])
+  }
+  function removeItemRevisar(id) {
+    setRevisarItens(p => { const n = p.filter(it => it.id !== id); return n.length ? n : [novoItemOrc()] })
+  }
+  function updateItemRevisar(id, campo, valor) {
+    setRevisarItens(prev => prev.map(it => {
+      if (it.id !== id) return it
+      const updated = { ...it, [campo]: valor }
+      if (campo === 'quantidade' || campo === 'valor_unit') {
+        const qtd  = parseInt(updated.quantidade) || 1
+        const unit = parseFloat(String(updated.valor_unit).replace(',', '.')) || 0
+        updated.valor_total = qtd * unit
+        const cenario = revisarOrc?.cenario || 'particular'
+        if (cenario === 'particular' || cenario === 'fora_contrato') {
+          updated.paga_cliente    = updated.valor_total
+          updated.paga_seguradora = 0
+        }
+      }
+      return updated
+    }))
+  }
+
+  // Salva revisão (admin edita itens e divisão)
+  async function saveRevisarOrcamento() {
+    if (!revisarOrc) return
+    setSavingRevisar(true)
+    try {
+      const itensNorm = revisarItens.map(it => ({
+        id:              it.id || `item_${Date.now()}`,
+        descricao:       it.descricao       || '',
+        quantidade:      parseInt(it.quantidade) || 1,
+        valor_unit:      parseFloat(it.valor_unit)      || 0,
+        valor_total:     parseFloat(it.valor_total)     || 0,
+        paga_seguradora: parseFloat(it.paga_seguradora) || 0,
+        paga_cliente:    parseFloat(it.paga_cliente)    || 0,
+      }))
+      const totalGeral = itensNorm.reduce((acc, it) => acc + it.valor_total, 0)
+      const totalSeg   = itensNorm.reduce((acc, it) => acc + it.paga_seguradora, 0)
+      const totalCli   = itensNorm.reduce((acc, it) => acc + it.paga_cliente, 0)
+      const payload = { itens: itensNorm, total_geral: totalGeral, total_seguradora: totalSeg, total_cliente: totalCli, garantia_obs: orcGarantiaObs || '' }
+      await updateDoc(doc(db, `empresas/${empresaId}/orcamentos`, revisarOrc.id), payload)
+      setOrcamentos(p => p.map(o => o.id === revisarOrc.id ? { ...o, ...payload } : o))
+      setRevisarOrc(p => ({ ...p, ...payload }))
+      showToast('✅ Orçamento salvo!')
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
+    finally { setSavingRevisar(false) }
+  }
+
+  // Envia link do orçamento para o cliente via WhatsApp
+  async function enviarLinkCliente(orc) {
+    try {
+      await updateDoc(doc(db, `empresas/${empresaId}/orcamentos`, orc.id), { status: 'enviado_cliente' })
+      setOrcamentos(p => p.map(o => o.id === orc.id ? { ...o, status: 'enviado_cliente' } : o))
+      if (revisarOrc?.id === orc.id) setRevisarOrc(p => ({ ...p, status: 'enviado_cliente' }))
+
+      const link       = buildLinkClienteOrc(orc.id)
+      const telCliente = (orc.tel_cliente || '').replace(/\D/g, '')
+      const nomeEmp    = config?.nome || empresa?.nome || 'AssistHub'
+      const msg = `Olá ${orc.nome_cliente || ''}! 😊\nSeu orçamento está pronto para análise.\n\n📋 Orçamento: ${orc.numero}\n🔧 Serviço: ${orc.tipo_equipamento || orc.tipo || '—'} ${orc.marca || ''}\n💰 Valor: ${fmtBRL(orc.total_cliente || orc.total_geral || 0)}\n✅ Garantia: ${orc.garantia || '—'}\n⏱️ Prazo: ${orc.prazo_execucao || '—'}\n\nPara visualizar e aprovar, clique no link:\n🔗 ${link}\n\nDúvidas? Entre em contato:\n📞 ${config?.telefone || ''}`
+      const waUrl = telCliente
+        ? `https://wa.me/55${telCliente}?text=${encodeURIComponent(msg)}`
+        : `https://wa.me/?text=${encodeURIComponent(msg)}`
+      window.open(waUrl, '_blank')
+      showToast('📤 Link enviado ao cliente!')
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
+  }
+
+  // Gera PDF do orçamento (versão cliente)
+  function handlePDFCliente(orc) {
+    const emp = { nome: config?.nome || empresa?.nome || '', telefone: config?.telefone || '', cnpj: config?.cnpj || '', logoUrl: config?.logoUrl || empresa?.logoUrl || '' }
+    generatePDFCliente(orc, emp)
+  }
+  // Gera PDF do orçamento (versão seguradora)
+  function handlePDFSeguradora(orc) {
+    const emp = { nome: config?.nome || empresa?.nome || '', telefone: config?.telefone || '', cnpj: config?.cnpj || '', logoUrl: config?.logoUrl || empresa?.logoUrl || '' }
+    generatePDFSeguradora(orc, emp)
+  }
+
+  // Abre modal de conversão em OS
+  function abrirConverterOS(orc) {
+    setConverterOrc(orc)
+    setShowConverterOS(true)
+  }
+
+  // Converte orçamento aprovado em Ordem de Serviço
+  async function converterEmOS(orc) {
+    setSavingOrc(true)
+    try {
+      const servicoDesc = orc.tipo === 'linha_branca'
+        ? `${orc.tipo_equipamento || ''} ${orc.marca || ''} ${orc.modelo || ''}`.trim()
+        : orc.tipo_emergencia || orc.tipo || ''
+      const payload = {
+        seguradora:    orc.seguradora    || '',
+        num_assist:    orc.num_assist    || '',
+        nome_segurado: orc.nome_cliente  || '',
+        tel_segurado:  orc.tel_cliente   || '',
+        endereco:      orc.endereco      || '',
+        cidade:        orc.cidade        || '',
+        servico:       servicoDesc,
+        desc_problema: orc.diagnostico   || orc.defeito || orc.desc_problema || '',
+        status:        'pendente',
+        origem:        'orcamento',
+        tecnico_nome:  orc.tecnico_nome  || '',
+        tecnico_id:    orc.tecnico_id    || '',
+        data_chegada:  '',
+      }
+      const ref    = await criarOS(empresaId, payload)
+      const newRec = { id: ref.id, ...payload, criado_em: { toDate: () => new Date() } }
+      await updateDoc(doc(db, `empresas/${empresaId}/orcamentos`, orc.id), { os_vinculada: ref.id, status: 'executado' })
+      setOrcamentos(p => p.map(o => o.id === orc.id ? { ...o, os_vinculada: ref.id, status: 'executado' } : o))
+      setReports(p => [newRec, ...p])
+      setTotalMes(p => p + 1)
+      setShowConverterOS(false)
+      setShowRevisarOrc(false)
+      setRevisarOrc(null)
+      setGeneratedLink({ link: buildLink(newRec), os: ref.id, nome: orc.nome_cliente, seguradora: orc.seguradora, num_assist: orc.num_assist })
+      showToast('🎉 OS criada com sucesso!')
+    } catch (e) { showToast('Erro ao criar OS: ' + e.message, 'error') }
+    finally { setSavingOrc(false) }
+  }
+
   // ── Toggle seguradoras no configForm ────────────────────
   function toggleSeguradora(seg) {
     setConfigForm(p => ({
@@ -748,11 +1143,12 @@ export default function AdminPage() {
 
         <nav className="sidebar-nav">
           {[
-            { id: 'dashboard', icon: '📊', label: 'Dashboard'         },
-            { id: 'os',        icon: '📋', label: 'Ordens de Serviço' },
-            { id: 'segurados', icon: '👥', label: 'Segurados'         },
-            { id: 'tecnicos',  icon: '👷', label: 'Técnicos'          },
-            { id: 'config',    icon: '⚙️', label: 'Configurações'     },
+            { id: 'dashboard',  icon: '📊', label: 'Dashboard'         },
+            { id: 'os',         icon: '📋', label: 'Ordens de Serviço' },
+            { id: 'orcamentos', icon: '📄', label: 'Orçamentos'        },
+            { id: 'segurados',  icon: '👥', label: 'Segurados'         },
+            { id: 'tecnicos',   icon: '👷', label: 'Técnicos'          },
+            { id: 'config',     icon: '⚙️', label: 'Configurações'     },
           ].map(item => (
             <button
               key={item.id}
@@ -764,6 +1160,11 @@ export default function AdminPage() {
               {item.id === 'os' && reports.length > 0 && (
                 <span style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 10, padding: '1px 8px', fontSize: '.72rem', fontWeight: 700 }}>
                   {reports.length}
+                </span>
+              )}
+              {item.id === 'orcamentos' && orcEmRevisaoCount > 0 && (
+                <span style={{ background: '#d4a017', color: '#fff', borderRadius: 10, padding: '1px 8px', fontSize: '.72rem', fontWeight: 700 }}>
+                  {orcEmRevisaoCount}
                 </span>
               )}
               {item.id === 'tecnicos' && tecnicos.length > 0 && (
@@ -811,7 +1212,7 @@ export default function AdminPage() {
             <button className="hamburger-btn" onClick={() => setSidebarOpen(o => !o)}>☰</button>
             <div>
               <div className="page-header-title">
-                {{ dashboard: '📊 Dashboard', os: '📋 Ordens de Serviço', segurados: '👥 Segurados', tecnicos: '👷 Técnicos', config: '⚙️ Configurações' }[abaAtiva]}
+                {{ dashboard: '📊 Dashboard', os: '📋 Ordens de Serviço', orcamentos: '📄 Orçamentos', segurados: '👥 Segurados', tecnicos: '👷 Técnicos', config: '⚙️ Configurações' }[abaAtiva]}
               </div>
               <div className="page-header-sub">{nomeEmpresa}</div>
             </div>
@@ -820,14 +1221,23 @@ export default function AdminPage() {
             <button className="btn-secondary" style={{ fontSize: '.82rem', padding: '7px 14px' }} onClick={loadReports} disabled={loading}>
               🔄 Atualizar
             </button>
-            <button
-              className="btn-new-os"
-              onClick={() => setShowOsForm(true)}
-              disabled={limite.bloqueado}
-              title={limite.bloqueado ? `Limite de ${limite.limite} OS/mês atingido` : 'Nova OS'}
-            >
-              + Nova OS
-            </button>
+            {abaAtiva === 'orcamentos'
+              ? (
+                <button className="btn-new-os" onClick={() => { setShowNovoOrc(true); setOrcEtapa(1); setOrcForm({ ...ORC_INITIAL }) }}>
+                  + Novo Orçamento
+                </button>
+              )
+              : (
+                <button
+                  className="btn-new-os"
+                  onClick={() => setShowOsForm(true)}
+                  disabled={limite.bloqueado}
+                  title={limite.bloqueado ? `Limite de ${limite.limite} OS/mês atingido` : 'Nova OS'}
+                >
+                  + Nova OS
+                </button>
+              )
+            }
           </div>
         </div>
 
@@ -1060,6 +1470,109 @@ export default function AdminPage() {
                         )}
                         {(r.status || 'pendente') === 'pendente' && (
                           <button className="btn-sm btn-ok" disabled={updating} onClick={() => changeStatus(r.id, 'processado')}>✓</button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════
+            ABA: ORÇAMENTOS
+        ══════════════════════════════════════════════════ */}
+        {abaAtiva === 'orcamentos' && (
+          <div className="tab-content">
+
+            {/* Filtros */}
+            <div className="filter-bar">
+              <input
+                className="filter-input flex-1"
+                placeholder="🔍 Buscar por nome, número..."
+                value={orcBusca}
+                onChange={e => setOrcBusca(e.target.value)}
+              />
+              <select className="filter-input" value={orcFiltTipo} onChange={e => setOrcFiltTipo(e.target.value)}>
+                <option value="">Todos os tipos</option>
+                <option value="linha_branca">🏠 Linha Branca</option>
+                <option value="emergencial">⚡ Emergencial</option>
+                <option value="particular">👤 Particular</option>
+              </select>
+              <select className="filter-input" value={orcFiltStatus} onChange={e => setOrcFiltStatus(e.target.value)}>
+                <option value="">Todos os status</option>
+                <option value="aguardando_tecnico">🟠 Aguardando</option>
+                <option value="em_revisao">🟡 Em Revisão</option>
+                <option value="enviado_cliente">🔵 Enviado ao Cliente</option>
+                <option value="enviado_seguradora">🟣 Enviado à Seg.</option>
+                <option value="aprovado">🟢 Aprovado</option>
+                <option value="reprovado">🔴 Reprovado</option>
+                <option value="executado">⚫ Executado</option>
+              </select>
+              <button
+                className="btn-sm btn-view"
+                onClick={loadOrcamentos}
+                disabled={loadingOrc}
+                style={{ whiteSpace:'nowrap' }}
+              >
+                🔄 Atualizar
+              </button>
+            </div>
+
+            {loadingOrc && (
+              <div className="loading-state"><div className="spinner" /><p className="loading-text">Carregando orçamentos...</p></div>
+            )}
+
+            {!loadingOrc && orcFiltered.length === 0 && (
+              <div className="empty-state">
+                <div className="e-icon">📄</div>
+                <p style={{ fontWeight:600, fontSize:'1rem', marginBottom:6 }}>
+                  {orcamentos.length === 0 ? 'Nenhum orçamento criado' : 'Nenhum orçamento encontrado'}
+                </p>
+                <p style={{ fontSize:'.85rem' }}>
+                  {orcamentos.length === 0
+                    ? 'Clique em "+ Novo Orçamento" para começar.'
+                    : 'Tente ajustar os filtros acima.'}
+                </p>
+              </div>
+            )}
+
+            {!loadingOrc && orcFiltered.length > 0 && (
+              <div className="orc-cards-grid">
+                {orcFiltered.map(orc => {
+                  const smeta = STATUS_ORC_META[orc.status] || STATUS_ORC_META.aguardando_tecnico
+                  const totalMostrar = orc.total_geral > 0 ? orc.total_geral : null
+                  return (
+                    <div key={orc.id} className={`orc-card ${orcCardCls(orc.status)}`}>
+                      <div className="orc-card-top">
+                        <span className={`badge ${smeta.cls}`}>{smeta.label}</span>
+                        <span className="orc-card-numero">{orc.numero}</span>
+                      </div>
+                      <div className="orc-card-name">{orc.nome_cliente || '—'}</div>
+                      <div className="orc-card-tel">{orc.tel_cliente || ''}</div>
+                      <div className="orc-card-equip">
+                        {orc.tipo === 'linha_branca'
+                          ? `${orc.tipo_equipamento || ''} ${orc.marca || ''} · ${orc.cidade || ''}`
+                          : orc.cidade || ''}
+                      </div>
+                      <div className="orc-card-meta">
+                        <div className="orc-card-meta-item">📅 {fmtDate(orc.criado_em)}</div>
+                        {totalMostrar !== null && <div className="orc-card-meta-item"><strong>{fmtBRL(totalMostrar)}</strong></div>}
+                        {orc.tecnico_nome && <div className="orc-card-meta-item">👷 {orc.tecnico_nome}</div>}
+                      </div>
+                      <div className="orc-card-actions">
+                        <button className="btn-sm btn-view" onClick={() => openRevisarOrcamento(orc)}>
+                          {orc.status === 'em_revisao' ? '✏️ Revisar' : '👁️ Ver'}
+                        </button>
+                        {(orc.total_cliente > 0 || (orc.status === 'aprovado' && orc.total_geral > 0)) && (
+                          <button className="btn-sm btn-pdf" onClick={() => handlePDFCliente(orc)}>📄 PDF</button>
+                        )}
+                        {orc.total_seguradora > 0 && (
+                          <button className="btn-sm btn-pdf" style={{ background:'#6c3483' }} onClick={() => handlePDFSeguradora(orc)}>📋 Seg.</button>
+                        )}
+                        {orc.status === 'aprovado' && !orc.os_vinculada && (
+                          <button className="btn-sm btn-ok" onClick={() => abrirConverterOS(orc)}>🚀 OS</button>
                         )}
                       </div>
                     </div>
@@ -1770,6 +2283,31 @@ export default function AdminPage() {
                 </div>
               </div>
 
+              {/* Anotações internas — visível só pelo admin, não vai ao PDF nem PNG */}
+              <div className="md-section" style={{ background: '#fffbf0', border: '1.5px solid #f0d080', borderRadius: 8, padding: '14px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                  <h3 style={{ color: '#8a6a00', margin: 0 }}>📝 Anotações Internas</h3>
+                  <span style={{ fontSize: '.72rem', color: '#aaa', fontWeight: 600 }}>🔒 Só você vê isso</span>
+                </div>
+                <textarea
+                  rows={4}
+                  value={anotacaoInterna}
+                  onChange={e => setAnotacaoInterna(e.target.value)}
+                  placeholder="Anotações internas, observações, lembretes... Visível apenas para você."
+                  style={{
+                    width: '100%', resize: 'none', border: '1.5px solid #f0d080',
+                    borderRadius: 6, padding: '9px 12px', fontSize: '.88rem',
+                    fontFamily: 'Barlow,sans-serif', background: '#fffdf5',
+                    color: 'var(--text)', outline: 'none', lineHeight: 1.55,
+                  }}
+                />
+                <div style={{ marginTop: 10, textAlign: 'right' }}>
+                  <button className="btn-sm btn-ok" disabled={savingAnotacao} onClick={saveAnotacao}>
+                    {savingAnotacao ? '⏳ Salvando...' : '💾 Salvar Anotação'}
+                  </button>
+                </div>
+              </div>
+
               {selected.avaliacao_nota
                 ? (
                   <div className="md-section" style={{ background: '#fffbf0', border: '1px solid #f0d88a', borderRadius: 8, padding: '14px 16px' }}>
@@ -2043,6 +2581,563 @@ export default function AdminPage() {
                 onClick={() => setShowTecnicoModal(false)}>Cancelar</button>
               <button className="btn-primary" onClick={saveTecnicoModal} disabled={savingTecnicoForm} style={{ padding: '9px 22px', fontSize: '.9rem' }}>
                 {savingTecnicoForm ? '⏳ Salvando...' : '💾 Salvar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ MODAL: NOVO ORÇAMENTO (3 etapas) ══ */}
+      {showNovoOrc && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowNovoOrc(false)}>
+          <div className="modal-box" style={{ maxWidth: 680 }}>
+            <div className="modal-header">
+              <h2>📄 Novo Orçamento</h2>
+              <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={() => setShowNovoOrc(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+
+              {/* Navegador de etapas */}
+              <div className="etapas-nav">
+                {['Tipo', 'Cliente', 'Condições'].map((lbl, idx) => (
+                  <div key={idx} className={`etapa-step ${orcEtapa === idx+1 ? 'ativa' : orcEtapa > idx+1 ? 'concluida' : ''}`}>
+                    {orcEtapa > idx+1 ? '✓ ' : `${idx+1}. `}{lbl}
+                  </div>
+                ))}
+              </div>
+
+              {/* ── ETAPA 1 ── */}
+              {orcEtapa === 1 && (
+                <>
+                  <p style={{ fontSize:'.82rem', color:'var(--muted)', marginBottom:14 }}>Selecione o tipo de atendimento:</p>
+                  <div className="tipo-selector">
+                    {[
+                      { v:'linha_branca', icon:'🏠', label:'Linha Branca / Marrom' },
+                      { v:'emergencial',  icon:'⚡', label:'Emergencial'           },
+                      { v:'particular',   icon:'👤', label:'Particular'            },
+                    ].map(op => (
+                      <div
+                        key={op.v}
+                        className={`tipo-card${orcForm.tipo === op.v ? ' selected' : ''}`}
+                        onClick={() => { setOrcForm(p => ({ ...p, tipo: op.v, cenario: op.v === 'particular' ? 'particular' : '' })); setOrcErrors(p => ({ ...p, tipo: false })) }}
+                      >
+                        <div className="tipo-icon">{op.icon}</div>
+                        <div className="tipo-label">{op.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {orcErrors.tipo && <div className="err-msg">Selecione um tipo</div>}
+
+                  {orcForm.tipo && orcForm.tipo !== 'particular' && (
+                    <>
+                      <p style={{ fontSize:'.82rem', fontWeight:700, color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.5px', margin:'16px 0 8px' }}>Cenário</p>
+                      <div className="cenario-group">
+                        {[
+                          { v:'seguradora_cobre_tudo', label:'Seguradora cobre tudo',             desc:'Todos os custos são da seguradora' },
+                          { v:'material_cliente',      label:'Material por conta do cliente',      desc:'Serviço coberto, peças não' },
+                          { v:'fora_contrato',         label:'Fora do contrato da seguradora',     desc:'Cliente paga tudo, mas há vinculação' },
+                        ].map(op => (
+                          <div
+                            key={op.v}
+                            className={`cenario-item${orcForm.cenario === op.v ? ' selected' : ''}`}
+                            onClick={() => setOrcForm(p => ({ ...p, cenario: op.v }))}
+                          >
+                            <div className="rdot"><div className={`rdot-i${orcForm.cenario === op.v ? '' : ' hidden'}`} style={{ display: orcForm.cenario === op.v ? 'block' : 'none' }} /></div>
+                            <div>
+                              <div className="cenario-label">{op.label}</div>
+                              <div className="cenario-desc">{op.desc}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="os-grid" style={{ marginTop: 16 }}>
+                        <div className="field">
+                          <label>Seguradora</label>
+                          <select value={orcForm.seguradora} onChange={e => setOrcForm(p => ({ ...p, seguradora: e.target.value }))}>
+                            <option value="">Selecione...</option>
+                            {seguradoras.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        </div>
+                        <div className="field">
+                          <label>Nº Assistência</label>
+                          <input value={orcForm.num_assist} onChange={e => setOrcForm(p => ({ ...p, num_assist: e.target.value }))} placeholder="Código da assistência" />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* ── ETAPA 2 ── */}
+              {orcEtapa === 2 && (
+                <>
+                  <p style={{ fontSize:'.82rem', fontWeight:700, color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.5px', marginBottom:14 }}>Dados do cliente</p>
+                  <div className="os-grid">
+                    <div className={`field${orcErrors.nome_cliente ? ' error' : ''}`}>
+                      <label>Nome <span className="req">*</span></label>
+                      <input className={orcErrors.nome_cliente ? 'error' : ''} value={orcForm.nome_cliente} onChange={e => { setOrcForm(p => ({ ...p, nome_cliente: e.target.value })); setOrcErrors(p => ({ ...p, nome_cliente: false })) }} />
+                    </div>
+                    <div className="field">
+                      <label>Telefone <span className="req">*</span></label>
+                      <input className={orcErrors.tel_cliente ? 'error' : ''} value={orcForm.tel_cliente} onChange={e => { setOrcForm(p => ({ ...p, tel_cliente: maskPhone(e.target.value) })); setOrcErrors(p => ({ ...p, tel_cliente: false })) }} placeholder="(XX) XXXXX-XXXX" />
+                    </div>
+                    <div className="field os-span2">
+                      <label>E-mail (opcional)</label>
+                      <input type="email" value={orcForm.email_cliente} onChange={e => setOrcForm(p => ({ ...p, email_cliente: e.target.value }))} placeholder="cliente@email.com" />
+                    </div>
+                    <div className="field os-span2">
+                      <label>Endereço <span className="req">*</span></label>
+                      <input className={orcErrors.endereco ? 'error' : ''} value={orcForm.endereco} onChange={e => { setOrcForm(p => ({ ...p, endereco: e.target.value })); setOrcErrors(p => ({ ...p, endereco: false })) }} placeholder="Rua, número, bairro" />
+                    </div>
+                    <div className="field os-span2">
+                      <label>Cidade <span className="req">*</span></label>
+                      <input className={orcErrors.cidade ? 'error' : ''} value={orcForm.cidade} onChange={e => { setOrcForm(p => ({ ...p, cidade: e.target.value })); setOrcErrors(p => ({ ...p, cidade: false })) }} placeholder="Cidade - UF" />
+                    </div>
+                  </div>
+
+                  {orcForm.tipo === 'linha_branca' && (
+                    <>
+                      <p style={{ fontSize:'.82rem', fontWeight:700, color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.5px', margin:'16px 0 10px' }}>Equipamento</p>
+                      <div className="os-grid">
+                        <div className="field">
+                          <label>Tipo <span className="req">*</span></label>
+                          <select className={orcErrors.tipo_equipamento ? 'error' : ''} value={orcForm.tipo_equipamento} onChange={e => { setOrcForm(p => ({ ...p, tipo_equipamento: e.target.value })); setOrcErrors(p => ({ ...p, tipo_equipamento: false })) }}>
+                            <option value="">Selecione...</option>
+                            {['Refrigerador','Fogão','Máquina de Lavar','Lava-louça','TV','Microondas','Ar Condicionado','Outro'].map(t => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                        </div>
+                        <div className="field">
+                          <label>Voltagem</label>
+                          <select value={orcForm.voltagem} onChange={e => setOrcForm(p => ({ ...p, voltagem: e.target.value }))}>
+                            <option value="">—</option>
+                            <option value="110v">110v</option>
+                            <option value="220v">220v</option>
+                            <option value="Bivolt">Bivolt</option>
+                          </select>
+                        </div>
+                        <div className="field">
+                          <label>Marca <span className="req">*</span></label>
+                          <input className={orcErrors.marca ? 'error' : ''} value={orcForm.marca} onChange={e => { setOrcForm(p => ({ ...p, marca: e.target.value })); setOrcErrors(p => ({ ...p, marca: false })) }} />
+                        </div>
+                        <div className="field">
+                          <label>Modelo <span className="req">*</span></label>
+                          <input className={orcErrors.modelo ? 'error' : ''} value={orcForm.modelo} onChange={e => { setOrcForm(p => ({ ...p, modelo: e.target.value })); setOrcErrors(p => ({ ...p, modelo: false })) }} />
+                        </div>
+                        <div className="field os-span2">
+                          <label>Defeito relatado <span className="req">*</span></label>
+                          <textarea rows={2} className={orcErrors.defeito ? 'error' : ''} value={orcForm.defeito} onChange={e => { setOrcForm(p => ({ ...p, defeito: e.target.value })); setOrcErrors(p => ({ ...p, defeito: false })) }} placeholder="Descreva o defeito relatado pelo cliente..." />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {orcForm.tipo === 'emergencial' && (
+                    <>
+                      <p style={{ fontSize:'.82rem', fontWeight:700, color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.5px', margin:'16px 0 10px' }}>Tipo de emergência</p>
+                      <div className="os-grid">
+                        <div className="field">
+                          <label>Tipo <span className="req">*</span></label>
+                          <select className={orcErrors.tipo_emergencia ? 'error' : ''} value={orcForm.tipo_emergencia} onChange={e => { setOrcForm(p => ({ ...p, tipo_emergencia: e.target.value })); setOrcErrors(p => ({ ...p, tipo_emergencia: false })) }}>
+                            <option value="">Selecione...</option>
+                            {['Hidráulico','Elétrico','Chaveiro','Vidro','Estrutural','Outro'].map(t => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                        </div>
+                        <div className="field os-span2">
+                          <label>Descrição <span className="req">*</span></label>
+                          <textarea rows={2} className={orcErrors.desc_problema ? 'error' : ''} value={orcForm.desc_problema} onChange={e => { setOrcForm(p => ({ ...p, desc_problema: e.target.value })); setOrcErrors(p => ({ ...p, desc_problema: false })) }} placeholder="Descreva o problema..." />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* ── ETAPA 3 ── */}
+              {orcEtapa === 3 && (
+                <>
+                  <div className="os-grid">
+                    <div className="field">
+                      <label>Validade do orçamento</label>
+                      <input type="date" value={orcForm.validade} onChange={e => setOrcForm(p => ({ ...p, validade: e.target.value }))} min={new Date().toISOString().slice(0,10)} />
+                    </div>
+                    <div className="field">
+                      <label>Prazo de execução</label>
+                      <select value={orcForm.prazo_execucao} onChange={e => setOrcForm(p => ({ ...p, prazo_execucao: e.target.value }))}>
+                        <option value="">Selecione...</option>
+                        {['Imediato','24h','2 dias úteis','3 dias úteis','5 dias úteis','A combinar'].map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </div>
+                    <div className="field">
+                      <label>Garantia</label>
+                      <select value={orcForm.garantia} onChange={e => setOrcForm(p => ({ ...p, garantia: e.target.value }))}>
+                        {['90 dias','6 meses','1 ano','Sem garantia'].map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </div>
+                    <div className="field">
+                      <label>Forma de pagamento</label>
+                      <select value={orcForm.forma_pagamento} onChange={e => setOrcForm(p => ({ ...p, forma_pagamento: e.target.value }))}>
+                        {['pix','dinheiro','cartao','parcelado','a_combinar'].map(t => <option key={t} value={t} style={{ textTransform:'capitalize' }}>{t.replace('_',' ')}</option>)}
+                      </select>
+                    </div>
+                    <div className="field os-span2">
+                      <label>Observações</label>
+                      <textarea rows={2} value={orcForm.observacoes} onChange={e => setOrcForm(p => ({ ...p, observacoes: e.target.value }))} placeholder="Observações adicionais..." />
+                    </div>
+                  </div>
+
+                  <div className="md-section" style={{ marginTop:16 }}>
+                    <h3>👷 Técnico Responsável</h3>
+                    <div className="field">
+                      <label>Selecionar técnico (opcional)</label>
+                      <select value={orcForm.tecnico_id} onChange={e => setOrcForm(p => ({ ...p, tecnico_id: e.target.value }))}>
+                        <option value="">Sem técnico definido</option>
+                        {tecnicosAtivos.map(t => <option key={t.id} value={t.id}>{t.nome} — {t.telefone}</option>)}
+                      </select>
+                    </div>
+                    <p style={{ fontSize:'.8rem', color:'var(--muted)', marginTop:8 }}>
+                      💡 Ao salvar, um link será gerado para o técnico preencher o diagnóstico e os valores no local.
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              {orcEtapa > 1 && (
+                <button className="btn-sm" style={{ background:'var(--light)', color:'var(--muted)', border:'1px solid var(--border)', marginRight:'auto' }}
+                  onClick={() => setOrcEtapa(p => p - 1)}>← Voltar</button>
+              )}
+              <button className="btn-sm" style={{ background:'var(--light)', color:'var(--muted)', border:'1px solid var(--border)' }}
+                onClick={() => setShowNovoOrc(false)}>Cancelar</button>
+              {orcEtapa < 3
+                ? (
+                  <button className="btn-primary" style={{ padding:'9px 22px', fontSize:'.9rem' }}
+                    onClick={() => {
+                      if (orcEtapa === 1 && !orcForm.tipo) { setOrcErrors({ tipo: true }); return }
+                      if (orcEtapa === 2) {
+                        const e = {}
+                        if (!orcForm.nome_cliente?.trim()) e.nome_cliente = true
+                        if (!orcForm.tel_cliente?.trim())  e.tel_cliente  = true
+                        if (!orcForm.endereco?.trim())     e.endereco     = true
+                        if (!orcForm.cidade?.trim())       e.cidade       = true
+                        if (Object.keys(e).length) { setOrcErrors(e); return }
+                      }
+                      setOrcEtapa(p => p + 1)
+                    }}>
+                    Próximo →
+                  </button>
+                )
+                : (
+                  <button className="btn-primary" onClick={saveNovoOrcamento} disabled={savingOrc} style={{ padding:'9px 22px', fontSize:'.9rem' }}>
+                    {savingOrc ? '⏳ Salvando...' : '💾 Criar Orçamento'}
+                  </button>
+                )
+              }
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ MODAL: LINKS GERADOS (orçamento) ══ */}
+      {orcLinks && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setOrcLinks(null)}>
+          <div className="modal-box" style={{ maxWidth: 520 }}>
+            <div className="modal-header" style={{ background:'#1e6e3e' }}>
+              <h2>✅ Orçamento {orcLinks.numero} criado!</h2>
+              <button className="btn-sm" style={{ background:'rgba(255,255,255,.15)', color:'#fff' }} onClick={() => setOrcLinks(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="orc-link-section">
+                <h4>👷 Link do Técnico</h4>
+                <p>Para o técnico preencher o diagnóstico e os valores no local</p>
+                <div className="link-box"><span className="link-text">{orcLinks.tecnico}</span></div>
+                <div style={{ display:'flex', gap:10, marginTop:12, flexWrap:'wrap' }}>
+                  <button className={`btn-copy${orcLinkCopied ? ' copied' : ''}`} onClick={() => copyOrcLink(orcLinks.tecnico)}>
+                    {orcLinkCopied ? '✅ Copiado!' : '📋 Copiar'}
+                  </button>
+                  {orcLinks.tecnicoTel && (
+                    <a className="btn-whatsapp" target="_blank" rel="noopener noreferrer"
+                      href={`https://wa.me/55${orcLinks.tecnicoTel.replace(/\D/g,'')}?text=${encodeURIComponent(`Olá ${orcLinks.tecnicoNome || 'Técnico'}! 👷\nVocê tem um novo orçamento para avaliar no local.\n\nAcesse o link para preencher o diagnóstico e os valores:\n🔗 ${orcLinks.tecnico}`)}`}>
+                      📲 WhatsApp Técnico
+                    </a>
+                  )}
+                  {!orcLinks.tecnicoTel && (
+                    <a className="btn-whatsapp" target="_blank" rel="noopener noreferrer"
+                      href={`https://wa.me/?text=${encodeURIComponent(`Novo orçamento para preencher:\n🔗 ${orcLinks.tecnico}`)}`}>
+                      📲 Enviar pelo WhatsApp
+                    </a>
+                  )}
+                </div>
+              </div>
+              <div className="orc-link-aviso">
+                ⚠️ O link do cliente só ficará disponível após o técnico preencher e você revisar o orçamento.
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-sm btn-view" onClick={() => setOrcLinks(null)}>Fechar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ MODAL: REVISAR ORÇAMENTO ══ */}
+      {showRevisarOrc && revisarOrc && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowRevisarOrc(false)}>
+          <div className="modal-box" style={{ maxWidth:760 }}>
+            <div className="modal-header">
+              <h2>{revisarOrc.status === 'em_revisao' ? '✏️ Revisão' : '👁️ Orçamento'} — {revisarOrc.numero}</h2>
+              <div className="modal-header-btns">
+                <span className={`badge ${STATUS_ORC_META[revisarOrc.status]?.cls || 'orc-aguardando'}`}>
+                  {STATUS_ORC_META[revisarOrc.status]?.label || ''}
+                </span>
+                {revisarOrc.status === 'aprovado' && !revisarOrc.os_vinculada && (
+                  <button className="btn-sm btn-ok" onClick={() => abrirConverterOS(revisarOrc)}>🚀 Converter em OS</button>
+                )}
+                {(revisarOrc.status === 'aprovado' || revisarOrc.status === 'executado') && (
+                  <button className="btn-sm btn-pdf" onClick={() => handlePDFCliente(revisarOrc)}>📄 PDF Cliente</button>
+                )}
+                {revisarOrc.total_seguradora > 0 && (
+                  <button className="btn-sm btn-pdf" style={{ background:'#6c3483' }} onClick={() => handlePDFSeguradora(revisarOrc)}>📋 PDF Seg.</button>
+                )}
+                <button className="btn-sm" style={{ background:'rgba(255,255,255,.15)', color:'#fff' }} onClick={() => setShowRevisarOrc(false)}>✕</button>
+              </div>
+            </div>
+            <div className="modal-body">
+
+              {/* Banner aprovado */}
+              {revisarOrc.status === 'aprovado' && (
+                <div className="orc-aprovado-banner">
+                  <h3>🎉 Aprovado por {revisarOrc.aprovado_por}!</h3>
+                  <p>Assinado em: {fmtDate(revisarOrc.aprovado_em)}</p>
+                </div>
+              )}
+
+              {/* Dados do cliente */}
+              <div className="md-section">
+                <h3>👤 Cliente</h3>
+                <div className="md-grid">
+                  <div className="md-field"><label>Nome</label><p>{revisarOrc.nome_cliente || '—'}</p></div>
+                  <div className="md-field"><label>Telefone</label><p>{revisarOrc.tel_cliente || '—'}</p></div>
+                  <div className="md-field"><label>Endereço</label><p>{revisarOrc.endereco || '—'}</p></div>
+                  <div className="md-field"><label>Cidade</label><p>{revisarOrc.cidade || '—'}</p></div>
+                </div>
+              </div>
+
+              {/* Diagnóstico do técnico */}
+              {revisarOrc.diagnostico && (
+                <div className="md-section">
+                  <h3>🔍 Diagnóstico do Técnico</h3>
+                  <div className="md-text">{revisarOrc.diagnostico}</div>
+                </div>
+              )}
+
+              {/* Itens (editável se em_revisao) */}
+              <div className="md-section">
+                <h3>📋 Itens</h3>
+                <div style={{ overflowX:'auto' }}>
+                  <table className="itens-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width:'44%' }}>Descrição</th>
+                        <th style={{ width:'9%' }}>Qtd</th>
+                        <th style={{ width:'17%' }}>Vlr Unit.</th>
+                        <th style={{ width:'17%' }}>Total</th>
+                        {revisarOrc.status === 'em_revisao' && <th style={{ width:'8%' }}></th>}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {revisarItens.map(it => (
+                        <tr key={it.id}>
+                          <td>
+                            {revisarOrc.status === 'em_revisao'
+                              ? <input type="text" value={it.descricao} onChange={e => updateItemRevisar(it.id, 'descricao', e.target.value)} placeholder="Descrição" />
+                              : it.descricao}
+                          </td>
+                          <td>
+                            {revisarOrc.status === 'em_revisao'
+                              ? <input type="number" min="1" style={{ width:60 }} value={it.quantidade} onChange={e => updateItemRevisar(it.id, 'quantidade', e.target.value)} />
+                              : it.quantidade}
+                          </td>
+                          <td>
+                            {revisarOrc.status === 'em_revisao'
+                              ? <input type="text" inputMode="decimal" value={it.valor_unit} onChange={e => updateItemRevisar(it.id, 'valor_unit', e.target.value)} placeholder="0,00" />
+                              : fmtBRL(it.valor_unit)}
+                          </td>
+                          <td style={{ fontWeight:700 }}>{fmtBRL(it.valor_total || (parseFloat(it.valor_unit)||0) * (parseInt(it.quantidade)||1))}</td>
+                          {revisarOrc.status === 'em_revisao' && (
+                            <td><button className="btn-remove-item" onClick={() => removeItemRevisar(it.id)}>✕</button></td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {revisarOrc.status === 'em_revisao' && (
+                  <button className="btn-add-item" onClick={addItemRevisar}>＋ Adicionar item</button>
+                )}
+
+                <div className="orc-subtotal">
+                  Total: {fmtBRL(revisarItens.reduce((acc,it) => acc + (parseFloat(it.valor_total) || parseFloat(it.valor_unit)||0 * parseInt(it.quantidade)||1), 0))}
+                </div>
+              </div>
+
+              {/* Divisão seguradora/cliente (se cenario != particular) */}
+              {revisarOrc.status === 'em_revisao' && revisarOrc.cenario && revisarOrc.cenario !== 'particular' && revisarItens.length > 0 && (
+                <div className="md-section">
+                  <h3>💰 Divisão de Responsabilidade</h3>
+                  <div style={{ overflowX:'auto' }}>
+                    <table className="divisao-table">
+                      <thead>
+                        <tr>
+                          <th>Item</th>
+                          <th>Seguradora</th>
+                          <th>Cliente</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {revisarItens.map(it => (
+                          <tr key={it.id}>
+                            <td style={{ fontSize:'.88rem' }}>{it.descricao || '—'}</td>
+                            <td>
+                              <input
+                                type="text" inputMode="decimal"
+                                value={it.paga_seguradora}
+                                onChange={e => {
+                                  const val = parseFloat(String(e.target.value).replace(',','.')) || 0
+                                  const total = parseFloat(it.valor_total) || 0
+                                  updateItemRevisar(it.id, 'paga_seguradora', val)
+                                  setRevisarItens(prev => prev.map(i => i.id === it.id ? { ...i, paga_seguradora: val, paga_cliente: Math.max(0, total - val) } : i))
+                                }}
+                                placeholder="0,00"
+                              />
+                            </td>
+                            <td>
+                              <input type="text" inputMode="decimal"
+                                value={it.paga_cliente}
+                                onChange={e => {
+                                  const val = parseFloat(String(e.target.value).replace(',','.')) || 0
+                                  const total = parseFloat(it.valor_total) || 0
+                                  setRevisarItens(prev => prev.map(i => i.id === it.id ? { ...i, paga_cliente: val, paga_seguradora: Math.max(0, total - val) } : i))
+                                }}
+                                placeholder="0,00"
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                        <tr className="totais-row">
+                          <td style={{ fontWeight:800 }}>TOTAIS</td>
+                          <td style={{ fontWeight:800 }}>{fmtBRL(revisarItens.reduce((acc,it) => acc + (parseFloat(it.paga_seguradora)||0), 0))}</td>
+                          <td style={{ fontWeight:800 }}>{fmtBRL(revisarItens.reduce((acc,it) => acc + (parseFloat(it.paga_cliente)||0), 0))}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Condições */}
+              <div className="md-section">
+                <h3>📋 Condições</h3>
+                <div className="md-grid">
+                  <div className="md-field"><label>Garantia</label><p>{revisarOrc.garantia || '—'}</p></div>
+                  <div className="md-field"><label>Prazo</label><p>{revisarOrc.prazo_execucao || '—'}</p></div>
+                  <div className="md-field"><label>Pagamento</label><p>{revisarOrc.forma_pagamento || '—'}</p></div>
+                  <div className="md-field"><label>Válido até</label><p>{fmtDate(revisarOrc.validade)}</p></div>
+                </div>
+              </div>
+
+              {/* Nota de garantia (editável) */}
+              {revisarOrc.status === 'em_revisao' && (
+                <div className="md-section">
+                  <h3>📝 Nota de Garantia</h3>
+                  <div className="field">
+                    <label>Texto que aparecerá no PDF para o cliente</label>
+                    <textarea rows={3} value={orcGarantiaObs} onChange={e => setOrcGarantiaObs(e.target.value)}
+                      placeholder="A garantia é válida somente para peças e materiais fornecidos por nossa empresa..." />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-sm" style={{ background:'var(--light)', color:'var(--muted)', border:'1px solid var(--border)' }}
+                onClick={() => setShowRevisarOrc(false)}>Fechar</button>
+              {revisarOrc.status === 'em_revisao' && (
+                <>
+                  <button className="btn-sm btn-view" onClick={saveRevisarOrcamento} disabled={savingRevisar}>
+                    {savingRevisar ? '⏳...' : '💾 Salvar'}
+                  </button>
+                  <button className="btn-sm btn-ok" onClick={() => enviarLinkCliente(revisarOrc)}>
+                    📲 Enviar ao Cliente
+                  </button>
+                  <button className="btn-sm btn-pdf" style={{ background:'#6c3483' }} onClick={() => handlePDFSeguradora(revisarOrc)}>
+                    🖨️ PDF Seguradora
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ MODAL: CONVERTER ORÇAMENTO EM OS ══ */}
+      {showConverterOS && converterOrc && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowConverterOS(false)}>
+          <div className="modal-box" style={{ maxWidth:520 }}>
+            <div className="modal-header" style={{ background:'#1e7040' }}>
+              <h2>🚀 Converter em OS</h2>
+              <button className="btn-sm" style={{ background:'rgba(255,255,255,.15)', color:'#fff' }} onClick={() => setShowConverterOS(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="orc-aprovado-banner" style={{ marginBottom:16 }}>
+                <h3>🎉 Orçamento aprovado por {converterOrc.aprovado_por}!</h3>
+                <p>Assinado em: {fmtDate(converterOrc.aprovado_em)}</p>
+              </div>
+              <p style={{ fontSize:'.88rem', color:'var(--muted)', marginBottom:16 }}>
+                Os dados abaixo serão pré-preenchidos na Ordem de Serviço:
+              </p>
+
+              <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:16 }}>
+                {[
+                  { l:'Nome',      v: converterOrc.nome_cliente },
+                  { l:'Telefone',  v: converterOrc.tel_cliente  },
+                  { l:'Endereço',  v: converterOrc.endereco     },
+                  { l:'Cidade',    v: converterOrc.cidade       },
+                  { l:'Serviço',   v: converterOrc.tipo === 'linha_branca'
+                      ? `${converterOrc.tipo_equipamento||''} ${converterOrc.marca||''} + manutenção`.trim()
+                      : converterOrc.tipo_emergencia || converterOrc.tipo || '—' },
+                ].map((f,i) => (
+                  <div key={i} style={{ display:'flex', gap:12, padding:'8px 0', borderBottom:'1px solid var(--border)', fontSize:'.88rem' }}>
+                    <span style={{ color:'var(--muted)', minWidth:80 }}>{f.l}</span>
+                    <span style={{ fontWeight:600 }}>{f.v || '—'} ✅</span>
+                  </div>
+                ))}
+              </div>
+
+              {converterOrc.tipo !== 'particular' && (
+                <div className="os-grid">
+                  <div className="field">
+                    <label>Seguradora</label>
+                    <input defaultValue={converterOrc.seguradora || ''} readOnly className="locked" />
+                  </div>
+                  <div className="field">
+                    <label>Nº Assistência</label>
+                    <input defaultValue={converterOrc.num_assist || ''} readOnly className="locked" />
+                  </div>
+                </div>
+              )}
+
+              <div className="os-callout" style={{ marginTop:12 }}>
+                💡 A OS será criada como "Pendente" e ficará disponível no painel para acompanhamento.
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-sm" style={{ background:'var(--light)', color:'var(--muted)', border:'1px solid var(--border)' }}
+                onClick={() => setShowConverterOS(false)}>Cancelar</button>
+              <button className="btn-primary" onClick={() => converterEmOS(converterOrc)} disabled={savingOrc} style={{ padding:'9px 22px', fontSize:'.9rem' }}>
+                {savingOrc ? '⏳ Criando...' : '🚀 Criar OS Agora'}
               </button>
             </div>
           </div>

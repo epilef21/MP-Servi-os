@@ -10,10 +10,12 @@ import AdminPage   from './pages/AdminPage.jsx'
 import LoginPage   from './pages/LoginPage.jsx'
 
 // Páginas novas e auxiliares
-import CadastroPage         from './pages/CadastroPage.jsx'
-import SuperAdminPage       from './pages/SuperAdminPage.jsx'
-import EmpresaNaoEncontrada from './pages/EmpresaNaoEncontrada.jsx'
-import AvaliacaoPage        from './pages/AvaliacaoPage.jsx'
+import CadastroPage           from './pages/CadastroPage.jsx'
+import SuperAdminPage         from './pages/SuperAdminPage.jsx'
+import EmpresaNaoEncontrada   from './pages/EmpresaNaoEncontrada.jsx'
+import AvaliacaoPage          from './pages/AvaliacaoPage.jsx'
+import OrcamentoTecnicoPage   from './pages/OrcamentoTecnicoPage.jsx'
+import AprovarOrcamentoPage   from './pages/AprovarOrcamentoPage.jsx'
 
 // ── Guarda de rota para admin da empresa ─────────────────────
 // Redireciona para /login se o usuário não estiver autenticado
@@ -41,6 +43,12 @@ export default function App() {
 
       {/* Pesquisa de satisfação — pública, sem auth */}
       <Route path="/avaliacao/:slug/:osId" element={<AvaliacaoPage />} />
+
+      {/* Técnico preenche orçamento no local — pública, sem auth */}
+      <Route path="/orcamento/:slug/:orcamentoId" element={<OrcamentoTecnicoPage />} />
+
+      {/* Cliente visualiza e aprova orçamento — pública, sem auth */}
+      <Route path="/aprovar/:slug/:orcamentoId" element={<AprovarOrcamentoPage />} />
 
       {/* ── Superadmin ─────────────────────────────────────── */}
       <Route

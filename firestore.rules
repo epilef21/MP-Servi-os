@@ -141,6 +141,29 @@ service cloud.firestore {
         // Exclusão: apenas superadmin
         allow delete: if eSuperAdmin();
       }
+
+      // ── /empresas/{empresaId}/orcamentos/{orcamentoId} ───
+      // Orçamentos gerados pelo admin, preenchidos pelo técnico
+      // e aprovados/reprovados pelo cliente via link público.
+      match /orcamentos/{orcamentoId} {
+
+        // Leitura pública: necessário para as páginas públicas do
+        // técnico (/orcamento/:slug/:id) e do cliente (/aprovar/:slug/:id)
+        // acessarem o documento sem autenticação.
+        allow read: if true;
+
+        // Criação: apenas o dono da empresa ou superadmin
+        allow create: if eDonoEmpresa(empresaId) || eSuperAdmin();
+
+        // Atualização sem restrição de auth: permite que o técnico
+        // (preenche diagnóstico + itens) e o cliente (assina + aprova)
+        // atualizem via link público sem precisar estar logado.
+        // O admin também pode atualizar (revisão de valores).
+        allow update: if true;
+
+        // Exclusão: apenas o dono da empresa ou superadmin
+        allow delete: if eDonoEmpresa(empresaId) || eSuperAdmin();
+      }
     }
   }
 }

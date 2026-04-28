@@ -44,10 +44,12 @@ export default function CadastroPage() {
     plano:      'basico',
   })
 
-  const [slugPreview, setSlugPreview] = useState('')
-  const [erro,        setErro]        = useState('')
-  const [loading,     setLoading]     = useState(false)
-  const [sucesso,     setSucesso]     = useState(false)
+  const [slugPreview,  setSlugPreview]  = useState('')
+  const [erro,         setErro]         = useState('')
+  const [loading,      setLoading]      = useState(false)
+  const [sucesso,      setSucesso]      = useState(false)
+  const [showSenha,    setShowSenha]    = useState(false)
+  const [showConfirma, setShowConfirma] = useState(false)
 
   // Atualiza campo do formulário e recalcula slug ao digitar o nome
   function handleChange(e) {
@@ -229,29 +231,49 @@ export default function CadastroPage() {
           {/* Senha */}
           <div className="form-group">
             <label className="form-label">Senha *</label>
-            <input
-              className="form-input"
-              type="password"
-              name="senha"
-              value={form.senha}
-              onChange={handleChange}
-              placeholder="Mínimo 6 caracteres"
-              required
-            />
+            <div className="password-field">
+              <input
+                className="form-input"
+                type={showSenha ? 'text' : 'password'}
+                name="senha"
+                value={form.senha}
+                onChange={handleChange}
+                placeholder="Mínimo 6 caracteres"
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowSenha(p => !p)}
+                tabIndex={-1}
+              >
+                {showSenha ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
 
           {/* Confirmar senha */}
           <div className="form-group">
             <label className="form-label">Confirmar senha *</label>
-            <input
-              className="form-input"
-              type="password"
-              name="confirma"
-              value={form.confirma}
-              onChange={handleChange}
-              placeholder="Repita a senha"
-              required
-            />
+            <div className="password-field">
+              <input
+                className="form-input"
+                type={showConfirma ? 'text' : 'password'}
+                name="confirma"
+                value={form.confirma}
+                onChange={handleChange}
+                placeholder="Repita a senha"
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowConfirma(p => !p)}
+                tabIndex={-1}
+              >
+                {showConfirma ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
 
           <button

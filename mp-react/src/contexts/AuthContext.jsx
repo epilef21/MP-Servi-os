@@ -40,14 +40,19 @@ export function AuthProvider({ children }) {
         } else {
           setIsSuperAdmin(false)
 
-          // Busca o documento do usuário para descobrir qual empresa ele administra
-          // Estrutura esperada: usuarios/{uid} → { empresaId: "..." }
           try {
-            const snapUsuario = await getDoc(doc(db, 'usuarios', user.uid))
-            if (snapUsuario.exists()) {
-              setEmpresaId(snapUsuario.data().empresaId ?? null)
+            // Tentativa primária: empresas/{uid} (por convenção empresaId === uid)
+            const snapEmpresa = await getDoc(doc(db, 'empresas', user.uid))
+            if (snapEmpresa.exists()) {
+              setEmpresaId(user.uid)
             } else {
-              setEmpresaId(null)
+              // Fallback: usuarios/{uid} → empresaId (compatibilidade com cadastros antigos)
+              const snapUsuario = await getDoc(doc(db, 'usuarios', user.uid))
+              if (snapUsuario.exists()) {
+                setEmpresaId(snapUsuario.data().empresaId ?? null)
+              } else {
+                setEmpresaId(null)
+              }
             }
           } catch (err) {
             console.error('[AuthContext] Erro ao buscar empresaId do usuário:', err)

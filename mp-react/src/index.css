@@ -90,6 +90,8 @@ body {
 .col-2 { grid-template-columns:1fr 1fr; }
 .col-3 { grid-template-columns:2fr 1fr 1fr; }
 .col-4 { grid-template-columns:repeat(4,1fr); }
+/* Evita deslocamento de layout quando campos têm alturas diferentes */
+.row.col-2, .row.col-3 { align-items:start; }
 
 /* ── FIELDS ── */
 .field { display:flex; flex-direction:column; gap:5px; }
@@ -102,6 +104,7 @@ body {
   padding:10px 13px; font-size:.93rem; font-family:'Barlow',sans-serif;
   color:var(--text); background:var(--light); outline:none; width:100%;
   transition:border-color .2s, box-shadow .2s, background .2s;
+  min-height:44px;
 }
 .field input:focus,.field textarea:focus,.field select:focus {
   border-color:var(--primary); background:#fff;
@@ -890,3 +893,343 @@ body {
 /* ── RESPONSIVE TÉCNICOS ── */
 @media(max-width:1100px) { .tecnico-cards-grid { grid-template-columns:repeat(2,1fr); } }
 @media(max-width:600px)  { .tecnico-cards-grid { grid-template-columns:1fr; } }
+
+/* ── CAMPO DE SENHA COM TOGGLE OLHINHO ── */
+.password-field {
+  position:relative; width:100%;
+}
+.password-field input {
+  width:100%;
+  padding-right:48px !important;
+}
+.password-toggle {
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  background:none; border:none; cursor:pointer;
+  font-size:20px; color:var(--muted);
+  padding:4px; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  transition:color .2s;
+}
+.password-toggle:hover { color:var(--primary); }
+
+/* ============================================================
+   MÓDULO ORÇAMENTOS
+   ============================================================ */
+
+/* ── CARDS DE ORÇAMENTO ── */
+.orc-card {
+  border-radius:16px; background:#fff;
+  padding:20px; box-shadow:0 2px 12px rgba(26,58,92,.08);
+  transition:all .2s; border-left:4px solid var(--border);
+}
+.orc-card:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(26,58,92,.14); }
+.orc-card.aguardando { border-left-color:#e07020; }
+.orc-card.revisao    { border-left-color:#d4a017; }
+.orc-card.enviado    { border-left-color:var(--primary); }
+.orc-card.aprovado   { border-left-color:var(--success); }
+.orc-card.reprovado  { border-left-color:var(--danger); }
+.orc-card.executado  { border-left-color:#555; }
+
+.orc-cards-grid {
+  display:grid; grid-template-columns:repeat(2,1fr); gap:16px;
+}
+
+.orc-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.orc-card-numero { font-family:'Barlow Condensed',sans-serif; font-size:.88rem; font-weight:700; color:var(--muted); }
+.orc-card-name { font-size:1rem; font-weight:700; color:var(--text); margin-bottom:2px; }
+.orc-card-tel  { font-size:.82rem; color:var(--muted); margin-bottom:6px; }
+.orc-card-equip{ font-size:.82rem; color:var(--muted); margin-bottom:10px; }
+.orc-card-meta { display:flex; align-items:center; gap:16px; padding-top:10px; border-top:1px solid var(--border); flex-wrap:wrap; }
+.orc-card-meta-item { display:flex; align-items:center; gap:5px; font-size:.8rem; color:var(--muted); }
+.orc-card-meta-item strong { color:var(--text); }
+.orc-card-actions { display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; }
+
+/* Badges de status do orçamento */
+.badge.orc-aguardando { background:#fff0e8; color:#c05010; border:1px solid #f5c5a0; }
+.badge.orc-revisao    { background:#fefce8; color:#92400e; border:1px solid #fde68a; }
+.badge.orc-enviado-c  { background:#e8f0fc; color:#1a3a8c; border:1px solid #b0c4f0; }
+.badge.orc-enviado-s  { background:#f3e8ff; color:#6b21a8; border:1px solid #d8b4fe; }
+.badge.orc-aprovado   { background:var(--success-bg); color:var(--success); border:1px solid #b2dfc5; }
+.badge.orc-reprovado  { background:var(--danger-bg); color:var(--danger); border:1px solid #fcc; }
+.badge.orc-executado  { background:#f0f0f0; color:#555; border:1px solid #ccc; }
+.badge.orc-cancelado  { background:#f5f5f5; color:#888; border:1px solid #ddd; }
+
+/* ── TABELA DE ITENS DO ORÇAMENTO ── */
+.itens-table { width:100%; border-collapse:collapse; margin:12px 0; }
+.itens-table th {
+  background:var(--light); padding:10px 12px;
+  text-align:left; font-size:.72rem; font-weight:700;
+  color:var(--muted); text-transform:uppercase;
+}
+.itens-table td { padding:8px 12px; border-bottom:1px solid var(--border); font-size:.9rem; }
+.itens-table td input {
+  border:1.5px solid var(--border); border-radius:6px;
+  padding:6px 10px; font-size:.88rem;
+  font-family:'Barlow',sans-serif; width:100%;
+  background:#fff; outline:none;
+}
+.itens-table td input:focus { border-color:var(--primary); }
+.itens-table .total-row { background:var(--light); font-weight:700; }
+.itens-table .btn-remove-item {
+  background:none; border:none; color:var(--danger);
+  cursor:pointer; font-size:18px; padding:0 4px;
+}
+
+/* ── TABELA DIVISÃO SEGURADORA/CLIENTE ── */
+.divisao-table { width:100%; border-collapse:collapse; margin:12px 0; border-radius:10px; overflow:hidden; }
+.divisao-table th { padding:10px 14px; font-size:.72rem; font-weight:700; color:#fff; text-transform:uppercase; }
+.divisao-table th:first-child { background:var(--primary); }
+.divisao-table th:nth-child(2) { background:#1e7040; }
+.divisao-table th:nth-child(3) { background:#a06000; }
+.divisao-table td { padding:10px 14px; border-bottom:1px solid var(--border); }
+.divisao-table td input {
+  border:1.5px solid var(--border); border-radius:6px;
+  padding:6px 10px; font-size:.88rem;
+  font-family:'Barlow Condensed',sans-serif; font-weight:700;
+  width:100%; background:#fff; outline:none;
+}
+.divisao-table .totais-row {
+  background:var(--light); font-weight:800;
+  font-family:'Barlow Condensed',sans-serif; font-size:1rem;
+}
+
+/* ── ETAPAS DO MODAL (3 steps) ── */
+.etapas-nav { display:flex; gap:0; margin-bottom:24px; border-radius:10px; overflow:hidden; }
+.etapa-step {
+  flex:1; padding:10px; text-align:center;
+  font-size:.78rem; font-weight:700; text-transform:uppercase;
+  background:var(--light); color:var(--muted);
+  border-bottom:3px solid var(--border); transition:all .2s;
+}
+.etapa-step.ativa    { background:#e8f0fb; color:var(--primary); border-bottom-color:var(--primary); }
+.etapa-step.concluida{ background:var(--success-bg); color:var(--success); border-bottom-color:var(--success); }
+
+/* ── TIPO SELECTOR (linha branca / emergencial / particular) ── */
+.tipo-selector { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
+.tipo-card {
+  border:2px solid var(--border); border-radius:12px;
+  padding:18px 12px; text-align:center; cursor:pointer;
+  transition:all .2s; background:var(--light);
+}
+.tipo-card:hover  { border-color:var(--primary); background:#e8f0fb; }
+.tipo-card.selected { border-color:var(--primary); background:#e8f0fb; }
+.tipo-card .tipo-icon  { font-size:28px; margin-bottom:8px; }
+.tipo-card .tipo-label { font-size:.82rem; font-weight:700; color:var(--primary); }
+
+/* ── BANNER APROVADO ── */
+.orc-aprovado-banner {
+  background:linear-gradient(135deg,var(--success),#1e7040);
+  border-radius:var(--r); padding:16px 20px; color:#fff; margin-bottom:16px;
+}
+.orc-aprovado-banner h3 {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:1.1rem; font-weight:900; margin:0 0 4px;
+}
+.orc-aprovado-banner p { font-size:.85rem; color:rgba(255,255,255,.8); margin:0; }
+
+/* ── PÁGINAS PÚBLICAS DE ORÇAMENTO ── */
+.orc-page { max-width:680px; margin:0 auto; padding:20px 14px 80px; }
+
+.orc-header-pub {
+  background:var(--primary);
+  border-radius:var(--r-lg) var(--r-lg) 0 0;
+  padding:22px 28px; display:flex; align-items:center; gap:14px;
+}
+.orc-header-pub img { height:44px; border-radius:8px; }
+.orc-header-pub .orc-empresa-nome {
+  color:#fff; font-family:'Barlow Condensed',sans-serif;
+  font-size:1.4rem; font-weight:900;
+}
+.orc-header-pub .orc-numero { color:var(--accent); font-size:.85rem; font-weight:700; margin-top:2px; }
+.orc-header-pub .orc-empresa-tel { color:rgba(255,255,255,.6); font-size:.8rem; margin-top:2px; }
+
+.orc-section-pub {
+  background:#fff; padding:22px 28px;
+  border-bottom:1px solid var(--border);
+}
+.orc-section-pub:last-of-type { border-radius:0 0 var(--r-lg) var(--r-lg); }
+
+.orc-section-title {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:.9rem; font-weight:800; color:var(--primary);
+  text-transform:uppercase; letter-spacing:.8px;
+  margin-bottom:14px; display:flex; align-items:center; gap:8px;
+}
+
+/* Tabela de itens somente leitura (cliente) */
+.itens-table-ro { width:100%; border-collapse:collapse; margin:12px 0; }
+.itens-table-ro th {
+  background:var(--light); padding:10px 14px;
+  text-align:left; font-size:.72rem; font-weight:700;
+  color:var(--muted); text-transform:uppercase;
+}
+.itens-table-ro td { padding:10px 14px; border-bottom:1px solid var(--border); font-size:.9rem; }
+.itens-table-ro .total-row { background:var(--light); font-weight:800;
+  font-family:'Barlow Condensed',sans-serif; font-size:1rem; }
+
+/* Caixas de condições (ícone + texto) */
+.orc-condicoes { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px; }
+.orc-cond-item {
+  background:var(--light); border:1px solid var(--border);
+  border-radius:10px; padding:12px 14px;
+  display:flex; align-items:center; gap:10px; font-size:.88rem;
+}
+.orc-cond-item strong { color:var(--text); }
+.orc-cond-item span   { color:var(--muted); font-size:.8rem; }
+
+/* Nota de garantia */
+.orc-garantia-nota {
+  background:var(--warn-bg); border:1px solid #fce4b0;
+  border-radius:10px; padding:14px 16px;
+  font-size:.83rem; color:var(--warn-text); line-height:1.55; margin-top:12px;
+}
+
+/* Total destaque */
+.orc-total-box {
+  background:linear-gradient(135deg,var(--primary),var(--primary-h));
+  border-radius:12px; padding:18px 22px; color:#fff;
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:8px;
+}
+.orc-total-box .orc-total-label { font-size:.85rem; color:rgba(255,255,255,.75); }
+.orc-total-box .orc-total-valor {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:2rem; font-weight:900;
+}
+
+/* Seção de aprovação do cliente */
+.orc-aprovacao-box {
+  background:var(--light); border:1.5px solid var(--border);
+  border-radius:14px; padding:22px;
+}
+.orc-aprovacao-box h3 {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:1.1rem; font-weight:800; color:var(--primary);
+  margin-bottom:16px;
+}
+
+/* Banner de status (aguardando / em revisão etc.) */
+.orc-status-banner {
+  border-radius:12px; padding:20px 24px; text-align:center;
+  margin-top:20px;
+}
+.orc-status-banner.info    { background:#e8f0fb; border:1px solid #b0c4f0; color:var(--primary); }
+.orc-status-banner.warn    { background:var(--warn-bg); border:1px solid #fce4b0; color:#a06000; }
+.orc-status-banner.success { background:var(--success-bg); border:1px solid #b2dfc5; color:var(--success); }
+.orc-status-banner.danger  { background:var(--danger-bg); border:1px solid #fcc; color:var(--danger); }
+.orc-status-banner .osb-icon { font-size:36px; margin-bottom:8px; }
+.orc-status-banner h3 {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:1.1rem; font-weight:800; margin-bottom:4px;
+}
+.orc-status-banner p { font-size:.88rem; opacity:.8; }
+
+/* Banner vencido */
+.orc-vencido-banner {
+  background:var(--danger-bg); border:1px solid #fcc;
+  border-radius:10px; padding:12px 16px;
+  color:var(--danger); font-size:.85rem; font-weight:600;
+  display:flex; align-items:center; gap:8px; margin-bottom:16px;
+}
+
+/* Nota seguradora coberta */
+.orc-seg-nota {
+  font-size:.8rem; color:var(--muted); margin-top:6px;
+  padding:8px 12px; background:var(--light);
+  border-radius:8px; border:1px solid var(--border);
+}
+
+/* Campo de subtotal abaixo da tabela de itens */
+.orc-subtotal {
+  text-align:right; font-family:'Barlow Condensed',sans-serif;
+  font-size:1rem; font-weight:800; color:var(--text);
+  padding:10px 12px 0; border-top:2px solid var(--border);
+  margin-top:4px;
+}
+
+/* Botão adicionar item */
+.btn-add-item {
+  background:none; border:1.5px dashed var(--border);
+  border-radius:8px; padding:9px 16px; font-size:.88rem;
+  font-family:'Barlow',sans-serif; color:var(--primary);
+  cursor:pointer; transition:all .2s; width:100%; margin-top:8px;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.btn-add-item:hover { border-color:var(--primary); background:#e8f0fb; }
+
+/* Botão enviar/aprovar (full width, laranja) */
+.btn-orc-submit {
+  width:100%; background:var(--accent); color:#fff; border:none;
+  border-radius:10px; padding:16px; font-family:'Barlow Condensed',sans-serif;
+  font-size:1.1rem; font-weight:800; letter-spacing:.8px; text-transform:uppercase;
+  cursor:pointer; transition:all .2s;
+  box-shadow:0 4px 16px rgba(240,90,26,.4);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  margin-top:12px;
+}
+.btn-orc-submit:hover:not(:disabled) { background:var(--accent-h); transform:translateY(-2px); }
+.btn-orc-submit:disabled { opacity:.65; cursor:not-allowed; transform:none; }
+
+/* Botão reprovar (outline vermelho) */
+.btn-orc-reprovar {
+  width:100%; background:transparent; color:var(--danger);
+  border:2px solid var(--danger); border-radius:10px; padding:14px;
+  font-family:'Barlow Condensed',sans-serif; font-size:1.05rem;
+  font-weight:800; letter-spacing:.8px; text-transform:uppercase;
+  cursor:pointer; transition:all .2s; margin-top:10px;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.btn-orc-reprovar:hover { background:var(--danger-bg); }
+
+/* Input de nome para assinatura */
+.orc-nome-assinar {
+  border:1.5px solid var(--border); border-radius:8px;
+  padding:12px 14px; font-size:.95rem; font-family:'Barlow',sans-serif;
+  width:100%; background:#fff; outline:none; margin-bottom:14px;
+  transition:border-color .2s;
+}
+.orc-nome-assinar:focus { border-color:var(--primary); }
+
+/* Área de assinatura para orçamento (maior que a do form) */
+.sig-container.orc-sig { height:160px; }
+
+/* ── MODAL LINKS GERADOS ── */
+.orc-link-section {
+  background:var(--light); border:1.5px solid var(--border);
+  border-radius:12px; padding:18px; margin-bottom:16px;
+}
+.orc-link-section h4 {
+  font-family:'Barlow Condensed',sans-serif; font-size:.95rem;
+  font-weight:800; color:var(--primary); text-transform:uppercase;
+  letter-spacing:.5px; margin-bottom:4px;
+}
+.orc-link-section p { font-size:.82rem; color:var(--muted); margin-bottom:12px; }
+.orc-link-aviso {
+  background:var(--warn-bg); border:1px solid #fce4b0;
+  border-radius:10px; padding:12px 16px; font-size:.83rem;
+  color:var(--warn-text); line-height:1.55;
+  display:flex; align-items:flex-start; gap:8px;
+}
+
+/* ── CENÁRIO SELECTOR ── */
+.cenario-group { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+.cenario-item {
+  display:flex; align-items:center; gap:10px;
+  padding:11px 14px; border:1.5px solid var(--border);
+  border-radius:10px; cursor:pointer; transition:all .18s;
+  background:var(--light); user-select:none;
+}
+.cenario-item:hover { border-color:var(--primary); background:#eef2fc; }
+.cenario-item.selected { border-color:var(--primary); background:#eef2fc; }
+.cenario-item .rdot { flex-shrink:0; }
+.cenario-item .cenario-label { font-size:.9rem; font-weight:500; color:var(--text); }
+.cenario-item .cenario-desc  { font-size:.78rem; color:var(--muted); }
+
+/* ── RESPONSIVE ORÇAMENTOS ── */
+@media(max-width:900px) { .orc-cards-grid { grid-template-columns:1fr; } }
+@media(max-width:640px) {
+  .tipo-selector { grid-template-columns:1fr; }
+  .orc-condicoes { grid-template-columns:1fr; }
+  .orc-header-pub { padding:16px 18px; }
+  .orc-section-pub { padding:16px 18px; }
+}
