@@ -42,8 +42,12 @@ export default function OrcamentoTecnicoPage() {
   const [diagnostico,   setDiagnostico]   = useState('')
   const [itens,         setItens]         = useState([novoItem()])
   const [formaPagto,    setFormaPagto]    = useState('pix')
+  const [prazoExecucao, setPrazoExecucao] = useState('')
   const [observacoes,   setObservacoes]   = useState('')
   const [numSerie,      setNumSerie]      = useState('')
+  const [marca,         setMarca]         = useState('')
+  const [modelo,        setModelo]        = useState('')
+  const [voltagem,      setVoltagem]      = useState('')
 
   const [salvando,  setSalvando]  = useState(false)
   const [sucesso,   setSucesso]   = useState(false)
@@ -76,11 +80,15 @@ export default function OrcamentoTecnicoPage() {
         const data = snap.data()
         setOrc({ id: snap.id, ...data })
         // Pré-preenche campos se já tiver dados
-        if (data.diagnostico)   setDiagnostico(data.diagnostico)
+        if (data.diagnostico)    setDiagnostico(data.diagnostico)
         if (data.forma_pagamento) setFormaPagto(data.forma_pagamento)
-        if (data.observacoes)   setObservacoes(data.observacoes)
-        if (data.num_serie)     setNumSerie(data.num_serie)
-        if (data.itens?.length) setItens(data.itens.map(it => ({ ...it, valor_unit: it.valor_unit || '' })))
+        if (data.prazo_execucao) setPrazoExecucao(data.prazo_execucao)
+        if (data.observacoes)    setObservacoes(data.observacoes)
+        if (data.num_serie)      setNumSerie(data.num_serie)
+        if (data.marca)          setMarca(data.marca)
+        if (data.modelo)         setModelo(data.modelo)
+        if (data.voltagem)       setVoltagem(data.voltagem)
+        if (data.itens?.length)  setItens(data.itens.map(it => ({ ...it, valor_unit: it.valor_unit || '' })))
       } catch (e) {
         setErroOrc('Erro ao carregar orçamento. Tente novamente.')
       } finally {
@@ -121,6 +129,10 @@ export default function OrcamentoTecnicoPage() {
   function validar() {
     const e = {}
     if (!diagnostico.trim())  e.diagnostico = 'Diagnóstico obrigatório'
+    if (orc.tipo === 'linha_branca') {
+      if (!marca.trim())  e.marca  = 'Marca obrigatória'
+      if (!modelo.trim()) e.modelo = 'Modelo obrigatório'
+    }
     if (itens.some(it => !it.descricao.trim())) e.itens = 'Todos os itens precisam de descrição'
     if (itens.some(it => parseBRL(it.valor_unit) <= 0)) e.itens = 'Todos os itens precisam de valor'
     setErros(e)
@@ -159,8 +171,10 @@ export default function OrcamentoTecnicoPage() {
         total_cliente:   totalGeral,
         total_seguradora:0,
         forma_pagamento: formaPagto || 'pix',
+        prazo_execucao:  prazoExecucao || '',
         observacoes:     observacoes || '',
         num_serie:       numSerie || '',
+        ...(orc.tipo === 'linha_branca' ? { marca: marca.trim(), modelo: modelo.trim(), voltagem } : {}),
         preenchido_em:   serverTimestamp(),
       })
       setSucesso(true)
@@ -315,18 +329,35 @@ export default function OrcamentoTecnicoPage() {
                 <input className="locked" readOnly value={orc.tipo_equipamento || ''} />
               </div>
               <div className="field">
-                <label>Marca</label>
-                <input className="locked" readOnly value={orc.marca || ''} />
+                <label>Marca <span className="req">*</span></label>
+                <input
+                  className={erros.marca ? 'error' : ''}
+                  value={marca}
+                  onChange={e => { setMarca(e.target.value); setErros(p => ({...p, marca:''})) }}
+                  placeholder="Ex: Brastemp"
+                />
+                {erros.marca && <span style={{ color:'var(--danger)', fontSize:'.78rem' }}>{erros.marca}</span>}
               </div>
             </div>
             <div className="row col-2">
               <div className="field">
-                <label>Modelo</label>
-                <input className="locked" readOnly value={orc.modelo || ''} />
+                <label>Modelo <span className="req">*</span></label>
+                <input
+                  className={erros.modelo ? 'error' : ''}
+                  value={modelo}
+                  onChange={e => { setModelo(e.target.value); setErros(p => ({...p, modelo:''})) }}
+                  placeholder="Ex: BRM44HB"
+                />
+                {erros.modelo && <span style={{ color:'var(--danger)', fontSize:'.78rem' }}>{erros.modelo}</span>}
               </div>
               <div className="field">
                 <label>Voltagem</label>
-                <input className="locked" readOnly value={orc.voltagem || ''} />
+                <select value={voltagem} onChange={e => setVoltagem(e.target.value)}>
+                  <option value="">—</option>
+                  <option value="110v">110v</option>
+                  <option value="220v">220v</option>
+                  <option value="Bivolt">Bivolt</option>
+                </select>
               </div>
             </div>
             <div className="row col-1">
@@ -425,9 +456,21 @@ export default function OrcamentoTecnicoPage() {
           </div>
         </div>
 
-        {/* Seção 5 — Forma de pagamento */}
+        {/* Seção 5 — Condições do Serviço */}
         <div className="orc-section-pub">
-          <div className="orc-section-title">💳 Forma de Pagamento Sugerida</div>
+          <div className="orc-section-title">📋 Condições do Serviço</div>
+          <div className="field" style={{ marginBottom:16 }}>
+            <label>Prazo de Execução</label>
+            <select value={prazoExecucao} onChange={e => setPrazoExecucao(e.target.value)}>
+              <option value="">Selecione...</option>
+              {['Imediato','24h','2 dias úteis','3 dias úteis','5 dias úteis','A combinar'].map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+          <div className="field">
+            <label>Forma de Pagamento Sugerida</label>
+          </div>
           <div className="radio-group">
             {[
               { v:'pix',       label:'PIX' },

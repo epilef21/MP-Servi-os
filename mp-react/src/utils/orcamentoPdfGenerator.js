@@ -164,21 +164,18 @@ function desenharDiagnostico(ctx, orc) {
   textBlock('Descricao do Diagnostico', orc.diagnostico)
 }
 
-// Desenha tabela de itens
+// Desenha tabela de itens — 4 colunas (cliente)
 function desenharTabelaItens(ctx, itens, totalLabel, totalValor) {
   const { doc, W, M, getY, setY, checkPage } = ctx
   let y = getY()
-
   checkPage(20)
 
-  // Cabeçalho da tabela
   const colDesc = W-M*2-20-30-32
   const colQtd  = 20
   const colUnit = 30
   const colTot  = 32
 
-  doc.setFillColor(26,63,168)
-  doc.rect(M, y, W-M*2, 7, 'F')
+  doc.setFillColor(26,63,168); doc.rect(M, y, W-M*2, 7, 'F')
   doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(7.5)
   doc.text('DESCRICAO', M+3, y+4.8)
   doc.text('QTD', M+colDesc+1, y+4.8)
@@ -187,23 +184,17 @@ function desenharTabelaItens(ctx, itens, totalLabel, totalValor) {
   y += 7
 
   ;(itens||[]).forEach((item, idx) => {
-    checkPage(10)
-    y = getY()
+    checkPage(10); y = getY()
     const bg = idx%2===0 ? [252,252,252] : [245,248,252]
-    doc.setFillColor(...bg)
-    doc.rect(M, y, W-M*2, 7, 'F')
+    doc.setFillColor(...bg); doc.rect(M, y, W-M*2, 7, 'F')
     doc.setDrawColor(220,228,240); doc.line(M, y+7, M+W-M*2, y+7)
-
     doc.setTextColor(30,45,61); doc.setFont('helvetica','normal'); doc.setFontSize(8.5)
     const descLines = doc.splitTextToSize(s(item.descricao), colDesc-4)
     const rowH = Math.max(descLines.length*4+4, 7)
-
-    // Redesenha a célula com altura correta se necessário
     if (descLines.length > 1) {
       doc.setFillColor(...bg); doc.rect(M, y, W-M*2, rowH, 'F')
       doc.setDrawColor(220,228,240); doc.line(M, y+rowH, M+W-M*2, y+rowH)
     }
-
     doc.text(descLines, M+3, y+4)
     doc.text(String(item.quantidade||1), M+colDesc+2, y+4)
     doc.text(fmtBRL(item.valor_unit), M+colDesc+colQtd+1, y+4)
@@ -211,11 +202,8 @@ function desenharTabelaItens(ctx, itens, totalLabel, totalValor) {
     setY(y + rowH)
   })
 
-  // Linha de total
-  y = getY()
-  checkPage(10)
-  doc.setFillColor(232,240,251)
-  doc.rect(M, y, W-M*2, 8, 'F')
+  y = getY(); checkPage(10)
+  doc.setFillColor(232,240,251); doc.rect(M, y, W-M*2, 8, 'F')
   doc.setDrawColor(180,200,230); doc.rect(M, y, W-M*2, 8, 'S')
   doc.setTextColor(26,63,168); doc.setFont('helvetica','bold'); doc.setFontSize(9)
   doc.text((totalLabel||'TOTAL').toUpperCase(), M+3, y+5.5)
@@ -223,12 +211,82 @@ function desenharTabelaItens(ctx, itens, totalLabel, totalValor) {
   setY(y+12)
 }
 
-// Desenha condições
+// Desenha tabela de itens com divisão — 5 colunas (seguradora)
+function desenharTabelaItensDivisao(ctx, itens, totalSeg, totalCli) {
+  const { doc, W, M, getY, setY, checkPage } = ctx
+  let y = getY()
+  checkPage(20)
+
+  const totalW  = W-M*2
+  const colDesc = totalW - 18 - 26 - 26 - 26
+  const colQtd  = 18
+  const colUnit = 26
+  const colSeg  = 26
+  const colCli  = 26
+
+  doc.setFillColor(26,63,168); doc.rect(M, y, totalW, 7, 'F')
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(7)
+  doc.text('DESCRICAO',  M+3,                           y+4.8)
+  doc.text('QTD',        M+colDesc+1,                   y+4.8)
+  doc.text('VLR UNIT.',  M+colDesc+colQtd+1,            y+4.8)
+  doc.text('SEGURADORA', M+colDesc+colQtd+colUnit+1,    y+4.8)
+  doc.text('CLIENTE',    M+colDesc+colQtd+colUnit+colSeg+1, y+4.8)
+  y += 7
+
+  ;(itens||[]).forEach((item, idx) => {
+    checkPage(10); y = getY()
+    const bg = idx%2===0 ? [252,252,252] : [245,248,252]
+    doc.setFillColor(...bg); doc.rect(M, y, totalW, 7, 'F')
+    doc.setDrawColor(220,228,240); doc.line(M, y+7, M+totalW, y+7)
+    doc.setTextColor(30,45,61); doc.setFont('helvetica','normal'); doc.setFontSize(8)
+    const descLines = doc.splitTextToSize(s(item.descricao), colDesc-4)
+    const rowH = Math.max(descLines.length*4+4, 7)
+    if (descLines.length > 1) {
+      doc.setFillColor(...bg); doc.rect(M, y, totalW, rowH, 'F')
+      doc.setDrawColor(220,228,240); doc.line(M, y+rowH, M+totalW, y+rowH)
+    }
+    doc.text(descLines, M+3, y+4)
+    doc.text(String(item.quantidade||1),              M+colDesc+2,                    y+4)
+    doc.text(fmtBRL(item.valor_unit),                 M+colDesc+colQtd+1,             y+4)
+    doc.text(fmtBRL(parseFloat(item.paga_seguradora)||0), M+colDesc+colQtd+colUnit+1, y+4)
+    doc.text(fmtBRL(parseFloat(item.paga_cliente)||0), M+colDesc+colQtd+colUnit+colSeg+1, y+4)
+    setY(y + rowH)
+  })
+
+  y = getY(); checkPage(10)
+  doc.setFillColor(232,240,251); doc.rect(M, y, totalW, 8, 'F')
+  doc.setDrawColor(180,200,230); doc.rect(M, y, totalW, 8, 'S')
+  doc.setTextColor(26,63,168); doc.setFont('helvetica','bold'); doc.setFontSize(8.5)
+  doc.text('TOTAIS', M+3, y+5.5)
+  doc.text(fmtBRL(totalSeg), M+colDesc+colQtd+colUnit+1, y+5.5)
+  doc.text(fmtBRL(totalCli), M+colDesc+colQtd+colUnit+colSeg+1, y+5.5)
+  setY(y+12)
+}
+
+// Desenha condições em caixa destacada
 function desenharCondicoes(ctx, orc) {
-  const { sectionHeader, twoCol } = ctx
-  sectionHeader('Condicoes')
-  twoCol('Garantia', orc.garantia, 'Prazo de Execucao', orc.prazo_execucao)
-  twoCol('Forma de Pagamento', orc.forma_pagamento, '', '')
+  const { doc, W, M, getY, setY, checkPage } = ctx
+  checkPage(28)
+  let y = getY()
+
+  doc.setFillColor(232,240,251)
+  doc.rect(M, y, W-M*2, 24, 'F')
+  doc.setDrawColor(180,200,230); doc.rect(M, y, W-M*2, 24, 'S')
+
+  const col = (W-M*2) / 3
+  const items = [
+    { label:'GARANTIA',          value: s(orc.garantia         || '—') },
+    { label:'PRAZO DE EXECUCAO', value: s(orc.prazo_execucao   || '—') },
+    { label:'FORMA DE PAGAMENTO',value: s(orc.forma_pagamento  || '—') },
+  ]
+  items.forEach((it, idx) => {
+    const x = M + idx * col + 4
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(107,124,147)
+    doc.text(it.label, x, y + 6)
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(26,63,168)
+    doc.text(it.value, x, y + 14)
+  })
+  setY(y + 28)
 }
 
 // Desenha observações
@@ -383,23 +441,43 @@ export function generatePDFSeguradora(orc, empresa) {
   // Diagnóstico
   desenharDiagnostico(ctx, orc)
 
-  // Itens — mostrar apenas valores da seguradora
-  const itensSeg = (orc.itens||[]).filter(it => (parseFloat(it.paga_seguradora)||0) > 0).map(it => ({
-    ...it,
-    valor_unit: it.paga_seguradora && it.quantidade
-      ? parseFloat(it.paga_seguradora) / Math.max(parseInt(it.quantidade)||1, 1)
-      : it.valor_unit,
-    valor_total: parseFloat(it.paga_seguradora)||0,
-  }))
+  // Detecta se há divisão entre seguradora e cliente
+  const todosItens = orc.itens || []
+  const temDivisao = todosItens.some(it =>
+    (parseFloat(it.paga_seguradora)||0) > 0 && (parseFloat(it.paga_cliente)||0) > 0
+  )
+  const itensSeg = todosItens.filter(it => (parseFloat(it.paga_seguradora)||0) > 0)
 
-  sectionHeader('Servicos Cobertos pela Seguradora')
+  sectionHeader('Servicos e Valores')
 
-  if (itensSeg.length === 0) {
+  if (todosItens.length === 0 || itensSeg.length === 0) {
     let y = getY()
     doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(107,124,147)
-    doc.text('Nenhum item coberto pela seguradora.', M, y); setY(y+8)
+    doc.text('Nenhum item coberto pela seguradora neste orcamento.', M, y)
+    setY(y+6)
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(30,45,61)
+    // Mostra tabela simples de todos os itens como referência
+    if (todosItens.length > 0) {
+      const itensRef = todosItens.map(it => ({
+        ...it,
+        valor_unit: parseFloat(it.valor_unit)||0,
+        valor_total: parseFloat(it.valor_total)||0,
+      }))
+      desenharTabelaItens(ctx, itensRef, 'TOTAL GERAL', orc.total_geral)
+      y = getY()
+      doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(107,124,147)
+      doc.text('* Divisao entre seguradora e cliente nao configurada neste orcamento.', M, y)
+      setY(y+8)
+    }
+  } else if (temDivisao) {
+    desenharTabelaItensDivisao(ctx, todosItens, orc.total_seguradora, orc.total_cliente)
   } else {
-    desenharTabelaItens(ctx, itensSeg, 'TOTAL SEGURADORA', orc.total_seguradora)
+    const itensSegMapped = itensSeg.map(it => ({
+      ...it,
+      valor_unit: parseFloat(it.paga_seguradora) / Math.max(parseInt(it.quantidade)||1, 1),
+      valor_total: parseFloat(it.paga_seguradora)||0,
+    }))
+    desenharTabelaItens(ctx, itensSegMapped, 'TOTAL SEGURADORA', orc.total_seguradora)
   }
 
   // Condições

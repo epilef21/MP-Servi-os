@@ -874,9 +874,7 @@ export default function AdminPage() {
     if (!orcForm.cidade?.trim())            e.cidade         = true
     if (orcForm.tipo === 'linha_branca') {
       if (!orcForm.tipo_equipamento)        e.tipo_equipamento = true
-      if (!orcForm.marca?.trim())           e.marca          = true
-      if (!orcForm.modelo?.trim())          e.modelo         = true
-      if (!orcForm.defeito?.trim())         e.defeito        = true
+      if (!orcForm.defeito?.trim())         e.defeito          = true
     }
     if (orcForm.tipo === 'emergencial') {
       if (!orcForm.tipo_emergencia)         e.tipo_emergencia = true
@@ -1561,10 +1559,27 @@ export default function AdminPage() {
                         {totalMostrar !== null && <div className="orc-card-meta-item"><strong>{fmtBRL(totalMostrar)}</strong></div>}
                         {orc.tecnico_nome && <div className="orc-card-meta-item">👷 {orc.tecnico_nome}</div>}
                       </div>
+                      {orc.status === 'aguardando_tecnico' && (
+                        <div style={{ marginBottom:6 }}>
+                          <span className="link-disponivel-badge">🔗 Link disponível</span>
+                        </div>
+                      )}
                       <div className="orc-card-actions">
                         <button className="btn-sm btn-view" onClick={() => openRevisarOrcamento(orc)}>
                           {orc.status === 'em_revisao' ? '✏️ Revisar' : '👁️ Ver'}
                         </button>
+                        {orc.status === 'aguardando_tecnico' && (
+                          <>
+                            <a className="btn-sm btn-ok" style={{ textDecoration:'none' }} target="_blank" rel="noopener noreferrer"
+                              href={`https://wa.me/${orc.tecnico_tel ? '55'+orc.tecnico_tel.replace(/\D/g,'') : ''}?text=${encodeURIComponent(`Olá ${orc.tecnico_nome||'Técnico'}! 👷\nNovo orçamento para avaliar no local:\n🔗 ${buildLinkTecnicoOrc(orc.id)}`)}`}>
+                              📲 Enviar
+                            </a>
+                            <button className="btn-sm" style={{ background:'var(--light)', color:'var(--primary)', border:'1px solid var(--border)' }}
+                              onClick={() => copyOrcLink(buildLinkTecnicoOrc(orc.id))}>
+                              📋 Copiar
+                            </button>
+                          </>
+                        )}
                         {(orc.total_cliente > 0 || (orc.status === 'aprovado' && orc.total_geral > 0)) && (
                           <button className="btn-sm btn-pdf" onClick={() => handlePDFCliente(orc)}>📄 PDF</button>
                         )}
@@ -2707,27 +2722,13 @@ export default function AdminPage() {
                             {['Refrigerador','Fogão','Máquina de Lavar','Lava-louça','TV','Microondas','Ar Condicionado','Outro'].map(t => <option key={t} value={t}>{t}</option>)}
                           </select>
                         </div>
-                        <div className="field">
-                          <label>Voltagem</label>
-                          <select value={orcForm.voltagem} onChange={e => setOrcForm(p => ({ ...p, voltagem: e.target.value }))}>
-                            <option value="">—</option>
-                            <option value="110v">110v</option>
-                            <option value="220v">220v</option>
-                            <option value="Bivolt">Bivolt</option>
-                          </select>
-                        </div>
-                        <div className="field">
-                          <label>Marca <span className="req">*</span></label>
-                          <input className={orcErrors.marca ? 'error' : ''} value={orcForm.marca} onChange={e => { setOrcForm(p => ({ ...p, marca: e.target.value })); setOrcErrors(p => ({ ...p, marca: false })) }} />
-                        </div>
-                        <div className="field">
-                          <label>Modelo <span className="req">*</span></label>
-                          <input className={orcErrors.modelo ? 'error' : ''} value={orcForm.modelo} onChange={e => { setOrcForm(p => ({ ...p, modelo: e.target.value })); setOrcErrors(p => ({ ...p, modelo: false })) }} />
-                        </div>
                         <div className="field os-span2">
                           <label>Defeito relatado <span className="req">*</span></label>
                           <textarea rows={2} className={orcErrors.defeito ? 'error' : ''} value={orcForm.defeito} onChange={e => { setOrcForm(p => ({ ...p, defeito: e.target.value })); setOrcErrors(p => ({ ...p, defeito: false })) }} placeholder="Descreva o defeito relatado pelo cliente..." />
                         </div>
+                      </div>
+                      <div className="info-tecnico-note">
+                        ℹ️ Marca, modelo, voltagem e número de série serão preenchidos pelo técnico no local.
                       </div>
                     </>
                   )}
@@ -2762,28 +2763,18 @@ export default function AdminPage() {
                       <input type="date" value={orcForm.validade} onChange={e => setOrcForm(p => ({ ...p, validade: e.target.value }))} min={new Date().toISOString().slice(0,10)} />
                     </div>
                     <div className="field">
-                      <label>Prazo de execução</label>
-                      <select value={orcForm.prazo_execucao} onChange={e => setOrcForm(p => ({ ...p, prazo_execucao: e.target.value }))}>
-                        <option value="">Selecione...</option>
-                        {['Imediato','24h','2 dias úteis','3 dias úteis','5 dias úteis','A combinar'].map(t => <option key={t} value={t}>{t}</option>)}
-                      </select>
-                    </div>
-                    <div className="field">
                       <label>Garantia</label>
                       <select value={orcForm.garantia} onChange={e => setOrcForm(p => ({ ...p, garantia: e.target.value }))}>
                         {['90 dias','6 meses','1 ano','Sem garantia'].map(t => <option key={t} value={t}>{t}</option>)}
-                      </select>
-                    </div>
-                    <div className="field">
-                      <label>Forma de pagamento</label>
-                      <select value={orcForm.forma_pagamento} onChange={e => setOrcForm(p => ({ ...p, forma_pagamento: e.target.value }))}>
-                        {['pix','dinheiro','cartao','parcelado','a_combinar'].map(t => <option key={t} value={t} style={{ textTransform:'capitalize' }}>{t.replace('_',' ')}</option>)}
                       </select>
                     </div>
                     <div className="field os-span2">
                       <label>Observações</label>
                       <textarea rows={2} value={orcForm.observacoes} onChange={e => setOrcForm(p => ({ ...p, observacoes: e.target.value }))} placeholder="Observações adicionais..." />
                     </div>
+                  </div>
+                  <div className="info-tecnico-note" style={{ marginTop:12 }}>
+                    ℹ️ Prazo de execução e forma de pagamento serão definidos pelo técnico no local.
                   </div>
 
                   <div className="md-section" style={{ marginTop:16 }}>
@@ -2875,7 +2866,12 @@ export default function AdminPage() {
               </div>
             </div>
             <div className="modal-footer">
-              <button className="btn-sm btn-view" onClick={() => setOrcLinks(null)}>Fechar</button>
+              <button className="btn-sm" style={{ background:'var(--light)', color:'var(--muted)', border:'1px solid var(--border)' }}
+                onClick={() => setOrcLinks(null)}>Fechar</button>
+              <button className="btn-sm btn-view"
+                onClick={() => { setOrcLinks(null); setAbaAtiva('orcamentos') }}>
+                📋 Ver na lista
+              </button>
             </div>
           </div>
         </div>
@@ -2906,6 +2902,24 @@ export default function AdminPage() {
             <div className="modal-body">
 
               {/* Banner aprovado */}
+              {revisarOrc.status === 'aguardando_tecnico' && (
+                <div className="link-tecnico-box">
+                  <div className="ltb-title">👷 Link do Técnico</div>
+                  <div className="ltb-url">{buildLinkTecnicoOrc(revisarOrc.id)}</div>
+                  <div className="ltb-btns">
+                    <button className="btn-copy" onClick={() => copyOrcLink(buildLinkTecnicoOrc(revisarOrc.id))}>
+                      {orcLinkCopied ? '✅ Copiado!' : '📋 Copiar link'}
+                    </button>
+                    {revisarOrc.tecnico_tel && (
+                      <a className="btn-whatsapp" target="_blank" rel="noopener noreferrer"
+                        href={`https://wa.me/55${revisarOrc.tecnico_tel.replace(/\D/g,'')}?text=${encodeURIComponent(`Olá ${revisarOrc.tecnico_nome||'Técnico'}! 👷\nNovo orçamento para avaliar no local:\n🔗 ${buildLinkTecnicoOrc(revisarOrc.id)}`)}`}>
+                        📲 WhatsApp
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {revisarOrc.status === 'aprovado' && (
                 <div className="orc-aprovado-banner">
                   <h3>🎉 Aprovado por {revisarOrc.aprovado_por}!</h3>
