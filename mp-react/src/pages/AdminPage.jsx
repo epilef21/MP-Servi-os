@@ -560,6 +560,29 @@ export default function AdminPage() {
     return `${window.location.origin}/${slug}?os=${r.id}`
   }
 
+  async function excluirOS(os) {
+    if (!window.confirm(`Excluir OS de "${os.nome_segurado}"?\nEsta ação não pode ser desfeita.`)) return
+    try {
+      await deleteDoc(doc(db, `empresas/${empresaId}/checklist`, os.id))
+      setReports(p => p.filter(r => r.id !== os.id))
+      setSelected(null)
+      showToast('OS excluída.', 'success')
+    } catch (e) {
+      showToast('Erro ao excluir OS: ' + e.message, 'error')
+    }
+  }
+
+  async function excluirOrcamento(orc) {
+    if (!window.confirm(`Excluir orçamento ${orc.numero}?\nEsta ação não pode ser desfeita.`)) return
+    try {
+      await deleteDoc(doc(db, `empresas/${empresaId}/orcamentos`, orc.id))
+      setOrcamentos(p => p.filter(o => o.id !== orc.id))
+      showToast('Orçamento excluído.', 'success')
+    } catch (e) {
+      showToast('Erro ao excluir orçamento: ' + e.message, 'error')
+    }
+  }
+
   async function saveOs() {
     if (!validateOs()) return
     if (limite.bloqueado) {
@@ -1589,6 +1612,8 @@ export default function AdminPage() {
                         {orc.status === 'aprovado' && !orc.os_vinculada && (
                           <button className="btn-sm btn-ok" onClick={() => abrirConverterOS(orc)}>🚀 OS</button>
                         )}
+                        <button className="btn-sm" style={{ background:'#fee2e2', color:'#dc2626', border:'1px solid #fca5a5', marginLeft:'auto' }}
+                          title="Excluir orçamento" onClick={() => excluirOrcamento(orc)}>🗑️</button>
                       </div>
                     </div>
                   )
@@ -2169,6 +2194,7 @@ export default function AdminPage() {
                   {genPng ? '⏳' : '📱 PNG WhatsApp'}
                 </button>
                 <button className="btn-sm btn-pdf" onClick={() => generatePDF(selected)}>🖨️ PDF</button>
+                <button className="btn-sm" style={{ background: 'rgba(220,38,38,.35)', color: '#fff' }} title="Excluir OS" onClick={() => excluirOS(selected)}>🗑️</button>
                 <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={() => setSelected(null)}>✕</button>
               </div>
             </div>
