@@ -4,7 +4,8 @@
 // ============================================================
 import { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
-import { db, doc, getDoc, updateDoc, serverTimestamp } from '../firebase.js'
+import imageCompression from 'browser-image-compression'
+import { db, doc, getDoc, updateDoc, serverTimestamp, uploadFoto } from '../firebase.js'
 import { useEmpresa } from '../hooks/useEmpresa.js'
 
 // Converte string de valor monetário ("120,50" ou "120.50") para float
@@ -53,6 +54,10 @@ export default function OrcamentoTecnicoPage() {
   const [sucesso,   setSucesso]   = useState(false)
   const [erros,     setErros]     = useState({})
   const [online,    setOnline]    = useState(navigator.onLine)
+  // Fotos — compressão e upload (IMG-01, IMG-02, IMG-03)
+  const [fotos,       setFotos]       = useState([])    // { file: File, preview: string }[]
+  const [comprimindo, setComprimindo] = useState(false) // IMG-02: spinner de compressão
+  const [erroFoto,    setErroFoto]    = useState('')    // IMG-03: mensagem de erro
 
   // Detecta conexão
   useEffect(() => {
@@ -139,12 +144,45 @@ export default function OrcamentoTecnicoPage() {
     return Object.keys(e).length === 0
   }
 
+  function handleFotoSelect(e) {
+    const files = Array.from(e.target.files)
+    const novas = files.map(f => ({ file: f, preview: URL.createObjectURL(f) }))
+    setFotos(prev => [...prev, ...novas])
+    setErroFoto('')
+    e.target.value = '' // permite re-selecionar o mesmo arquivo
+  }
+
+  function removerFoto(idx) {
+    setFotos(prev => {
+      const copia = [...prev]
+      URL.revokeObjectURL(copia[idx].preview) // libera memória
+      copia.splice(idx, 1)
+      return copia
+    })
+  }
+
   // ── SUBMIT ──────────────────────────────────────────────────
   async function handleSubmit() {
     if (!validar()) return
     if (!online) { alert('Sem conexão. Conecte-se para enviar.'); return }
 
     setSalvando(true)
+    // ── Compressão e upload de fotos (IMG-01, IMG-02, IMG-03) ──
+    let fotosUrls = []
+    if (fotos.length > 0) {
+      setComprimindo(true)
+      try {
+        const opts = { maxSizeMB: 0.4, maxWidthOrHeight: 1920, useWebWorker: true }
+        const comprimidas = await Promise.all(fotos.map(f => imageCompression(f.file, opts)))
+        fotosUrls = await Promise.all(comprimidas.map(c => uploadFoto(c, empresaId, orcamentoId)))
+      } catch (e) {
+        setErroFoto('Não foi possível comprimir as imagens. Verifique os arquivos e tente novamente.')
+        setComprimindo(false)
+        setSalvando(false)
+        return
+      }
+      setComprimindo(false)
+    }
     try {
       const itensNormalizados = itens.map(it => {
         const qtd  = parseInt(it.quantidade) || 1
@@ -173,6 +211,7 @@ export default function OrcamentoTecnicoPage() {
         forma_pagamento: formaPagto || 'pix',
         prazo_execucao:  prazoExecucao || '',
         observacoes:     observacoes || '',
+        fotos:           fotosUrls,           // IMG-01: URLs das fotos comprimidas
         num_serie:       numSerie || '',
         ...(orc.tipo === 'linha_branca' ? { marca: marca.trim(), modelo: modelo.trim(), voltagem } : {}),
         preenchido_em:   serverTimestamp(),
@@ -502,6 +541,49 @@ export default function OrcamentoTecnicoPage() {
               placeholder="Alguma observação técnica adicional..."
             />
           </div>
+        </div>
+
+        {/* Seção 7 — Fotos */}
+        <div className="orc-section-pub">
+          <div className="orc-section-title">📷 Fotos do Atendimento</div>
+          <label className="foto-upload-area">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFotoSelect}
+              style={{ display: 'none' }}
+            />
+            <div className="foto-upload-icon">📷</div>
+            <div className="foto-upload-text">
+              <strong>Toque para adicionar fotos</strong><br />
+              Aceita múltiplas imagens • Máx 400KB por foto após compressão
+            </div>
+          </label>
+          {comprimindo && (
+            <p className="foto-upload-progress">⏳ Comprimindo fotos...</p>
+          )}
+          {erroFoto && (
+            <p style={{ color: 'var(--danger)', fontSize: '.82rem', marginTop: 8 }}>
+              {erroFoto}
+            </p>
+          )}
+          {fotos.length > 0 && (
+            <div className="foto-grid">
+              {fotos.map((f, idx) => (
+                <div key={idx} className="foto-thumb">
+                  <img src={f.preview} alt={`foto ${idx + 1}`} />
+                  <button
+                    type="button"
+                    className="foto-thumb-remove"
+                    onClick={() => removerFoto(idx)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Botão enviar */}
