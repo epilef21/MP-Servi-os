@@ -30,7 +30,7 @@ Quatro fases encadeadas levam a plataforma de zero testes para uma suite confiá
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: Instalar dependências e criar vitest.config.js, .env.test e package.json scripts
+- [x] 01-01: Instalar dependências e criar vitest.config.js, .env.test e package.json scripts
 - [ ] 01-02: Criar src/test-utils/ (setupTests.js, renderWithProviders.jsx, mockFirebase.js) e smoke test
 
 **UI hint**: no
@@ -105,7 +105,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infraestrutura de Testes | 0/2 | Not started | - |
+| 1. Infraestrutura de Testes | 1/2 | In progress | - |
 | 2. Camada Base | 0/2 | Not started | - |
 | 3. Auth e Roteamento | 0/2 | Not started | - |
 | 4. Fluxos Críticos | 0/2 | Not started | - |
@@ -114,13 +114,13 @@ Plans:
 
 | Requirement | Description | Phase | Status |
 |-------------|-------------|-------|--------|
-| INFRA-01 | Vitest + jsdom + RTL + jest-dom instalados | Phase 1 | Pending |
-| INFRA-02 | vitest.config.js com globals, jsdom e setupFiles | Phase 1 | Pending |
-| INFRA-03 | .env.test com stubs VITE_FIREBASE_* | Phase 1 | Pending |
+| INFRA-01 | Vitest + jsdom + RTL + jest-dom instalados | Phase 1 | Complete (01-01) |
+| INFRA-02 | vitest.config.js com globals, jsdom e setupFiles | Phase 1 | Complete (01-01) |
+| INFRA-03 | .env.test com stubs VITE_FIREBASE_* | Phase 1 | Complete (01-01) |
 | INFRA-04 | setupTests.js com jest-dom e cleanup RTL | Phase 1 | Pending |
 | INFRA-05 | renderWithProviders.jsx com MemoryRouter + FakeAuthProvider | Phase 1 | Pending |
 | INFRA-06 | mockFirebase.js com vi.fn() factory | Phase 1 | Pending |
-| INFRA-07 | Scripts test, test:watch, test:coverage no package.json | Phase 1 | Pending |
+| INFRA-07 | Scripts test, test:watch, test:coverage no package.json | Phase 1 | Complete (01-01) |
 | INFRA-08 | Smoke test `it('works')` passa | Phase 1 | Pending |
 | UTIL-01 | fmtDate formata Firestore Timestamp corretamente | Phase 2 | Pending |
 | UTIL-02 | fmtBRL formata valores monetários em pt-BR | Phase 2 | Pending |
