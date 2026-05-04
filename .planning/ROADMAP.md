@@ -117,7 +117,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 05-01: Integrar browser-image-compression em OrcamentoTecnicoPage (compressão, feedback, tratamento de erro)
+- [x] 05-01: Integrar browser-image-compression em OrcamentoTecnicoPage (compressão, feedback, tratamento de erro)
 
 **UI hint**: yes
 **Complexity**: low
@@ -153,7 +153,7 @@ Plans:
 | 2. Camada Base | 0/2 | Not started | - |
 | 3. Auth e Roteamento | 0/2 | Not started | - |
 | 4. Fluxos Críticos | 0/2 | Not started | - |
-| 5. Compressão de Imagens | 0/1 | Not started | - |
+| 5. Compressão de Imagens | 1/1 | Complete | 2026-05-04 |
 | 6. Relatório Mensal em PDF | 0/2 | Not started | - |
 
 ## Requirement Traceability
@@ -203,9 +203,9 @@ Plans:
 | ORC-04 | Cliente visualiza orçamento na página de aprovação | Phase 4 | Pending |
 | ORC-05 | Cliente aprova orçamento e assinatura é registrada | Phase 4 | Pending |
 | ORC-06 | Orçamento aprovado atualiza status no Firestore | Phase 4 | Pending |
-| IMG-01 | Fotos comprimidas para máx 400KB antes do upload ao Storage | Phase 5 | Pending |
-| IMG-02 | Interface exibe feedback visual durante compressão | Phase 5 | Pending |
-| IMG-03 | Mensagem de erro amigável exibida se compressão falhar | Phase 5 | Pending |
+| IMG-01 | Fotos comprimidas para máx 400KB antes do upload ao Storage | Phase 5 | Complete (05-01) |
+| IMG-02 | Interface exibe feedback visual durante compressão | Phase 5 | Complete (05-01) |
+| IMG-03 | Mensagem de erro amigável exibida se compressão falhar | Phase 5 | Complete (05-01) |
 | REL-01 | Admin seleciona mês e ano para gerar relatório mensal | Phase 6 | Pending |
 | REL-02 | Relatório exibe total de OS e breakdown por status | Phase 6 | Pending |
 | REL-03 | Relatório exibe lucro total, média por OS e breakdown por seguradora | Phase 6 | Pending |

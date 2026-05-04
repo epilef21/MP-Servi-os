@@ -10,13 +10,13 @@ See: .planning/PROJECT.md (updated 2026-05-04)
 ## Current Position
 
 Milestone: v1.1 Produto Core
-Phase: 5 of 6 (v1.1 scope) — planned, ready to execute
-Plan: 0 of 3 total (v1.1 plans)
-Status: Phase 5 planned — ready to execute
-Last activity: 2026-05-04 — Phase 5 planejada (1 plano, 3 tasks, verificação: 0 blockers)
+Phase: 5 of 6 (v1.1 scope) — complete
+Plan: 1 of 3 total (v1.1 plans)
+Status: Phase 5 complete — Phase 6 not planned
+Last activity: 2026-05-04 — Phase 5 plan 05-01 complete (IMG-01, IMG-02, IMG-03) — verificado pelo usuário
 
 Progress (v1.0): [██░░░░░░░░] 25% (Phase 1 complete, Phases 2-4 pending)
-Progress (v1.1): [░░░░░░░░░░] 0% (Phase 5 planned, Phase 6 not started)
+Progress (v1.1): [█████░░░░░] 50% (Phase 5 complete, Phase 6 not started)
 
 ## Performance Metrics
 
@@ -33,7 +33,7 @@ Progress (v1.1): [░░░░░░░░░░] 0% (Phase 5 planned, Phase 6 n
 | 2. Camada Base | 2 | 0 | — |
 | 3. Auth e Roteamento | 2 | 0 | — |
 | 4. Fluxos Críticos | 2 | 0 | — |
-| 5. Compressão de Imagens | 1 | 0 | — |
+| 5. Compressão de Imagens | 1 | 1 | ~4 min |
 | 6. Relatório Mensal em PDF | 2 | 0 | — |
 
 **Recent Trend:** 2 plans complete (2026-05-03) — nenhum plano executado desde então
@@ -52,12 +52,13 @@ Progress (v1.1): [░░░░░░░░░░] 0% (Phase 5 planned, Phase 6 n
 - v1.1: browser-image-compression já instalado — integrar diretamente em OrcamentoTecnicoPage.jsx
 - v1.1: jsPDF já instalado (usado em pdfGenerator.js e orcamentoPdfGenerator.js) — reaproveitar padrão existente em utils/relatorioMensalPdf.js
 - v1.1: campo lucroReal já salvo em cada documento de OS em empresas/{empresaId}/checklist/{osId} — sem migration necessária
+- 05-01: compressão ocorre no handleSubmit (não no handleFotoSelect) — evita bloqueio async na seleção
+- 05-01: estado `comprimindo` (não uploadingFoto) — reflete que o feedback corresponde à fase de compressão
 
 ### Pending Todos
 
 - Executar Phases 2-4 do milestone v1.0 (Camada Base, Auth, Fluxos Críticos)
-- Executar Phase 5 do milestone v1.1 (Compressão de Imagens)
-- Executar Phase 6 do milestone v1.1 (Relatório Mensal em PDF)
+- Planejar e executar Phase 6 do milestone v1.1 (Relatório Mensal em PDF)
 
 ### Blockers/Concerns
 
@@ -69,5 +70,5 @@ Progress (v1.1): [░░░░░░░░░░] 0% (Phase 5 planned, Phase 6 n
 ## Session Continuity
 
 Last session: 2026-05-04
-Stopped at: Roadmap v1.1 criado. Phase 1 (v1.0) completa. Phases 2-4 (v1.0) e Phases 5-6 (v1.1) pendentes.
+Stopped at: Phase 5 (v1.1) completa — compressão de imagens entregue (IMG-01, IMG-02, IMG-03). Phase 6 (Relatório Mensal em PDF) não planejada ainda.
 Resume file: None
