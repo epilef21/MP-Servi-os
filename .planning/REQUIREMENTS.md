@@ -92,20 +92,57 @@ Adiados para milestone futuro.
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| INFRA-01..08 | Phase 1 | Pending |
-| UTIL-01..04 | Phase 2 | Pending |
-| DATA-01..06 | Phase 2 | Pending |
-| AUTH-01..13 | Phase 3 | Pending |
-| OS-01..06 | Phase 4 | Pending |
-| ORC-01..06 | Phase 4 | Pending |
+| Requirement | Phase | Plan | Status |
+|-------------|-------|------|--------|
+| INFRA-01 | Phase 1 | 01-01 | Pending |
+| INFRA-02 | Phase 1 | 01-01 | Pending |
+| INFRA-03 | Phase 1 | 01-01 | Pending |
+| INFRA-04 | Phase 1 | 01-02 | Pending |
+| INFRA-05 | Phase 1 | 01-02 | Pending |
+| INFRA-06 | Phase 1 | 01-02 | Pending |
+| INFRA-07 | Phase 1 | 01-01 | Pending |
+| INFRA-08 | Phase 1 | 01-02 | Pending |
+| UTIL-01 | Phase 2 | 02-01 | Pending |
+| UTIL-02 | Phase 2 | 02-01 | Pending |
+| UTIL-03 | Phase 2 | 02-01 | Pending |
+| UTIL-04 | Phase 2 | 02-01 | Pending |
+| DATA-01 | Phase 2 | 02-02 | Pending |
+| DATA-02 | Phase 2 | 02-02 | Pending |
+| DATA-03 | Phase 2 | 02-02 | Pending |
+| DATA-04 | Phase 2 | 02-02 | Pending |
+| DATA-05 | Phase 2 | 02-02 | Pending |
+| DATA-06 | Phase 2 | 02-02 | Pending |
+| AUTH-01 | Phase 3 | 03-01 | Pending |
+| AUTH-02 | Phase 3 | 03-01 | Pending |
+| AUTH-03 | Phase 3 | 03-01 | Pending |
+| AUTH-04 | Phase 3 | 03-01 | Pending |
+| AUTH-05 | Phase 3 | 03-01 | Pending |
+| AUTH-06 | Phase 3 | 03-02 | Pending |
+| AUTH-07 | Phase 3 | 03-02 | Pending |
+| AUTH-08 | Phase 3 | 03-02 | Pending |
+| AUTH-09 | Phase 3 | 03-02 | Pending |
+| AUTH-10 | Phase 3 | 03-02 | Pending |
+| AUTH-11 | Phase 3 | 03-02 | Pending |
+| AUTH-12 | Phase 3 | 03-02 | Pending |
+| AUTH-13 | Phase 3 | 03-02 | Pending |
+| OS-01 | Phase 4 | 04-01 | Pending |
+| OS-02 | Phase 4 | 04-01 | Pending |
+| OS-03 | Phase 4 | 04-01 | Pending |
+| OS-04 | Phase 4 | 04-01 | Pending |
+| OS-05 | Phase 4 | 04-01 | Pending |
+| OS-06 | Phase 4 | 04-01 | Pending |
+| ORC-01 | Phase 4 | 04-02 | Pending |
+| ORC-02 | Phase 4 | 04-02 | Pending |
+| ORC-03 | Phase 4 | 04-02 | Pending |
+| ORC-04 | Phase 4 | 04-02 | Pending |
+| ORC-05 | Phase 4 | 04-02 | Pending |
+| ORC-06 | Phase 4 | 04-02 | Pending |
 
 **Coverage:**
 - v1 requirements: 37 total
 - Mapeados para fases: 37
-- Não mapeados: 0 ✓
+- Não mapeados: 0
 
 ---
 *Requirements definidos: 2026-05-03*
-*Last updated: 2026-05-03 após inicialização*
+*Last updated: 2026-05-03 — traceability expandida com mapeamento por plano*
