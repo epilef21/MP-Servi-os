@@ -2,24 +2,26 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-03)
+See: .planning/PROJECT.md (updated 2026-05-04)
 
-**Core value:** Nenhum fluxo crítico (OS, orçamentos, autenticação) deve quebrar silenciosamente quando o código muda.
-**Current focus:** Phase 1 — Infraestrutura de Testes
+**Core value:** Produto confiável e completo — fluxos críticos cobertos por testes e features core entregues.
+**Current focus:** v1.1 Produto Core — Phase 5 (Compressão de Imagens) e Phase 6 (Relatório Mensal em PDF)
 
 ## Current Position
 
-Phase: 1 of 4 (complete)
-Plan: 2 of 8 total
-Status: Phase 1 complete — Phase 2 next
-Last activity: 2026-05-03 — Plan 01-02 complete (test-utils helpers + smoke test, 3/3 pass)
+Milestone: v1.1 Produto Core
+Phase: 5 of 6 (v1.1 scope) — not started
+Plan: 0 of 3 total (v1.1 plans)
+Status: v1.0 Phase 1 complete — v1.1 starting
+Last activity: 2026-05-04 — Roadmap v1.1 criado (Phases 5-6 adicionadas)
 
-Progress: [██░░░░░░░░] 25%
+Progress (v1.0): [██░░░░░░░░] 25% (Phase 1 complete, Phases 2-4 pending)
+Progress (v1.1): [░░░░░░░░░░] 0% (Phases 5-6 not started)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
+- Total plans completed: 2 (v1.0 Phase 1)
 - Average duration: ~8 min
 - Total execution time: 0.27 hours
 
@@ -31,8 +33,10 @@ Progress: [██░░░░░░░░] 25%
 | 2. Camada Base | 2 | 0 | — |
 | 3. Auth e Roteamento | 2 | 0 | — |
 | 4. Fluxos Críticos | 2 | 0 | — |
+| 5. Compressão de Imagens | 1 | 0 | — |
+| 6. Relatório Mensal em PDF | 2 | 0 | — |
 
-**Recent Trend:** 2 plans complete (2026-05-03)
+**Recent Trend:** 2 plans complete (2026-05-03) — nenhum plano executado desde então
 
 ## Accumulated Context
 
@@ -45,19 +49,25 @@ Progress: [██░░░░░░░░] 25%
 - 01-01: .env.test commitado (não no .gitignore) — stubs seguros para todos os testes
 - 01-02: AuthContext exportado (export const) para permitir FakeAuthProvider sem trigger do Firebase
 - 01-02: Arquivos de teste com JSX devem usar extensão .jsx — OXC/Vite 8 não processa JSX em .js
+- v1.1: browser-image-compression já instalado — integrar diretamente em OrcamentoTecnicoPage.jsx
+- v1.1: jsPDF já instalado (usado em pdfGenerator.js e orcamentoPdfGenerator.js) — reaproveitar padrão existente em utils/relatorioMensalPdf.js
+- v1.1: campo lucroReal já salvo em cada documento de OS em empresas/{empresaId}/checklist/{osId} — sem migration necessária
 
 ### Pending Todos
 
-None yet.
+- Executar Phases 2-4 do milestone v1.0 (Camada Base, Auth, Fluxos Críticos)
+- Executar Phase 5 do milestone v1.1 (Compressão de Imagens)
+- Executar Phase 6 do milestone v1.1 (Relatório Mensal em PDF)
 
 ### Blockers/Concerns
 
 - Phase 1 risk: env-guard bomb em firebase.js — resolvido por .env.test com stubs VITE_FIREBASE_*
 - Phase 3 risk: onAuthStateChanged fora de act() — resolvido por mock síncrono com cb(null)
 - Phase 4 risk: AdminPage 3264 linhas — testar handlers/hooks isolados, não renderizar o componente inteiro
+- Phase 6 risk: UI do relatório vai dentro do AdminPage de 3264 linhas — usar padrão de seção/tab existente; não renderizar o componente inteiro em testes
 
 ## Session Continuity
 
-Last session: 2026-05-03
-Stopped at: Completed 01-02 (test-utils helpers + smoke test — 3/3 pass). Phase 1 complete. Next: Phase 2
+Last session: 2026-05-04
+Stopped at: Roadmap v1.1 criado. Phase 1 (v1.0) completa. Phases 2-4 (v1.0) e Phases 5-6 (v1.1) pendentes.
 Resume file: None

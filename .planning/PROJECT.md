@@ -1,4 +1,20 @@
-# AssistHub — Milestone: Cobertura de Testes
+# AssistHub — Projeto
+
+## Current Milestone: v1.1 Produto Core
+
+**Goal:** Completar o produto core implementando as 2 features pendentes da PRIORIDADE 2 do backlog.
+
+**Target features:**
+- FEAT-007: Compressão de imagens no OrcamentoTecnicoPage (máx 400KB, padrão do FormPage)
+- FEAT-008: Relatório mensal em PDF (total OS, lucro, breakdown por técnico e seguradora)
+
+---
+
+## Previous Milestone: v1.0 Test Coverage (Em andamento)
+
+**Status:** Phase 1 completa, Phases 2-4 pendentes.
+
+---
 
 ## What This Is
 

@@ -1,4 +1,43 @@
-# Requirements: AssistHub — Cobertura de Testes
+# Requirements: AssistHub
+
+**Atualizado:** 2026-05-04
+**Core Value:** Produto confiável e completo — fluxos críticos cobertos por testes e features core entregues.
+
+---
+
+## v1.1 Requirements — Produto Core
+
+**Definido:** 2026-05-04
+
+### Compressão de Imagens no Orçamento (IMG)
+
+- [ ] **IMG-01**: Técnico pode enviar fotos no orçamento comprimidas para máx 400KB antes do upload ao Storage
+- [ ] **IMG-02**: Interface exibe feedback visual enquanto a compressão está em andamento
+- [ ] **IMG-03**: Mensagem de erro amigável é exibida se a compressão falhar
+
+### Relatório Mensal em PDF (REL)
+
+- [ ] **REL-01**: Admin pode selecionar mês e ano para gerar o relatório mensal
+- [ ] **REL-02**: Relatório exibe total de OS e breakdown por status (pendente/processado/enviado) no período
+- [ ] **REL-03**: Relatório exibe lucro total, média por OS e breakdown por seguradora no período
+- [ ] **REL-04**: Relatório exibe OS e lucro por técnico no período
+- [ ] **REL-05**: Admin pode baixar o relatório como PDF gerado via jsPDF
+
+---
+
+## v1.1 Out of Scope
+
+| Feature | Motivo |
+|---------|--------|
+| Bugs críticos (PRIORIDADE 1) | Milestone separado (BUG-001..005) |
+| Monetização / legal (PRIORIDADE 3) | Milestone futuro — produto primeiro |
+| Portal do técnico / WhatsApp / Ranking (PRIORIDADE 4) | Diferencial competitivo — milestone futuro |
+| Escala / PWA / Sentry (PRIORIDADE 5) | Infraestrutura — milestone futuro |
+| TCC / FastAPI / Plotly (PRIORIDADE 6) | Contexto acadêmico — milestone separado |
+
+---
+
+## v1.0 Requirements — Cobertura de Testes
 
 **Definido:** 2026-05-03
 **Core Value:** Nenhum fluxo crítico (OS, orçamentos, autenticação) deve quebrar silenciosamente quando o código muda.
@@ -7,14 +46,14 @@
 
 ### Infraestrutura de Testes
 
-- [ ] **INFRA-01**: Vitest 4.1.5 + jsdom + @testing-library/react 16 + @testing-library/jest-dom instalados em mp-react/
-- [ ] **INFRA-02**: `mp-react/vitest.config.js` configurado com globals, ambiente jsdom e setupFiles
-- [ ] **INFRA-03**: `mp-react/.env.test` com stubs de todas as variáveis VITE_FIREBASE_* para evitar o env-guard bomb
-- [ ] **INFRA-04**: `src/test-utils/setupTests.js` com import do jest-dom/vitest e limpeza do RTL
-- [ ] **INFRA-05**: `src/test-utils/renderWithProviders.jsx` com MemoryRouter + FakeAuthProvider combinados
-- [ ] **INFRA-06**: `src/test-utils/mockFirebase.js` com fábrica de vi.fn() para os exports de ../firebase
-- [ ] **INFRA-07**: Scripts `test`, `test:watch` e `test:coverage` adicionados ao package.json de mp-react/
-- [ ] **INFRA-08**: Suite de smoke test (`it('works')`) passa com `npm test`
+- [x] **INFRA-01**: Vitest 4.1.5 + jsdom + @testing-library/react 16 + @testing-library/jest-dom instalados em mp-react/
+- [x] **INFRA-02**: `mp-react/vitest.config.js` configurado com globals, ambiente jsdom e setupFiles
+- [x] **INFRA-03**: `mp-react/.env.test` com stubs de todas as variáveis VITE_FIREBASE_* para evitar o env-guard bomb
+- [x] **INFRA-04**: `src/test-utils/setupTests.js` com import do jest-dom/vitest e limpeza do RTL
+- [x] **INFRA-05**: `src/test-utils/renderWithProviders.jsx` com MemoryRouter + FakeAuthProvider combinados
+- [x] **INFRA-06**: `src/test-utils/mockFirebase.js` com fábrica de vi.fn() para os exports de ../firebase
+- [x] **INFRA-07**: Scripts `test`, `test:watch` e `test:coverage` adicionados ao package.json de mp-react/
+- [x] **INFRA-08**: Suite de smoke test (`it('works')`) passa com `npm test`
 
 ### Utilitários Puros
 
@@ -94,14 +133,14 @@ Adiados para milestone futuro.
 
 | Requirement | Phase | Plan | Status |
 |-------------|-------|------|--------|
-| INFRA-01 | Phase 1 | 01-01 | Pending |
-| INFRA-02 | Phase 1 | 01-01 | Pending |
-| INFRA-03 | Phase 1 | 01-01 | Pending |
-| INFRA-04 | Phase 1 | 01-02 | Pending |
-| INFRA-05 | Phase 1 | 01-02 | Pending |
-| INFRA-06 | Phase 1 | 01-02 | Pending |
-| INFRA-07 | Phase 1 | 01-01 | Pending |
-| INFRA-08 | Phase 1 | 01-02 | Pending |
+| INFRA-01 | Phase 1 | 01-01 | Complete |
+| INFRA-02 | Phase 1 | 01-01 | Complete |
+| INFRA-03 | Phase 1 | 01-01 | Complete |
+| INFRA-04 | Phase 1 | 01-02 | Complete |
+| INFRA-05 | Phase 1 | 01-02 | Complete |
+| INFRA-06 | Phase 1 | 01-02 | Complete |
+| INFRA-07 | Phase 1 | 01-01 | Complete |
+| INFRA-08 | Phase 1 | 01-02 | Complete |
 | UTIL-01 | Phase 2 | 02-01 | Pending |
 | UTIL-02 | Phase 2 | 02-01 | Pending |
 | UTIL-03 | Phase 2 | 02-01 | Pending |
@@ -137,12 +176,20 @@ Adiados para milestone futuro.
 | ORC-04 | Phase 4 | 04-02 | Pending |
 | ORC-05 | Phase 4 | 04-02 | Pending |
 | ORC-06 | Phase 4 | 04-02 | Pending |
+| IMG-01 | Phase 5 | 05-01 | Pending |
+| IMG-02 | Phase 5 | 05-01 | Pending |
+| IMG-03 | Phase 5 | 05-01 | Pending |
+| REL-01 | Phase 6 | 06-02 | Pending |
+| REL-02 | Phase 6 | 06-02 | Pending |
+| REL-03 | Phase 6 | 06-01 | Pending |
+| REL-04 | Phase 6 | 06-01 | Pending |
+| REL-05 | Phase 6 | 06-02 | Pending |
 
 **Coverage:**
-- v1 requirements: 37 total
-- Mapeados para fases: 37
-- Não mapeados: 0
+- v1.0 requirements: 37 total — 37 mapped
+- v1.1 requirements: 8 total — 8 mapped
+- Total: 45/45 mapped. No orphans.
 
 ---
 *Requirements definidos: 2026-05-03*
-*Last updated: 2026-05-03 — traceability expandida com mapeamento por plano*
+*Last updated: 2026-05-04 — v1.1 requirements adicionados (IMG-01..03, REL-01..05); traceability expandida para Phases 5-6*

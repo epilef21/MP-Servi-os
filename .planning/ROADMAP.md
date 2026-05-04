@@ -1,13 +1,16 @@
-# Roadmap: AssistHub — Cobertura de Testes
+# Roadmap: AssistHub — Cobertura de Testes + Produto Core
 
-**Milestone:** Test Coverage v1
+**Milestones:** Test Coverage v1 (Phases 1-4) · Produto Core v1.1 (Phases 5-6)
 **Created:** 2026-05-03
-**Phases:** 4
-**Requirements:** 37
+**Updated:** 2026-05-04
+**Phases:** 6
+**Requirements:** 45 (37 v1.0 + 8 v1.1)
 
 ## Overview
 
 Quatro fases encadeadas levam a plataforma de zero testes para uma suite confiável dos fluxos críticos. A ordem respeita o grafo de dependências: infra primeiro (nada roda sem ela), utilitários puros e camada de dados em seguida (sem dependências de contexto React), autenticação e roteamento depois (depende dos mocks de firebase.js estabelecidos na fase anterior), e os fluxos de negócio por último (dependem de auth, roteamento e helpers de dados funcionando nos testes).
+
+As Phases 5 e 6 pertencem ao milestone v1.1 Produto Core e são independentes da suite de testes — entregam as duas features de produto pendentes da PRIORIDADE 2 do backlog.
 
 ## Phases
 
@@ -15,6 +18,8 @@ Quatro fases encadeadas levam a plataforma de zero testes para uma suite confiá
 - [ ] **Phase 2: Camada Base** - Testar utilitários puros e funções de acesso ao Firestore em isolamento
 - [ ] **Phase 3: Auth e Roteamento** - Testar AuthContext, guards de rota e hook useEmpresa
 - [ ] **Phase 4: Fluxos Críticos** - Testar CRUD de OS e fluxo completo de orçamento
+- [ ] **Phase 5: Compressão de Imagens** - Técnico pode enviar fotos comprimidas no orçamento com feedback visual
+- [ ] **Phase 6: Relatório Mensal em PDF** - Admin pode gerar e baixar relatório mensal com OS, lucro e breakdown
 
 ## Phase Details
 
@@ -31,7 +36,7 @@ Quatro fases encadeadas levam a plataforma de zero testes para uma suite confiá
 
 Plans:
 - [x] 01-01: Instalar dependências e criar vitest.config.js, .env.test e package.json scripts
-- [ ] 01-02: Criar src/test-utils/ (setupTests.js, renderWithProviders.jsx, mockFirebase.js) e smoke test
+- [x] 01-02: Criar src/test-utils/ (setupTests.js, renderWithProviders.jsx, mockFirebase.js) e smoke test
 
 **UI hint**: no
 **Complexity**: low
@@ -101,14 +106,55 @@ Plans:
 
 ---
 
+### Phase 5: Compressão de Imagens
+**Goal**: Técnico pode enviar fotos no orçamento com garantia de que cada arquivo respeita o limite de 400KB, com feedback visual durante o processo e mensagem clara se algo der errado.
+**Depends on**: Nothing (feature independente — não depende das fases de teste)
+**Requirements**: IMG-01, IMG-02, IMG-03
+**Success Criteria** (what must be TRUE):
+  1. Técnico seleciona uma foto grande (ex: 3MB) no formulário de orçamento e o upload enviado ao Storage nunca ultrapassa 400KB
+  2. Enquanto a compressão está em andamento, o técnico vê um indicador visual (spinner, texto ou barra) que desaparece quando a compressão termina
+  3. Se a compressão falhar (arquivo corrompido, formato inesperado), o técnico vê uma mensagem de erro em português — sem crash da página
+**Plans**: 1 plan
+
+Plans:
+- [ ] 05-01: Integrar browser-image-compression em OrcamentoTecnicoPage (compressão, feedback, tratamento de erro)
+
+**UI hint**: yes
+**Complexity**: low
+
+---
+
+### Phase 6: Relatório Mensal em PDF
+**Goal**: Admin pode selecionar qualquer mês/ano, visualizar os dados consolidados de OS e lucro por status, seguradora e técnico, e baixar o relatório como arquivo PDF.
+**Depends on**: Nothing (feature independente — lê campo lucroReal já existente em cada OS)
+**Requirements**: REL-01, REL-02, REL-03, REL-04, REL-05
+**Success Criteria** (what must be TRUE):
+  1. Admin vê no painel um seletor de mês e ano e pode escolher qualquer período dos últimos 12 meses
+  2. Após selecionar o período, os dados de OS do mês aparecem na tela: total de OS, breakdown por status, lucro total, média por OS, breakdown por seguradora e breakdown por técnico
+  3. Todos os valores monetários exibidos na tela batem com o campo `lucroReal` salvo nos documentos de OS do período
+  4. Admin clica em "Baixar PDF" e recebe um arquivo PDF gerado no browser via jsPDF, sem chamada a servidor externo
+  5. O PDF contém as mesmas seções da tela: total OS, status, lucro, seguradora e técnico — legível e sem dados trocados
+**Plans**: 2 plans
+
+Plans:
+- [ ] 06-01: Criar utils/relatorioMensalPdf.js (função de busca no Firestore + lógica de agregação + geração jsPDF)
+- [ ] 06-02: Criar UI na AdminPage — seletor de mês/ano, tabelas de resultado e botão de download
+
+**UI hint**: yes
+**Complexity**: medium
+
+---
+
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infraestrutura de Testes | 1/2 | In progress | - |
+| 1. Infraestrutura de Testes | 2/2 | Complete | 2026-05-03 |
 | 2. Camada Base | 0/2 | Not started | - |
 | 3. Auth e Roteamento | 0/2 | Not started | - |
 | 4. Fluxos Críticos | 0/2 | Not started | - |
+| 5. Compressão de Imagens | 0/1 | Not started | - |
+| 6. Relatório Mensal em PDF | 0/2 | Not started | - |
 
 ## Requirement Traceability
 
@@ -117,11 +163,11 @@ Plans:
 | INFRA-01 | Vitest + jsdom + RTL + jest-dom instalados | Phase 1 | Complete (01-01) |
 | INFRA-02 | vitest.config.js com globals, jsdom e setupFiles | Phase 1 | Complete (01-01) |
 | INFRA-03 | .env.test com stubs VITE_FIREBASE_* | Phase 1 | Complete (01-01) |
-| INFRA-04 | setupTests.js com jest-dom e cleanup RTL | Phase 1 | Pending |
-| INFRA-05 | renderWithProviders.jsx com MemoryRouter + FakeAuthProvider | Phase 1 | Pending |
-| INFRA-06 | mockFirebase.js com vi.fn() factory | Phase 1 | Pending |
+| INFRA-04 | setupTests.js com jest-dom e cleanup RTL | Phase 1 | Complete (01-02) |
+| INFRA-05 | renderWithProviders.jsx com MemoryRouter + FakeAuthProvider | Phase 1 | Complete (01-02) |
+| INFRA-06 | mockFirebase.js com vi.fn() factory | Phase 1 | Complete (01-02) |
 | INFRA-07 | Scripts test, test:watch, test:coverage no package.json | Phase 1 | Complete (01-01) |
-| INFRA-08 | Smoke test `it('works')` passa | Phase 1 | Pending |
+| INFRA-08 | Smoke test `it('works')` passa | Phase 1 | Complete (01-02) |
 | UTIL-01 | fmtDate formata Firestore Timestamp corretamente | Phase 2 | Pending |
 | UTIL-02 | fmtBRL formata valores monetários em pt-BR | Phase 2 | Pending |
 | UTIL-03 | getLucro calcula margem de lucro corretamente | Phase 2 | Pending |
@@ -157,5 +203,13 @@ Plans:
 | ORC-04 | Cliente visualiza orçamento na página de aprovação | Phase 4 | Pending |
 | ORC-05 | Cliente aprova orçamento e assinatura é registrada | Phase 4 | Pending |
 | ORC-06 | Orçamento aprovado atualiza status no Firestore | Phase 4 | Pending |
+| IMG-01 | Fotos comprimidas para máx 400KB antes do upload ao Storage | Phase 5 | Pending |
+| IMG-02 | Interface exibe feedback visual durante compressão | Phase 5 | Pending |
+| IMG-03 | Mensagem de erro amigável exibida se compressão falhar | Phase 5 | Pending |
+| REL-01 | Admin seleciona mês e ano para gerar relatório mensal | Phase 6 | Pending |
+| REL-02 | Relatório exibe total de OS e breakdown por status | Phase 6 | Pending |
+| REL-03 | Relatório exibe lucro total, média por OS e breakdown por seguradora | Phase 6 | Pending |
+| REL-04 | Relatório exibe OS e lucro por técnico no período | Phase 6 | Pending |
+| REL-05 | Admin baixa relatório como PDF gerado via jsPDF | Phase 6 | Pending |
 
-**Coverage:** 37/37 v1 requirements mapped. No orphans.
+**Coverage:** 45/45 requirements mapped. No orphans.
