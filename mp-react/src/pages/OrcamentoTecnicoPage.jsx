@@ -55,9 +55,10 @@ export default function OrcamentoTecnicoPage() {
   const [erros,     setErros]     = useState({})
   const [online,    setOnline]    = useState(navigator.onLine)
   // Fotos — compressão e upload (IMG-01, IMG-02, IMG-03)
-  const [fotos,       setFotos]       = useState([])    // { file: File, preview: string }[]
-  const [comprimindo, setComprimindo] = useState(false) // IMG-02: spinner de compressão
-  const [erroFoto,    setErroFoto]    = useState('')    // IMG-03: mensagem de erro
+  const [fotos,          setFotos]          = useState([])    // { file: File, preview: string }[]
+  const [fotosExistentes,setFotosExistentes]= useState([])    // URLs já salvas no Firestore
+  const [comprimindo,    setComprimindo]    = useState(false) // IMG-02: spinner de compressão
+  const [erroFoto,       setErroFoto]       = useState('')    // IMG-03: mensagem de erro
 
   // Detecta conexão
   useEffect(() => {
@@ -94,6 +95,7 @@ export default function OrcamentoTecnicoPage() {
         if (data.modelo)         setModelo(data.modelo)
         if (data.voltagem)       setVoltagem(data.voltagem)
         if (data.itens?.length)  setItens(data.itens.map(it => ({ ...it, valor_unit: it.valor_unit || '' })))
+        if (data.fotos?.length)  setFotosExistentes(data.fotos)
       } catch (e) {
         setErroOrc('Erro ao carregar orçamento. Tente novamente.')
       } finally {
@@ -173,7 +175,12 @@ export default function OrcamentoTecnicoPage() {
       setComprimindo(true)
       try {
         const opts = { maxSizeMB: 0.4, maxWidthOrHeight: 1920, useWebWorker: true }
-        const comprimidas = await Promise.all(fotos.map(f => imageCompression(f.file, opts)))
+        const comprimidas = await Promise.all(
+          fotos.map(async f => {
+            const blob = await imageCompression(f.file, opts)
+            return new File([blob], f.file.name, { type: blob.type })
+          })
+        )
         fotosUrls = await Promise.all(comprimidas.map(c => uploadFoto(c, empresaId, orcamentoId)))
       } catch (e) {
         setErroFoto('Não foi possível comprimir as imagens. Verifique os arquivos e tente novamente.')
@@ -211,7 +218,7 @@ export default function OrcamentoTecnicoPage() {
         forma_pagamento: formaPagto || 'pix',
         prazo_execucao:  prazoExecucao || '',
         observacoes:     observacoes || '',
-        fotos:           fotosUrls,           // IMG-01: URLs das fotos comprimidas
+        fotos:           [...fotosExistentes, ...fotosUrls], // IMG-01: preserva fotos anteriores + novas
         num_serie:       numSerie || '',
         ...(orc.tipo === 'linha_branca' ? { marca: marca.trim(), modelo: modelo.trim(), voltagem } : {}),
         preenchido_em:   serverTimestamp(),
