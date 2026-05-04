@@ -17,7 +17,7 @@ import {
 } from '../firebase'
 
 // ── Criação do contexto ──────────────────────────────────────
-const AuthContext = createContext(null)
+export const AuthContext = createContext(null)
 
 // ── Provider — envolve o App inteiro em main.jsx ─────────────
 export function AuthProvider({ children }) {
