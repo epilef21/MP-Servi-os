@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-05-04)
 ## Current Position
 
 Milestone: v1.1 Produto Core
-Phase: 5 of 6 (v1.1 scope) — complete
+Phase: 6 of 6 (v1.1 scope) — not planned
 Plan: 1 of 3 total (v1.1 plans)
-Status: Phase 5 complete — Phase 6 not planned
+Status: Phase 5 complete — Phase 6 (Relatório Mensal em PDF) not planned yet
 Last activity: 2026-05-04 — Phase 5 plan 05-01 complete (IMG-01, IMG-02, IMG-03) — verificado pelo usuário
 
 Progress (v1.0): [██░░░░░░░░] 25% (Phase 1 complete, Phases 2-4 pending)

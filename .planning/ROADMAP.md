@@ -18,7 +18,7 @@ As Phases 5 e 6 pertencem ao milestone v1.1 Produto Core e são independentes da
 - [ ] **Phase 2: Camada Base** - Testar utilitários puros e funções de acesso ao Firestore em isolamento
 - [ ] **Phase 3: Auth e Roteamento** - Testar AuthContext, guards de rota e hook useEmpresa
 - [ ] **Phase 4: Fluxos Críticos** - Testar CRUD de OS e fluxo completo de orçamento
-- [ ] **Phase 5: Compressão de Imagens** - Técnico pode enviar fotos comprimidas no orçamento com feedback visual
+- [x] **Phase 5: Compressão de Imagens** - Técnico pode enviar fotos comprimidas no orçamento com feedback visual
 - [ ] **Phase 6: Relatório Mensal em PDF** - Admin pode gerar e baixar relatório mensal com OS, lucro e breakdown
 
 ## Phase Details
