@@ -44,11 +44,16 @@ import {
 // ── Helpers de formatação ────────────────────────────────────
 function fmtDate(d) {
   if (!d) return '—'
-  if (typeof d === 'string' && d.includes('-')) {
-    const [y, m, day] = d.split('-')
-    return `${day}/${m}/${y}`
+  if (typeof d === 'string') {
+    // DD/MM/AAAA (formato da extensão Chrome e entrada manual)
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) return d
+    // YYYY-MM-DD
+    if (d.includes('-')) {
+      const [y, m, day] = d.split('-')
+      return `${day}/${m}/${y}`
+    }
   }
-  // Firestore Timestamp (criado_em dos orçamentos)
+  // Firestore Timestamp
   if (d?.toDate) {
     const dt = d.toDate()
     return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`
@@ -107,6 +112,7 @@ const OS_INITIAL = {
   tel_segurado: '', cep: '', endereco: '', numero: '', cidade: '',
   data_atend: '', hora_atend: '', servico: '', desc_problema: '',
   tecnico_id: '', tecnico_nome_manual: '',
+  data_agendada: '', hora_agendada: '',
 }
 
 const PIE_COLORS = {
@@ -233,6 +239,9 @@ export default function AdminPage() {
   const [savingFin,     setSavingFin]     = useState(false)
   const [tecnicoForm,   setTecnicoForm]   = useState({ nome: '', tel: '' })
   const [savingTecnico, setSavingTecnico] = useState(false)
+  const [editAtend,     setEditAtend]     = useState(false)
+  const [atendForm,     setAtendForm]     = useState({})
+  const [savingAtend,   setSavingAtend]   = useState(false)
   // modo técnico no detalhe da OS
   const [detTecnicoMode, setDetTecnicoMode] = useState('select')
 
@@ -652,6 +661,41 @@ export default function AdminPage() {
       showToast('💰 Financeiro salvo!')
     } catch (e) { alert('Erro ao salvar financeiro: ' + e.message) }
     finally { setSavingFin(false) }
+  }
+
+  function abrirEditAtend() {
+    setAtendForm({
+      seguradora:    selected.seguradora    || '',
+      num_assist:    selected.num_assist    || '',
+      data_chegada:  selected.data_chegada  || '',
+      hora_chegada:  selected.hora_chegada  || '',
+      hora_saida:    selected.hora_saida    || '',
+      servico:       selected.servico       || '',
+      nome_segurado: selected.nome_segurado || '',
+      tel_segurado:  selected.tel_segurado  || '',
+      endereco:      selected.endereco      || '',
+      numero:        selected.numero        || '',
+      bairro:        selected.bairro        || '',
+      cidade:        selected.cidade        || '',
+      cep:           selected.cep           || '',
+    })
+    setEditAtend(true)
+  }
+
+  async function saveAtend() {
+    setSavingAtend(true)
+    try {
+      await atualizarOS(empresaId, selected.id, atendForm)
+      const updated = { ...selected, ...atendForm }
+      setReports(p => p.map(r => r.id === selected.id ? updated : r))
+      setSelected(updated)
+      setEditAtend(false)
+      showToast('✅ OS atualizada!')
+    } catch (e) {
+      showToast('Erro: ' + e.message, 'error')
+    } finally {
+      setSavingAtend(false)
+    }
   }
 
   async function saveTecnico() {
@@ -1165,6 +1209,7 @@ export default function AdminPage() {
         <nav className="sidebar-nav">
           {[
             { id: 'dashboard',  icon: '📊', label: 'Dashboard'         },
+            { id: 'agenda',     icon: '📅', label: 'Agenda'            },
             { id: 'os',         icon: '📋', label: 'Ordens de Serviço' },
             { id: 'orcamentos', icon: '📄', label: 'Orçamentos'        },
             { id: 'segurados',  icon: '👥', label: 'Segurados'         },
@@ -1174,7 +1219,10 @@ export default function AdminPage() {
             <button
               key={item.id}
               className={`sidebar-item${abaAtiva === item.id ? ' active' : ''}`}
-              onClick={() => { setAbaAtiva(item.id); setSidebarOpen(false) }}
+              onClick={() => {
+                if (item.id === 'agenda') { navigate(`/${slug}/agenda`); setSidebarOpen(false) }
+                else { setAbaAtiva(item.id); setSidebarOpen(false) }
+              }}
             >
               <span className="si-icon">{item.icon}</span>
               <span className="si-label">{item.label}</span>
@@ -2039,6 +2087,14 @@ export default function AdminPage() {
                     <label>Horário</label>
                     <input type="time" value={osForm.hora_atend} onChange={e => setOsField('hora_atend', e.target.value)} />
                   </div>
+                  <div className="field">
+                    <label>Data Agendada <span className="req" title="Usado na Agenda Visual">📅</span></label>
+                    <input type="date" value={osForm.data_agendada} onChange={e => setOsField('data_agendada', e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Hora Agendada</label>
+                    <input type="time" value={osForm.hora_agendada} onChange={e => setOsField('hora_agendada', e.target.value)} />
+                  </div>
                 </div>
               </div>
 
@@ -2179,7 +2235,7 @@ export default function AdminPage() {
 
       {/* ══ MODAL: DETALHE DA OS ══ */}
       {selected && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+        <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) { setSelected(null); setEditAtend(false) } }}>
           <div className="modal-box">
             <div className="modal-header">
               <h2>OS — {selected.nome_segurado || ''}</h2>
@@ -2195,7 +2251,7 @@ export default function AdminPage() {
                 </button>
                 <button className="btn-sm btn-pdf" onClick={() => generatePDF(selected)}>🖨️ PDF</button>
                 <button className="btn-sm" style={{ background: 'rgba(220,38,38,.35)', color: '#fff' }} title="Excluir OS" onClick={() => excluirOS(selected)}>🗑️</button>
-                <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={() => setSelected(null)}>✕</button>
+                <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={() => { setSelected(null); setEditAtend(false) }}>✕</button>
               </div>
             </div>
 
@@ -2207,24 +2263,56 @@ export default function AdminPage() {
               )}
 
               <div className="md-section">
-                <h3>📋 Atendimento</h3>
-                <div className="md-grid">
-                  <div className="md-field"><label>Seguradora</label><p>{selected.seguradora || '—'}</p></div>
-                  <div className="md-field"><label>Nº Assistência</label><p>{selected.num_assist || '—'}</p></div>
-                  <div className="md-field"><label>Data</label><p>{fmtDate(selected.data_chegada)}</p></div>
-                  <div className="md-field"><label>Horários</label><p>{selected.hora_chegada || '—'} → {selected.hora_saida || '—'}</p></div>
-                  <div className="md-field span-2"><label>Serviço</label><p>{selected.servico || '—'}</p></div>
-                </div>
+                <h3 style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                  <span>📋 Atendimento</span>
+                  {!editAtend
+                    ? <button className="btn-sm" style={{ fontSize:'11px', padding:'3px 10px' }} onClick={abrirEditAtend}>✏️ Editar</button>
+                    : <div style={{ display:'flex', gap:6 }}>
+                        <button className="btn-sm" style={{ fontSize:'11px', padding:'3px 10px', background:'var(--muted)', color:'#fff' }} onClick={() => setEditAtend(false)}>Cancelar</button>
+                        <button className="btn-sm btn-ok" style={{ fontSize:'11px', padding:'3px 10px' }} disabled={savingAtend} onClick={saveAtend}>{savingAtend ? '⏳' : '💾 Salvar'}</button>
+                      </div>
+                  }
+                </h3>
+                {!editAtend ? (
+                  <div className="md-grid">
+                    <div className="md-field"><label>Seguradora</label><p>{selected.seguradora || '—'}</p></div>
+                    <div className="md-field"><label>Nº Assistência</label><p>{selected.num_assist || '—'}</p></div>
+                    <div className="md-field"><label>Data</label><p>{fmtDate(selected.data_chegada)}</p></div>
+                    <div className="md-field"><label>Horários</label><p>{selected.hora_chegada || '—'} → {selected.hora_saida || '—'}</p></div>
+                    <div className="md-field span-2"><label>Serviço</label><p>{selected.servico || '—'}</p></div>
+                  </div>
+                ) : (
+                  <div className="md-grid">
+                    <div className="md-field"><label>Seguradora</label><input className="inline-input" value={atendForm.seguradora} onChange={e => setAtendForm(p=>({...p, seguradora: e.target.value}))} /></div>
+                    <div className="md-field"><label>Nº Assistência</label><input className="inline-input" value={atendForm.num_assist} onChange={e => setAtendForm(p=>({...p, num_assist: e.target.value}))} /></div>
+                    <div className="md-field"><label>Data (DD/MM/AAAA)</label><input className="inline-input" placeholder="DD/MM/AAAA" value={atendForm.data_chegada} onChange={e => setAtendForm(p=>({...p, data_chegada: e.target.value}))} /></div>
+                    <div className="md-field"><label>Hora chegada</label><input className="inline-input" placeholder="08:00" value={atendForm.hora_chegada} onChange={e => setAtendForm(p=>({...p, hora_chegada: e.target.value}))} /></div>
+                    <div className="md-field"><label>Hora saída</label><input className="inline-input" placeholder="12:00" value={atendForm.hora_saida} onChange={e => setAtendForm(p=>({...p, hora_saida: e.target.value}))} /></div>
+                    <div className="md-field"><label>Serviço</label><input className="inline-input" value={atendForm.servico} onChange={e => setAtendForm(p=>({...p, servico: e.target.value}))} /></div>
+                  </div>
+                )}
               </div>
 
               <div className="md-section">
                 <h3>👤 Segurado</h3>
-                <div className="md-grid">
-                  <div className="md-field"><label>Nome</label><p>{selected.nome_segurado || '—'}</p></div>
-                  <div className="md-field"><label>Telefone</label><p>{selected.tel_segurado || '—'}</p></div>
-                  <div className="md-field"><label>Endereço</label><p>{selected.endereco || '—'}</p></div>
-                  <div className="md-field"><label>Cidade</label><p>{selected.cidade || '—'}</p></div>
-                </div>
+                {!editAtend ? (
+                  <div className="md-grid">
+                    <div className="md-field"><label>Nome</label><p>{selected.nome_segurado || '—'}</p></div>
+                    <div className="md-field"><label>Telefone</label><p>{selected.tel_segurado || '—'}</p></div>
+                    <div className="md-field"><label>Endereço</label><p>{selected.endereco || '—'}</p></div>
+                    <div className="md-field"><label>Cidade</label><p>{selected.cidade || '—'}</p></div>
+                  </div>
+                ) : (
+                  <div className="md-grid">
+                    <div className="md-field"><label>Nome</label><input className="inline-input" value={atendForm.nome_segurado} onChange={e => setAtendForm(p=>({...p, nome_segurado: e.target.value}))} /></div>
+                    <div className="md-field"><label>Telefone</label><input className="inline-input" value={atendForm.tel_segurado} onChange={e => setAtendForm(p=>({...p, tel_segurado: e.target.value}))} /></div>
+                    <div className="md-field"><label>Endereço</label><input className="inline-input" value={atendForm.endereco} onChange={e => setAtendForm(p=>({...p, endereco: e.target.value}))} /></div>
+                    <div className="md-field"><label>Número</label><input className="inline-input" value={atendForm.numero} onChange={e => setAtendForm(p=>({...p, numero: e.target.value}))} /></div>
+                    <div className="md-field"><label>Bairro</label><input className="inline-input" value={atendForm.bairro} onChange={e => setAtendForm(p=>({...p, bairro: e.target.value}))} /></div>
+                    <div className="md-field"><label>Cidade</label><input className="inline-input" value={atendForm.cidade} onChange={e => setAtendForm(p=>({...p, cidade: e.target.value}))} /></div>
+                    <div className="md-field"><label>CEP</label><input className="inline-input" value={atendForm.cep} onChange={e => setAtendForm(p=>({...p, cep: e.target.value}))} /></div>
+                  </div>
+                )}
               </div>
 
               {(selected.desc_problema || selected.desc_servico) && (

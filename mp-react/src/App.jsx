@@ -16,6 +16,7 @@ import EmpresaNaoEncontrada   from './pages/EmpresaNaoEncontrada.jsx'
 import AvaliacaoPage          from './pages/AvaliacaoPage.jsx'
 import OrcamentoTecnicoPage   from './pages/OrcamentoTecnicoPage.jsx'
 import AprovarOrcamentoPage   from './pages/AprovarOrcamentoPage.jsx'
+import AgendaPage             from './pages/AgendaPage.jsx'
 
 // ── Guarda de rota para admin da empresa ─────────────────────
 // Redireciona para /login se o usuário não estiver autenticado
@@ -71,6 +72,16 @@ export default function App() {
         element={
           <RotaAdmin>
             <AdminPage />
+          </RotaAdmin>
+        }
+      />
+
+      {/* Agenda visual do dia — /:slug/agenda (protegido) */}
+      <Route
+        path="/:slug/agenda"
+        element={
+          <RotaAdmin>
+            <AgendaPage />
           </RotaAdmin>
         }
       />
