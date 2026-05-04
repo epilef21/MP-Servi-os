@@ -448,12 +448,10 @@ const url = await uploadFoto(compressedFile, empresaId, orcamentoId)
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should photos be optional or block submit if compression fails?**
-   - What we know: IMG-03 requires a friendly error message "se a compressão falhar" — does not say "block submit"
-   - What's unclear: Can the técnico submit without photos if compression fails? Or must they retry?
-   - Recommendation: Return early (block submit) on compression error — clean UX, foto section is optional but if the user selected files, all must be processed or explicitly removed. The error message guides the user.
+   - RESOLVED: Block submit — catch block resets both `comprimindo` and `salvando` states then returns early, guiding the user to retry or remove the problematic file. If the user selected files, all must be processed or explicitly removed before submitting.
 
 ---
 
