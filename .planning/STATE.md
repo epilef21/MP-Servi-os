@@ -9,30 +9,30 @@ See: .planning/PROJECT.md (updated 2026-05-03)
 
 ## Current Position
 
-Phase: 1 of 4 (in progress)
-Plan: 1 of 8 total
-Status: In progress — Phase 1, Plan 01-02 next
-Last activity: 2026-05-04 — Plan 01-01 complete (vitest deps + config + .env.test)
+Phase: 1 of 4 (complete)
+Plan: 2 of 8 total
+Status: Phase 1 complete — Phase 2 next
+Last activity: 2026-05-03 — Plan 01-02 complete (test-utils helpers + smoke test, 3/3 pass)
 
-Progress: [█░░░░░░░░░] 12%
+Progress: [██░░░░░░░░] 25%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
+- Total plans completed: 2
 - Average duration: ~8 min
-- Total execution time: 0.13 hours
+- Total execution time: 0.27 hours
 
 **By Phase:**
 
 | Phase | Plans | Completed | Avg/Plan |
 |-------|-------|-----------|----------|
-| 1. Infraestrutura | 2 | 1 | 8 min |
+| 1. Infraestrutura | 2 | 2 | 8 min |
 | 2. Camada Base | 2 | 0 | — |
 | 3. Auth e Roteamento | 2 | 0 | — |
 | 4. Fluxos Críticos | 2 | 0 | — |
 
-**Recent Trend:** 1 plan complete (2026-05-04)
+**Recent Trend:** 2 plans complete (2026-05-03)
 
 ## Accumulated Context
 
@@ -43,6 +43,8 @@ Progress: [█░░░░░░░░░] 12%
 - Pre-start: clearMocks: true globalmente (nunca resetMocks: true)
 - 01-01: vitest.config.js standalone (vitest/config, não extendendo vite_config.js)
 - 01-01: .env.test commitado (não no .gitignore) — stubs seguros para todos os testes
+- 01-02: AuthContext exportado (export const) para permitir FakeAuthProvider sem trigger do Firebase
+- 01-02: Arquivos de teste com JSX devem usar extensão .jsx — OXC/Vite 8 não processa JSX em .js
 
 ### Pending Todos
 
@@ -56,6 +58,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-04
-Stopped at: Completed 01-01 (vitest deps + vitest.config.js + .env.test). Next: 01-02
+Last session: 2026-05-03
+Stopped at: Completed 01-02 (test-utils helpers + smoke test — 3/3 pass). Phase 1 complete. Next: Phase 2
 Resume file: None
