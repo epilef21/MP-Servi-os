@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-05-05)
 
 **Core value:** Produto confiável e completo — fluxos críticos cobertos por testes e features core entregues.
-**Current focus:** v1.0 Test Coverage — Phases 2-4 pendentes (Camada Base, Auth, Fluxos Críticos)
+**Current focus:** v1.0 Test Coverage — Phases 3-4 pendentes (Auth e Roteamento, Fluxos Críticos)
 
 ## Current Position
 
 Milestone: v1.0 Test Coverage — em progresso
-Phase: 2 of 4 (v1.0 scope) — Ready to execute
-Plan: 0 of 2 (Phase 2 plans) — Planned, not yet executed
-Status: Phase 2 planned (2026-05-05) — 2 planos criados e verificados. Pronto para execução.
-Last activity: 2026-05-05 — Phase 2 planned — 02-01 (formatters extraction + tests) e 02-02 (firebase data layer tests)
+Phase: 3 of 4 (v1.0 scope) — Ready to plan
+Plan: 2 of 2 (Phase 2 plans) — Complete
+Status: Phase 2 complete (2026-05-05) — 50 testes passando, UTIL-01..04 e DATA-01..06 cobertos.
+Last activity: 2026-05-05 — Phase 2 complete — formatters.js extraído, formatters.test.js (30 testes) e firebase.test.js (17 testes) criados
 
-Progress (v1.0): [██░░░░░░░░] 25% (Phase 1 complete, Phases 2-4 pending)
+Progress (v1.0): [████░░░░░░] 50% (Phases 1-2 complete, Phases 3-4 pending)
 Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 
 ## Performance Metrics
@@ -30,7 +30,7 @@ Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 | Phase | Plans | Completed | Avg/Plan |
 |-------|-------|-----------|----------|
 | 1. Infraestrutura | 2 | 2 | 8 min |
-| 2. Camada Base | 2 | 0 | — |
+| 2. Camada Base | 2 | 2 | ~12 min |
 | 3. Auth e Roteamento | 2 | 0 | — |
 | 4. Fluxos Críticos | 2 | 0 | — |
 | 5. Compressão de Imagens | 1 | 1 | ~4 min |
@@ -63,7 +63,7 @@ Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 
 ### Pending Todos
 
-- Executar Phases 2-4 do milestone v1.0 (Camada Base, Auth, Fluxos Críticos)
+- Executar Phases 3-4 do milestone v1.0 (Auth e Roteamento, Fluxos Críticos)
 
 ### Blockers/Concerns
 
@@ -75,5 +75,5 @@ Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 ## Session Continuity
 
 Last session: 2026-05-05
-Stopped at: Phase 2 planejada — 2 planos prontos para execução. Próximo: /gsd-execute-phase 2
+Stopped at: Phase 2 completa — 50 testes passando (smoke 3, formatters 30, firebase 17). Próximo: /gsd-discuss-phase 3 ou /gsd-plan-phase 3
 Resume file: None

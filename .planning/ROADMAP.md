@@ -14,8 +14,8 @@ As Phases 5 e 6 pertencem ao milestone v1.1 Produto Core e são independentes da
 
 ## Phases
 
-- [ ] **Phase 1: Infraestrutura de Testes** - Configurar Vitest, RTL, mocks globais e smoke test passando
-- [ ] **Phase 2: Camada Base** - Testar utilitários puros e funções de acesso ao Firestore em isolamento
+- [x] **Phase 1: Infraestrutura de Testes** - Configurar Vitest, RTL, mocks globais e smoke test passando
+- [x] **Phase 2: Camada Base** - Testar utilitários puros e funções de acesso ao Firestore em isolamento
 - [ ] **Phase 3: Auth e Roteamento** - Testar AuthContext, guards de rota e hook useEmpresa
 - [ ] **Phase 4: Fluxos Críticos** - Testar CRUD de OS e fluxo completo de orçamento
 - [x] **Phase 5: Compressão de Imagens** - Técnico pode enviar fotos comprimidas no orçamento com feedback visual
@@ -56,8 +56,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: Testes das funções utilitárias puras (UTIL-01..04)
-- [ ] 02-02: Testes das funções de acesso ao Firestore em firebase.js (DATA-01..06)
+- [x] 02-01: Testes das funções utilitárias puras (UTIL-01..04)
+- [x] 02-02: Testes das funções de acesso ao Firestore em firebase.js (DATA-01..06)
 
 **UI hint**: no
 **Complexity**: medium
@@ -158,7 +158,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Infraestrutura de Testes | 2/2 | Complete | 2026-05-03 |
-| 2. Camada Base | 0/2 | Not started | - |
+| 2. Camada Base | 2/2 | Complete | 2026-05-05 |
 | 3. Auth e Roteamento | 0/2 | Not started | - |
 | 4. Fluxos Críticos | 0/2 | Not started | - |
 | 5. Compressão de Imagens | 1/1 | Complete | 2026-05-04 |
@@ -176,16 +176,16 @@ Plans:
 | INFRA-06 | mockFirebase.js com vi.fn() factory | Phase 1 | Complete (01-02) |
 | INFRA-07 | Scripts test, test:watch, test:coverage no package.json | Phase 1 | Complete (01-01) |
 | INFRA-08 | Smoke test `it('works')` passa | Phase 1 | Complete (01-02) |
-| UTIL-01 | fmtDate formata Firestore Timestamp corretamente | Phase 2 | Pending |
-| UTIL-02 | fmtBRL formata valores monetários em pt-BR | Phase 2 | Pending |
-| UTIL-03 | getLucro calcula margem de lucro corretamente | Phase 2 | Pending |
-| UTIL-04 | maskPhone e maskCNPJ mascaram entradas corretamente | Phase 2 | Pending |
-| DATA-01 | criarOS chama addDoc com campos corretos | Phase 2 | Pending |
-| DATA-02 | atualizarOS chama updateDoc no documento certo | Phase 2 | Pending |
-| DATA-03 | getOSdaEmpresa consulta subcoleção por empresaId | Phase 2 | Pending |
-| DATA-04 | getEmpresaBySlug busca por slug e retorna null quando não existe | Phase 2 | Pending |
-| DATA-05 | cadastrarEmpresa cria documento e retorna dados | Phase 2 | Pending |
-| DATA-06 | verificarLimite retorna true/false por plano e contagem | Phase 2 | Pending |
+| UTIL-01 | fmtDate formata Firestore Timestamp corretamente | Phase 2 | Complete (02-01) |
+| UTIL-02 | fmtBRL formata valores monetários em pt-BR | Phase 2 | Complete (02-01) |
+| UTIL-03 | getLucro calcula margem de lucro corretamente | Phase 2 | Complete (02-01) |
+| UTIL-04 | maskPhone e maskCNPJ mascaram entradas corretamente | Phase 2 | Complete (02-01) |
+| DATA-01 | criarOS chama addDoc com campos corretos | Phase 2 | Complete (02-02) |
+| DATA-02 | atualizarOS chama updateDoc no documento certo | Phase 2 | Complete (02-02) |
+| DATA-03 | getOSdaEmpresa consulta subcoleção por empresaId | Phase 2 | Complete (02-02) |
+| DATA-04 | getEmpresaBySlug busca por slug e retorna null quando não existe | Phase 2 | Complete (02-02) |
+| DATA-05 | cadastrarEmpresa cria documento e retorna dados | Phase 2 | Complete (02-02) |
+| DATA-06 | verificarLimite retorna true/false por plano e contagem | Phase 2 | Complete (02-02) |
 | AUTH-01 | AuthContext exibe loading enquanto onAuthStateChanged pende | Phase 3 | Pending |
 | AUTH-02 | AuthContext resolve usuário com empresaId via token claims | Phase 3 | Pending |
 | AUTH-03 | AuthContext usa fallback Firestore quando claims sem empresaId | Phase 3 | Pending |
