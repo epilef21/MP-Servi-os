@@ -2,7 +2,7 @@
 
 ## Current Milestone: v1.0 Test Coverage (Em andamento)
 
-**Status:** Phase 1 completa, Phases 2-4 pendentes.
+**Status:** Phases 1-2 completas, Phases 3-4 pendentes.
 
 ---
 
@@ -40,14 +40,20 @@ Nenhum fluxo crítico (OS, orçamentos, autenticação) deve quebrar silenciosam
 - ✓ Painel SuperAdmin para visão global da plataforma — existing
 - ✓ Pesquisa de satisfação pós-OS — existing
 
+### Validated in Phase 1 (Infraestrutura de Testes)
+
+INFRA-01..08 — Vitest 4.1.5 + RTL + jsdom configurados, smoke test verde, renderWithProviders/mockFirebase disponíveis.
+
+### Validated in Phase 2 (Camada Base)
+
+UTIL-01..04 — fmtDate/fmtBRL/getLucro/maskPhone/maskCNPJ extraídos para formatters.js, 30 testes verdes.
+DATA-01..06 — criarOS/atualizarOS/getOSdaEmpresa/getEmpresaBySlug/cadastrarEmpresa/contarOSdoMes testados, 17 testes verdes.
+
 ### Active
 
-- [ ] Configurar Vitest + React Testing Library no projeto mp-react
 - [ ] Testes do fluxo de autenticação e multi-tenancy (login, rota por slug, guards)
 - [ ] Testes do fluxo de OS (criar, editar, fechar, listar)
 - [ ] Testes do fluxo de orçamento (gerar, técnico preenche, cliente aprova)
-- [ ] Testes de funções utilitárias críticas (geração de slug, helpers de Firestore)
-- [ ] Testes passando em `npm test` com output claro de falhas
 
 ### Out of Scope
 
