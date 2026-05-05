@@ -213,6 +213,9 @@ export default function AdminPage() {
 
   // ── Navegação ────────────────────────────────────────────
   const [abaAtiva,     setAbaAtiva]     = useState('dashboard')
+  const [relMes,       setRelMes]       = useState(new Date().getMonth() + 1)
+  const [relAno,       setRelAno]       = useState(new Date().getFullYear())
+  const [relDados,     setRelDados]     = useState(null)
   const [sidebarOpen,  setSidebarOpen]  = useState(false)
 
   // ── Filtros (aba OS) ─────────────────────────────────────
