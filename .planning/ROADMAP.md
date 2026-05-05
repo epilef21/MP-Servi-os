@@ -139,7 +139,7 @@ Plans:
 Plans:
 
 **Wave 1**
-- [ ] 06-01: Criar utils/relatorioMensalPdf.js (agregarRelatorio + gerarRelatorioMensalPdf via jsPDF)
+- [x] 06-01: Criar utils/relatorioMensalPdf.js (agregarRelatorio + gerarRelatorioMensalPdf via jsPDF)
 
 **Wave 2** *(bloqueado pelo Wave 1)*
 - [ ] 06-02: Criar UI na AdminPage — seletor de mês/ano, tabelas de resultado e botão de download
@@ -162,7 +162,7 @@ Plans:
 | 3. Auth e Roteamento | 0/2 | Not started | - |
 | 4. Fluxos Críticos | 0/2 | Not started | - |
 | 5. Compressão de Imagens | 1/1 | Complete | 2026-05-04 |
-| 6. Relatório Mensal em PDF | 0/2 | Not started | - |
+| 6. Relatório Mensal em PDF | 1/2 | In progress | - |
 
 ## Requirement Traceability
 
@@ -215,9 +215,9 @@ Plans:
 | IMG-02 | Interface exibe feedback visual durante compressão | Phase 5 | Complete (05-01) |
 | IMG-03 | Mensagem de erro amigável exibida se compressão falhar | Phase 5 | Complete (05-01) |
 | REL-01 | Admin seleciona mês e ano para gerar relatório mensal | Phase 6 | Pending |
-| REL-02 | Relatório exibe total de OS e breakdown por status | Phase 6 | Pending |
-| REL-03 | Relatório exibe lucro total, média por OS e breakdown por seguradora | Phase 6 | Pending |
-| REL-04 | Relatório exibe OS e lucro por técnico no período | Phase 6 | Pending |
-| REL-05 | Admin baixa relatório como PDF gerado via jsPDF | Phase 6 | Pending |
+| REL-02 | Relatório exibe total de OS e breakdown por status | Phase 6 | Complete (06-01) |
+| REL-03 | Relatório exibe lucro total, média por OS e breakdown por seguradora | Phase 6 | Complete (06-01) |
+| REL-04 | Relatório exibe OS e lucro por técnico no período | Phase 6 | Complete (06-01) |
+| REL-05 | Admin baixa relatório como PDF gerado via jsPDF | Phase 6 | Complete (06-01) |
 
 **Coverage:** 45/45 requirements mapped. No orphans.

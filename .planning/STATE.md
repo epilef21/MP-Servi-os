@@ -10,13 +10,13 @@ See: .planning/PROJECT.md (updated 2026-05-04)
 ## Current Position
 
 Milestone: v1.1 Produto Core
-Phase: 6 of 6 (v1.1 scope) — Ready to execute
-Plan: 1 of 3 total (v1.1 plans)
-Status: Phase 5 complete — Phase 6 (Relatório Mensal em PDF) planned (2 plans), ready to execute
-Last activity: 2026-05-04 — Phase 6 planned — 06-01 (relatorioMensalPdf.js) + 06-02 (UI AdminPage)
+Phase: 6 of 6 (v1.1 scope) — In progress
+Plan: 2 of 3 total (v1.1 plans)
+Status: Phase 5 complete — Phase 6 Plan 01 complete (relatorioMensalPdf.js criado); Plan 02 (UI AdminPage) pendente
+Last activity: 2026-05-04 — Phase 6 Plan 01 executado — relatorioMensalPdf.js com agregarRelatorio + gerarRelatorioMensalPdf
 
 Progress (v1.0): [██░░░░░░░░] 25% (Phase 1 complete, Phases 2-4 pending)
-Progress (v1.1): [████████░░] 80% (Phase 5 complete, Phase 6 planned)
+Progress (v1.1): [█████████░] 90% (Phase 5 complete, Phase 6 Plan 01 complete, Plan 02 pendente)
 
 ## Performance Metrics
 
@@ -51,6 +51,9 @@ Progress (v1.1): [████████░░] 80% (Phase 5 complete, Phase 6
 - 01-02: Arquivos de teste com JSX devem usar extensão .jsx — OXC/Vite 8 não processa JSX em .js
 - v1.1: browser-image-compression já instalado — integrar diretamente em OrcamentoTecnicoPage.jsx
 - v1.1: jsPDF já instalado (usado em pdfGenerator.js e orcamentoPdfGenerator.js) — reaproveitar padrão existente em utils/relatorioMensalPdf.js
+- 06-01: getLucroLocal copiado internamente para evitar dependencia circular utils->pages
+- 06-01: agregarRelatorio filtra client-side (in-memory) sem nova query Firestore
+- 06-01: tableRow helper para tabelas de breakdown (3 colunas) em vez de textBlock
 - v1.1: campo lucroReal já salvo em cada documento de OS em empresas/{empresaId}/checklist/{osId} — sem migration necessária
 - 05-01: compressão ocorre no handleSubmit (não no handleFotoSelect) — evita bloqueio async na seleção
 - 05-01: estado `comprimindo` (não uploadingFoto) — reflete que o feedback corresponde à fase de compressão
@@ -58,7 +61,7 @@ Progress (v1.1): [████████░░] 80% (Phase 5 complete, Phase 6
 ### Pending Todos
 
 - Executar Phases 2-4 do milestone v1.0 (Camada Base, Auth, Fluxos Críticos)
-- Executar Phase 6 do milestone v1.1 (Relatório Mensal em PDF) — 2 planos prontos
+- Executar Phase 6 Plan 02 do milestone v1.1 (UI AdminPage — seletor mes/ano, tabelas, botao download)
 
 ### Blockers/Concerns
 
@@ -70,5 +73,5 @@ Progress (v1.1): [████████░░] 80% (Phase 5 complete, Phase 6
 ## Session Continuity
 
 Last session: 2026-05-04
-Stopped at: Phase 6 planejada — 06-01 (relatorioMensalPdf.js: agregarRelatorio + gerarRelatorioMensalPdf) e 06-02 (UI AdminPage: sidebar + seletor + tabelas + download PDF). Pronto para executar.
+Stopped at: Phase 6 Plan 01 completo — relatorioMensalPdf.js criado (commit 4b073a3). Proximo: 06-02 UI AdminPage.
 Resume file: None
