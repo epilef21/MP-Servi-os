@@ -567,6 +567,10 @@ export default function AdminPage() {
     return !Object.keys(errs).length
   }
 
+  function gerarRelatorio() {
+    setRelDados(agregarRelatorio(reports, relMes, relAno))
+  }
+
   // Link curto — só o ID da OS. O FormPage busca os dados do Firestore.
   // Resolve URLs gigantes no WhatsApp que cortavam o texto da mensagem.
   function buildLink(r) {
@@ -1219,6 +1223,7 @@ export default function AdminPage() {
             { id: 'segurados',  icon: '👥', label: 'Segurados'         },
             { id: 'tecnicos',   icon: '👷', label: 'Técnicos'          },
             { id: 'config',     icon: '⚙️', label: 'Configurações'     },
+            { id: 'relatorio',  icon: '📊', label: 'Relatório Mensal'  },
           ].map(item => (
             <button
               key={item.id}
