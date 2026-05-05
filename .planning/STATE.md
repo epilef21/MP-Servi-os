@@ -9,11 +9,11 @@ See: .planning/PROJECT.md (updated 2026-05-05)
 
 ## Current Position
 
-Milestone: v1.1 Produto Core — COMPLETO
-Phase: 6 of 6 (v1.1 scope) — Complete
-Plan: 3 of 3 total (v1.1 plans) — All complete
-Status: Phase 6 complete (2026-05-05) — REL-01..REL-05 verificados. Milestone v1.1 Produto Core encerrado.
-Last activity: 2026-05-05 — Phase 6 complete — aba Relatório Mensal entregue e aprovada pelo usuário
+Milestone: v1.0 Test Coverage — em progresso
+Phase: 2 of 4 (v1.0 scope) — Ready to execute
+Plan: 0 of 2 (Phase 2 plans) — Planned, not yet executed
+Status: Phase 2 planned (2026-05-05) — 2 planos criados e verificados. Pronto para execução.
+Last activity: 2026-05-05 — Phase 2 planned — 02-01 (formatters extraction + tests) e 02-02 (firebase data layer tests)
 
 Progress (v1.0): [██░░░░░░░░] 25% (Phase 1 complete, Phases 2-4 pending)
 Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
@@ -75,5 +75,5 @@ Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 ## Session Continuity
 
 Last session: 2026-05-05
-Stopped at: Phase 6 completa — milestone v1.1 encerrado. Próximo: Phases 2-4 do v1.0 (Camada Base, Auth, Fluxos Críticos).
+Stopped at: Phase 2 planejada — 2 planos prontos para execução. Próximo: /gsd-execute-phase 2
 Resume file: None
