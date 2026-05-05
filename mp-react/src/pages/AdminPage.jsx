@@ -41,26 +41,9 @@ import {
   Legend, ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts'
 import { agregarRelatorio, gerarRelatorioMensalPdf } from '../utils/relatorioMensalPdf.js'
+import { fmtDate, fmtBRL, getLucro, maskPhone, maskCNPJ } from '../utils/formatters.js'
 
 // ── Helpers de formatação ────────────────────────────────────
-function fmtDate(d) {
-  if (!d) return '—'
-  if (typeof d === 'string') {
-    // DD/MM/AAAA (formato da extensão Chrome e entrada manual)
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) return d
-    // YYYY-MM-DD
-    if (d.includes('-')) {
-      const [y, m, day] = d.split('-')
-      return `${day}/${m}/${y}`
-    }
-  }
-  // Firestore Timestamp
-  if (d?.toDate) {
-    const dt = d.toDate()
-    return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}`
-  }
-  return '—'
-}
 function fmtDatetime(ts) {
   if (!ts) return '—'
   try {
@@ -70,30 +53,6 @@ function fmtDatetime(ts) {
 }
 function fmtSN(v) {
   return v === 'sim' ? '✅ Sim' : v === 'nao' ? '❌ Não' : '—'
-}
-function fmtBRL(v) {
-  const n = parseFloat(v)
-  if (isNaN(n)) return '—'
-  return `R$ ${n.toFixed(2).replace('.', ',')}`
-}
-function getLucro(r) {
-  const mos = parseFloat(r.mo_seguradora)      || 0
-  const vpt = parseFloat(r.valor_prestador)    || 0
-  const vds = parseFloat(r.valor_deslocamento) || 0
-  return (mos || vpt || vds) ? (mos - vpt) + vds : null
-}
-function maskPhone(v) {
-  const d = v.replace(/\D/g, '').slice(0, 11)
-  if (d.length <= 10) return d.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '')
-  return d.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '')
-}
-function maskCNPJ(v) {
-  const d = v.replace(/\D/g, '').slice(0, 14)
-  return d
-    .replace(/(\d{2})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1/$2')
-    .replace(/(\d{4})(\d)/, '$1-$2')
 }
 
 const MESES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
