@@ -10,13 +10,13 @@ See: .planning/PROJECT.md (updated 2026-05-04)
 ## Current Position
 
 Milestone: v1.1 Produto Core
-Phase: 6 of 6 (v1.1 scope) — not planned
+Phase: 6 of 6 (v1.1 scope) — Ready to execute
 Plan: 1 of 3 total (v1.1 plans)
-Status: Phase 5 complete — Phase 6 (Relatório Mensal em PDF) not planned yet
-Last activity: 2026-05-04 — Phase 5 plan 05-01 complete (IMG-01, IMG-02, IMG-03) — verificado pelo usuário
+Status: Phase 5 complete — Phase 6 (Relatório Mensal em PDF) planned (2 plans), ready to execute
+Last activity: 2026-05-04 — Phase 6 planned — 06-01 (relatorioMensalPdf.js) + 06-02 (UI AdminPage)
 
 Progress (v1.0): [██░░░░░░░░] 25% (Phase 1 complete, Phases 2-4 pending)
-Progress (v1.1): [█████░░░░░] 50% (Phase 5 complete, Phase 6 not started)
+Progress (v1.1): [████████░░] 80% (Phase 5 complete, Phase 6 planned)
 
 ## Performance Metrics
 
@@ -58,7 +58,7 @@ Progress (v1.1): [█████░░░░░] 50% (Phase 5 complete, Phase 6
 ### Pending Todos
 
 - Executar Phases 2-4 do milestone v1.0 (Camada Base, Auth, Fluxos Críticos)
-- Planejar e executar Phase 6 do milestone v1.1 (Relatório Mensal em PDF)
+- Executar Phase 6 do milestone v1.1 (Relatório Mensal em PDF) — 2 planos prontos
 
 ### Blockers/Concerns
 
@@ -70,5 +70,5 @@ Progress (v1.1): [█████░░░░░] 50% (Phase 5 complete, Phase 6
 ## Session Continuity
 
 Last session: 2026-05-04
-Stopped at: Phase 5 (v1.1) completa — compressão de imagens entregue (IMG-01, IMG-02, IMG-03). Phase 6 (Relatório Mensal em PDF) não planejada ainda.
+Stopped at: Phase 6 planejada — 06-01 (relatorioMensalPdf.js: agregarRelatorio + gerarRelatorioMensalPdf) e 06-02 (UI AdminPage: sidebar + seletor + tabelas + download PDF). Pronto para executar.
 Resume file: None

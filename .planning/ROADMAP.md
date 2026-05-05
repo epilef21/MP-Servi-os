@@ -137,8 +137,16 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: Criar utils/relatorioMensalPdf.js (função de busca no Firestore + lógica de agregação + geração jsPDF)
+
+**Wave 1**
+- [ ] 06-01: Criar utils/relatorioMensalPdf.js (agregarRelatorio + gerarRelatorioMensalPdf via jsPDF)
+
+**Wave 2** *(bloqueado pelo Wave 1)*
 - [ ] 06-02: Criar UI na AdminPage — seletor de mês/ano, tabelas de resultado e botão de download
+
+**Cross-cutting constraints:**
+- getLucroLocal deve replicar exatamente getLucro() do AdminPage: (mo_seguradora - valor_prestador) + valor_deslocamento
+- Filtro de OS por período usa criado_em.toDate() — consistente com padrão já usado em stats/chartData do AdminPage
 
 **UI hint**: yes
 **Complexity**: medium
