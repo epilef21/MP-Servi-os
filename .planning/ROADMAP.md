@@ -2,7 +2,7 @@
 
 **Milestones:** Test Coverage v1 (Phases 1-4) · Produto Core v1.1 (Phases 5-6)
 **Created:** 2026-05-03
-**Updated:** 2026-05-04
+**Updated:** 2026-05-05
 **Phases:** 6
 **Requirements:** 45 (37 v1.0 + 8 v1.1)
 
@@ -19,7 +19,7 @@ As Phases 5 e 6 pertencem ao milestone v1.1 Produto Core e são independentes da
 - [ ] **Phase 3: Auth e Roteamento** - Testar AuthContext, guards de rota e hook useEmpresa
 - [ ] **Phase 4: Fluxos Críticos** - Testar CRUD de OS e fluxo completo de orçamento
 - [x] **Phase 5: Compressão de Imagens** - Técnico pode enviar fotos comprimidas no orçamento com feedback visual
-- [ ] **Phase 6: Relatório Mensal em PDF** - Admin pode gerar e baixar relatório mensal com OS, lucro e breakdown
+- [x] **Phase 6: Relatório Mensal em PDF** - Admin pode gerar e baixar relatório mensal com OS, lucro e breakdown
 
 ## Phase Details
 
@@ -142,7 +142,7 @@ Plans:
 - [x] 06-01: Criar utils/relatorioMensalPdf.js (agregarRelatorio + gerarRelatorioMensalPdf via jsPDF)
 
 **Wave 2** *(bloqueado pelo Wave 1)*
-- [ ] 06-02: Criar UI na AdminPage — seletor de mês/ano, tabelas de resultado e botão de download
+- [x] 06-02: Criar UI na AdminPage — seletor de mês/ano, tabelas de resultado e botão de download
 
 **Cross-cutting constraints:**
 - getLucroLocal deve replicar exatamente getLucro() do AdminPage: (mo_seguradora - valor_prestador) + valor_deslocamento
@@ -162,7 +162,7 @@ Plans:
 | 3. Auth e Roteamento | 0/2 | Not started | - |
 | 4. Fluxos Críticos | 0/2 | Not started | - |
 | 5. Compressão de Imagens | 1/1 | Complete | 2026-05-04 |
-| 6. Relatório Mensal em PDF | 1/2 | In progress | - |
+| 6. Relatório Mensal em PDF | 2/2 | Complete | 2026-05-05 |
 
 ## Requirement Traceability
 
@@ -214,10 +214,10 @@ Plans:
 | IMG-01 | Fotos comprimidas para máx 400KB antes do upload ao Storage | Phase 5 | Complete (05-01) |
 | IMG-02 | Interface exibe feedback visual durante compressão | Phase 5 | Complete (05-01) |
 | IMG-03 | Mensagem de erro amigável exibida se compressão falhar | Phase 5 | Complete (05-01) |
-| REL-01 | Admin seleciona mês e ano para gerar relatório mensal | Phase 6 | Pending |
-| REL-02 | Relatório exibe total de OS e breakdown por status | Phase 6 | Complete (06-01) |
-| REL-03 | Relatório exibe lucro total, média por OS e breakdown por seguradora | Phase 6 | Complete (06-01) |
-| REL-04 | Relatório exibe OS e lucro por técnico no período | Phase 6 | Complete (06-01) |
-| REL-05 | Admin baixa relatório como PDF gerado via jsPDF | Phase 6 | Complete (06-01) |
+| REL-01 | Admin seleciona mês e ano para gerar relatório mensal | Phase 6 | Complete (06-02) |
+| REL-02 | Relatório exibe total de OS e breakdown por status | Phase 6 | Complete (06-01, 06-02) |
+| REL-03 | Relatório exibe lucro total, média por OS e breakdown por seguradora | Phase 6 | Complete (06-01, 06-02) |
+| REL-04 | Relatório exibe OS e lucro por técnico no período | Phase 6 | Complete (06-01, 06-02) |
+| REL-05 | Admin baixa relatório como PDF gerado via jsPDF | Phase 6 | Complete (06-01, 06-02) |
 
 **Coverage:** 45/45 requirements mapped. No orphans.
