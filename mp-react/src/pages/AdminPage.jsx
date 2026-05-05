@@ -40,6 +40,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts'
+import { agregarRelatorio, gerarRelatorioMensalPdf } from '../utils/relatorioMensalPdf.js'
 
 // ── Helpers de formatação ────────────────────────────────────
 function fmtDate(d) {
