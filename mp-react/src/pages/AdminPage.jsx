@@ -585,6 +585,7 @@ export default function AdminPage() {
         nome_segurado: osForm.nome_segurado, tel_segurado: osForm.tel_segurado || '',
         endereco: enderecoFinal, cidade: osForm.cidade,
         data_chegada: osForm.data_atend || '', hora_chegada: osForm.hora_atend || '',
+        data_agendada: osForm.data_agendada || '', hora_agendada: osForm.hora_agendada || '',
         servico: osForm.servico, desc_problema: osForm.desc_problema,
         status: 'aguardando_tecnico', origem: 'admin',
         tecnico_nome: tecNome, tecnico_tel: tecTel, tecnico_id: tecId,
