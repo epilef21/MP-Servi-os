@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gerar ícones AssistHub</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    canvas { display: none; }
+    .preview { display: flex; gap: 20px; align-items: flex-end; margin: 20px 0; }
+    .preview img { border: 1px solid #ccc; }
+    button { padding: 10px 20px; background: #1a3fa8; color: #fff; border: none;
+             border-radius: 6px; cursor: pointer; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h2>Gerador de ícones — AssistHub Extension</h2>
+  <p>Clique no botão para gerar e baixar os 3 ícones PNG.</p>
+  <div class="preview" id="preview"></div>
+  <button onclick="gerarTodos()">Baixar icon16.png / icon48.png / icon128.png</button>
+
+  <script>
+    function desenharIcone(size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      // Fundo azul
+      ctx.fillStyle = '#1a3fa8';
+      ctx.beginPath();
+      ctx.roundRect(0, 0, size, size, size * 0.18);
+      ctx.fill();
+
+      // Letra "A" branca centralizada
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${size * 0.6}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('A', size / 2, size / 2 + size * 0.04);
+
+      // Ponto laranja no canto inferior direito (identidade visual)
+      if (size >= 48) {
+        ctx.fillStyle = '#f05a1a';
+        const r = size * 0.12;
+        ctx.beginPath();
+        ctx.arc(size - r * 0.9, size - r * 0.9, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      return canvas;
+    }
+
+    function gerarTodos() {
+      [16, 48, 128].forEach(size => {
+        const canvas = desenharIcone(size);
+        const link = document.createElement('a');
+        link.download = `icon${size}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        // Preview
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL();
+        img.width = size;
+        img.height = size;
+        img.title = `${size}x${size}`;
+        document.getElementById('preview').appendChild(img);
+      });
+    }
+  </script>
+</body>
+</html>

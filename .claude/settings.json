@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx --yes ctx7@latest library vitest \"vitest vite testing\")",
+      "Bash(npx --yes ctx7@latest library vitest \"testing react vite\")",
+      "Bash(npx --yes ctx7@latest library \"@testing-library/react\" \"react testing library\")",
+      "Bash(npx --yes ctx7@latest library \"@testing-library/react\" \"react testing library react 19\")",
+      "WebSearch",
+      "Bash(npx --yes ctx7@latest docs /vitest-dev/vitest \"configuration setup jsdom environment vite react\")",
+      "Bash(npx --yes ctx7@latest docs /vitest-dev/vitest \"configuration jsdom happy-dom environment react\")",
+      "Bash(npx --yes ctx7@latest docs \"vitest-dev/vitest\" \"configuration setup jsdom environment vite react\")",
+      "Bash(npx --yes ctx7@latest docs -- /vitest-dev/vitest \"configuration setup jsdom environment vite react\")",
+      "Bash(npx --yes ctx7@latest docs /testing-library/testing-library-docs \"react testing setup vitest jsdom\")",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm view *)",
+      "WebFetch(domain:vitest.dev)",
+      "WebFetch(domain:www.thecandidstartup.org)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:vite.dev)",
+      "Read(//c/Users/felip/.claude/get-shit-done/templates/research-project/**)",
+      "Read(//c/Users/felip/.claude/get-shit-done/templates/**)",
+      "Bash(echo \"EXIT:$?\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\felip\\OneDrive\\Área de Trabalho\\projeto Check List\\mp-react-v3-completo\\.planning"
+    ]
+  }
+}

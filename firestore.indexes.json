@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "checklist",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "data_agendada", "order": "ASCENDING" },
+        { "fieldPath": "hora_agendada", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

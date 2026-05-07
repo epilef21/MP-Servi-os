@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(gsd-new-milestone)",
+      "Skill(gsd-plan-phase)",
+      "Skill(gsd-progress)",
+      "Skill(gsd-execute-phase)",
+      "Bash(npm test *)",
+      "Skill(gsd-code-review)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const c=fs.readFileSync\\('mp-react/src/utils/relatorioMensalPdf.js','utf8'\\);const checks=['export function agregarRelatorio','export function gerarRelatorioMensalPdf','getLucroLocal','porStatus','porSeguradora','porTecnico','lucroTotal','mediaPorOS','doc\\\\\\\\.save','relatorio_'];const failed=checks.filter\\(p=>!new RegExp\\(p\\).test\\(c\\)\\);if\\(failed.length\\){console.error\\('MISSING:',failed\\);process.exit\\(1\\)}else{console.log\\('ALL CHECKS PASSED'\\)}\")",
+      "Bash(npx vite *)",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const c=fs.readFileSync\\('mp-react/src/pages/AdminPage.jsx','utf8'\\);const checks=[\\\\\"abaAtiva === 'relatorio'\\\\\",\\\\\"gerarRelatorio\\\\\\\\\\(\\\\\",\\\\\"gerarRelatorioMensalPdf\\\\\\\\\\(\\\\\",\\\\\"porStatus\\\\\",\\\\\"porSeguradora\\\\\",\\\\\"porTecnico\\\\\",\\\\\"relDados\\\\\",\\\\\"relMes\\\\\",\\\\\"relAno\\\\\",\\\\\"Relat\\\\\\\\u00f3rio Mensal\\\\\",\\\\\"Baixar PDF\\\\\",\\\\\"Gerar Relat\\\\\\\\u00f3rio\\\\\",\\\\\"mediaPorOS\\\\\",\\\\\"osComLucro\\\\\"];const failed=checks.filter\\(p=>!new RegExp\\(p\\).test\\(c\\)\\);if\\(failed.length\\){console.error\\('MISSING:',failed\\);process.exit\\(1\\)}else{console.log\\('ALL CHECKS PASSED'\\)}\")",
+      "Read(//c/c/Users/felip/OneDrive/Área de Trabalho/projeto Check List/mp-react-v3-completo/mp-react/src/pages/**)",
+      "Bash(command -v gsd-sdk)",
+      "Bash(node -e \"const fs=require\\('fs'\\); const f=fs.readFileSync\\('src/utils/formatters.js','utf8'\\); ['fmtDate','fmtBRL','getLucro','maskPhone','maskCNPJ'].forEach\\(n=>{ if\\(!f.includes\\('export function '+n\\)\\) throw new Error\\('Missing export: '+n\\) }\\); if\\(f.includes\\('export default'\\)\\) throw new Error\\('No default export allowed'\\); if\\(f.includes\\('fmtDatetime'\\)\\) throw new Error\\('fmtDatetime must stay in AdminPage'\\); if\\(f.includes\\('import '\\)\\) throw new Error\\('formatters.js must have zero imports'\\); console.log\\('OK'\\)\")",
+      "Bash(node *)",
+      "Bash(git worktree *)",
+      "Bash(git branch *)",
+      "Bash(git *)"
+    ]
+  }
+}

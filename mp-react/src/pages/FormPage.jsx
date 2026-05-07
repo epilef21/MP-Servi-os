@@ -39,6 +39,8 @@ const INITIAL = {
   desc_servico: '', pecas: '', problema_solucionado: '', especifique: '',
   havera_retorno: '', garantia: '', excedente: '',
   data_atend: '', tel_contato: '',
+  resultado_visita: '', ficou_pendente: '', motivo_retorno: '',
+  motivo_outro: '', data_retorno: '', tentativa_contato: '',
 }
 
 function sanitizePayload(obj) {
@@ -67,7 +69,7 @@ export default function FormPage() {
   // tel_segurado nunca é bloqueado — técnico sempre pode preencher/editar
   const LOCKED = isPrefilled
     ? ['seguradora', 'num_assist', 'nome_segurado',
-       'endereco', 'cidade', 'data_chegada', 'hora_chegada', 'servico', 'desc_problema']
+       'endereco', 'cidade', 'servico', 'desc_problema']
     : []
 
   // Se a URL tem parâmetros inline (links antigos), usa eles como seed inicial.
@@ -264,8 +266,13 @@ export default function FormPage() {
   function validate() {
     const errs = {}
     REQUIRED_FIELDS.forEach(f => { if (!form[f]?.trim()) errs[f] = true })
+    // Assinaturas sempre obrigatórias (cliente estava presente)
     if (!hasSigPrest) errs.sig_prest = true
     if (!hasSigSeg)   errs.sig_seg   = true
+    // Ficou na visita: ficou_pendente obrigatório
+    if (form.resultado_visita === 'ficou_visita' && !form.ficou_pendente?.trim()) {
+      errs.ficou_pendente = true
+    }
     setErrors(errs)
     return !Object.keys(errs).length
   }
@@ -307,14 +314,19 @@ export default function FormPage() {
       .filter(i => checkup[i.id]?.checked)
       .map(i => ({ item: i.label, quant: checkup[i.id]?.quant || '' }))
 
+    // Status final baseado no resultado da visita
+    let statusFinal = 'pendente'
+    if (form.resultado_visita === 'ficou_visita') statusFinal = 'ficou_visita'
+
     const base = sanitizePayload({
       ...form,
+      resultado_visita: form.resultado_visita || 'concluido',
       endereco:             form.endereco + (form.numero ? ', ' + form.numero : ''),
       checkup:              checkupList,
       fotos:                photoUrls,
       assinatura_prestador: sigPrestData,
       assinatura_segurado:  sigSegData,
-      status:               'pendente',
+      status:               statusFinal,
     })
 
     try {
@@ -631,16 +643,106 @@ export default function FormPage() {
               placeholder="Descreva detalhadamente o serviço que foi realizado..." />
           </div>
         </div>
-        <div className="row col-1">
-          <div className="field">
-            <label>Peças / Materiais Utilizados</label>
-            <textarea rows={3} value={form.pecas} onChange={e => setField('pecas', e.target.value)}
-              placeholder="Liste as peças e materiais utilizados..." />
-          </div>
+        {/* Toggle ficou na visita — imediatamente após desc_servico */}
+        <div className="ficou-visita-toggle">
+          <label className="ficou-toggle-label">
+            <input
+              type="checkbox"
+              checked={form.resultado_visita === 'ficou_visita'}
+              onChange={e => setField('resultado_visita', e.target.checked ? 'ficou_visita' : '')}
+            />
+            <span className="ficou-toggle-box">
+              <span className="ficou-toggle-icon">🔄</span>
+              <div>
+                <strong>Ficou na Visita</strong>
+                <p>O serviço não foi concluído e precisa de retorno</p>
+              </div>
+            </span>
+          </label>
         </div>
       </div>
 
-      {/* ══ 4. CHEK-UP ════════════════════════════════════════ */}
+      {/* Detalhes do Retorno — só aparece quando ficou na visita */}
+      {form.resultado_visita === 'ficou_visita' && (
+        <div className="card" style={{ borderLeft: '4px solid #f0a500', background: '#fffdf5' }}>
+          <div className="section-title">
+            <div className="s-ico">🔄</div>
+            <h2>Detalhes do Retorno</h2>
+            <div className="section-divider" />
+          </div>
+
+          <div className="row col-1">
+            <div className="field">
+              <label>O que ficou pendente? <span className="req">*</span></label>
+              <textarea rows={3}
+                value={form.ficou_pendente}
+                onChange={e => setField('ficou_pendente', e.target.value)}
+                className={errors.ficou_pendente ? 'error' : ''}
+                placeholder="Descreva o que ficou pendente para o retorno..." />
+            </div>
+          </div>
+
+          <div className="row col-1">
+            <div className="field">
+              <label>Motivo do Retorno</label>
+              <div className="radio-group" style={{ flexWrap: 'wrap' }}>
+                {[
+                  ['aguardando_peca',      '⚙️ Aguardando Peça'],
+                  ['aprovacao_cliente',    '👤 Aprovação do Cliente'],
+                  ['aprovacao_seguradora', '🏢 Aprovação da Seguradora'],
+                  ['outro',               '📝 Outro'],
+                ].map(([val, lbl]) => (
+                  <div key={val}
+                    className={`ri${form.motivo_retorno === val ? ' rs' : ''}`}
+                    onClick={() => setField('motivo_retorno', val)}>
+                    <div className="rdot"><div className="rdot-i" /></div>
+                    {lbl}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {form.motivo_retorno === 'outro' && (
+            <div className="row col-1">
+              <div className="field">
+                <label>Especifique o motivo</label>
+                <input
+                  value={form.motivo_outro}
+                  onChange={e => setField('motivo_outro', e.target.value)}
+                  placeholder="Descreva o motivo..." />
+              </div>
+            </div>
+          )}
+
+          <div className="row col-1">
+            <div className="field">
+              <label>Data Prevista do Retorno</label>
+              <input type="date" value={form.data_retorno}
+                onChange={e => setField('data_retorno', e.target.value)} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Peças/Materiais — só aparece quando serviço foi concluído */}
+      {form.resultado_visita !== 'ficou_visita' && (
+        <div className="card">
+          <div className="section-title">
+            <div className="s-ico">🔩</div><h2>Peças / Materiais</h2><div className="section-divider" />
+          </div>
+          <div className="row col-1">
+            <div className="field">
+              <label>Peças / Materiais Utilizados</label>
+              <textarea rows={3} value={form.pecas} onChange={e => setField('pecas', e.target.value)}
+                placeholder="Liste as peças e materiais utilizados..." />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chek-Up — só aparece quando serviço foi concluído */}
+      {form.resultado_visita !== 'ficou_visita' && (
       <div className="card">
         <div className="section-title">
           <div className="s-ico">✅</div><h2>Chek-Up Realizado</h2><div className="section-divider" />
@@ -663,8 +765,10 @@ export default function FormPage() {
           })}
         </div>
       </div>
+      )}
 
-      {/* ══ 5. CONCLUSÃO ══════════════════════════════════════ */}
+      {/* Conclusão — só aparece quando serviço foi concluído */}
+      {form.resultado_visita !== 'ficou_visita' && (
       <div className="card">
         <div className="section-title">
           <div className="s-ico">🏁</div><h2>Conclusão do Serviço</h2><div className="section-divider" />
@@ -699,7 +803,14 @@ export default function FormPage() {
             </div>
           </div>
         )}
+      </div>
+      )}
 
+      {/* ══ DADOS FINANCEIROS — sempre visível ════════════════ */}
+      <div className="card">
+        <div className="section-title">
+          <div className="s-ico">💰</div><h2>Dados Financeiros</h2><div className="section-divider" />
+        </div>
         <div className="conclusao-item">
           <span className="conclusao-label">Houve Excedente?</span>
           <div className="field" style={{ minWidth: 170 }}>
@@ -735,7 +846,7 @@ export default function FormPage() {
         )}
       </div>
 
-      {/* ══ 7. ASSINATURAS ════════════════════════════════════ */}
+      {/* ══ ASSINATURAS — sempre obrigatórias ════════════════ */}
       <div className="card">
         <div className="section-title">
           <div className="s-ico">✍️</div><h2>Assinaturas</h2><div className="section-divider" />

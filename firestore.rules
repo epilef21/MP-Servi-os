@@ -138,8 +138,8 @@ service cloud.firestore {
             !('avaliacao_nota' in resource.data)
           );
 
-        // Exclusão: apenas superadmin
-        allow delete: if eSuperAdmin();
+        // Exclusão: dono da empresa ou superadmin
+        allow delete: if eDonoEmpresa(empresaId) || eSuperAdmin();
       }
 
       // ── /empresas/{empresaId}/orcamentos/{orcamentoId} ───

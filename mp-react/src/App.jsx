@@ -17,6 +17,7 @@ import AvaliacaoPage          from './pages/AvaliacaoPage.jsx'
 import OrcamentoTecnicoPage   from './pages/OrcamentoTecnicoPage.jsx'
 import AprovarOrcamentoPage   from './pages/AprovarOrcamentoPage.jsx'
 import AgendaPage             from './pages/AgendaPage.jsx'
+import RelatorioPage          from './pages/RelatorioPage.jsx'
 
 // ── Guarda de rota para admin da empresa ─────────────────────
 // Redireciona para /login se o usuário não estiver autenticado
@@ -50,6 +51,9 @@ export default function App() {
 
       {/* Cliente visualiza e aprova orçamento — pública, sem auth */}
       <Route path="/aprovar/:slug/:orcamentoId" element={<AprovarOrcamentoPage />} />
+
+      {/* Relatório técnico público — enviado à seguradora via link */}
+      <Route path="/relatorio/:slug/:osId" element={<RelatorioPage />} />
 
       {/* ── Superadmin ─────────────────────────────────────── */}
       <Route

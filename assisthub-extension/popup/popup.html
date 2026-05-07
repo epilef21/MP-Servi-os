@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AssistHub</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+
+  <!-- TELA: não autenticado -->
+  <div id="tela-login" class="tela hidden">
+    <div class="logo-wrap">
+      <img src="../icons/icon48.png" alt="AssistHub" class="logo" />
+      <h1 class="app-name">AssistHub</h1>
+    </div>
+    <p class="desc">Conecte sua conta AssistHub para capturar OS dos portais de seguradora com 1 clique.</p>
+    <button id="btn-conectar" class="btn btn-primary btn-full">
+      Conectar ao AssistHub
+    </button>
+    <p class="hint">Você será direcionado para o login.</p>
+  </div>
+
+  <!-- TELA: autenticado -->
+  <div id="tela-principal" class="tela hidden">
+
+    <header class="header">
+      <div class="header-left">
+        <img src="../icons/icon16.png" alt="" class="header-icon" />
+        <span class="header-title">AssistHub</span>
+      </div>
+      <div class="header-right">
+        <span id="empresa-slug" class="empresa-badge"></span>
+        <button id="btn-logout" class="btn-icon" title="Desconectar">✕</button>
+      </div>
+    </header>
+
+    <div class="body">
+      <div id="portal-info" class="portal-info hidden"></div>
+
+      <div id="status" class="status"></div>
+
+      <div id="dados-extraidos" class="dados hidden"></div>
+
+      <div class="acoes">
+        <button id="btn-extrair" class="btn btn-secondary btn-full">
+          📋 Extrair dados desta página
+        </button>
+        <button id="btn-criar-os" class="btn btn-primary btn-full hidden">
+          ✅ Criar OS no AssistHub
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

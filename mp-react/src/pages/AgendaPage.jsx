@@ -97,27 +97,57 @@ export default function AgendaPage() {
     return () => unsub()
   }, [empresaId, data])
 
-  // Query diária — requer índice composto data_agendada+hora_agendada no Firestore
+  // Query diária — data_agendada + retornos de "ficou na visita" para o mesmo dia
   useEffect(() => {
     if (!empresaId) return
     setLoadingDia(true)
-    const q = query(
+
+    // Query principal: OS agendadas para o dia
+    const qPrincipal = query(
       collection(db, `empresas/${empresaId}/checklist`),
       where('data_agendada', '==', data),
       orderBy('hora_agendada', 'asc')
     )
-    const unsub = onSnapshot(
-      q,
-      snap => {
-        setOsList(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-        setLoadingDia(false)
-      },
-      err => {
-        console.error('[Agenda] Erro query diária — verifique o índice composto data_agendada+hora_agendada no Firestore Console:', err)
-        setLoadingDia(false)
-      }
+    // Query secundária: OS "ficou na visita" com data de retorno no dia
+    const qRetorno = query(
+      collection(db, `empresas/${empresaId}/checklist`),
+      where('resultado_visita', '==', 'ficou_visita'),
+      where('data_retorno', '==', data)
     )
-    return () => unsub()
+
+    let snapPrincipal = null
+    let snapRetorno = null
+    let unsubPrincipal = null
+    let unsubRetorno = null
+
+    function merge() {
+      if (snapPrincipal === null || snapRetorno === null) return
+      const mapaIds = new Set()
+      const lista = []
+      snapPrincipal.docs.forEach(d => {
+        mapaIds.add(d.id)
+        lista.push({ id: d.id, ...d.data() })
+      })
+      // adiciona retornos que não estejam já na lista principal
+      snapRetorno.docs.forEach(d => {
+        if (!mapaIds.has(d.id)) lista.push({ id: d.id, ...d.data() })
+      })
+      setOsList(lista)
+      setLoadingDia(false)
+    }
+
+    unsubPrincipal = onSnapshot(
+      qPrincipal,
+      snap => { snapPrincipal = snap; merge() },
+      err  => { console.error('[Agenda] Erro query diária:', err); setLoadingDia(false) }
+    )
+    unsubRetorno = onSnapshot(
+      qRetorno,
+      snap => { snapRetorno = snap; merge() },
+      err  => { console.error('[Agenda] Erro query retorno:', err) }
+    )
+
+    return () => { unsubPrincipal?.(); unsubRetorno?.() }
   }, [empresaId, data])
 
   function diaAnterior() {

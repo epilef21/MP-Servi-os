@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "AssistHub - Capturar OS",
+  "version": "1.0.0",
+  "description": "Captura dados de OS dos portais Tempo, Maxpar e Allianz e envia para o AssistHub",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://portal.tempoassist.com.br/*",
+    "https://novo-portal-prestador.prd.tempoassist.cloud/*",
+    "https://prestador.maxpar.com/*",
+    "https://sistemas.maxpar.com.br/*",
+    "https://portal.allianz.com.br/*",
+    "https://vianet.webmondial.com.br/*",
+    "https://mp-servi-os.vercel.app/*",
+    "https://us-central1-checklist-53795.cloudfunctions.net/*"
+  ],
+  "externally_connectable": {
+    "matches": ["https://mp-servi-os.vercel.app/*"]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://portal.tempoassist.com.br/*",
+        "https://prestador.maxpar.com/*",
+        "https://sistemas.maxpar.com.br/*",
+        "https://portal.allianz.com.br/*",
+        "https://vianet.webmondial.com.br/*"
+      ],
+      "js": ["content-scripts/scraper.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

@@ -59,10 +59,12 @@ const MESES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out'
 const AVATAR_COLORS = ['av0','av1','av2','av3']
 
 const STATUS_META = {
-  aguardando_tecnico: { label: '🔔 Aguardando',  cls: 'aguardando-t' },
-  pendente:           { label: '⏳ Pendente',      cls: 'pendente-y'   },
-  processado:         { label: '✅ Processado',    cls: 'processado-g' },
-  enviado:            { label: '📤 Enviado',       cls: 'enviado-b'    },
+  aguardando_tecnico: { label: '🔔 Aguardando',       cls: 'aguardando-t'    },
+  pendente:           { label: '⏳ Pendente',           cls: 'pendente-y'      },
+  processado:         { label: '✅ Processado',         cls: 'processado-g'    },
+  enviado:            { label: '📤 Enviado',            cls: 'enviado-b'       },
+  ficou_visita:       { label: '🔄 Ficou na Visita',   cls: 'ficou-visita'    },
+  cliente_ausente:    { label: '🚪 Cliente Ausente',   cls: 'cliente-ausente' },
 }
 const badgeLabel = s => STATUS_META[s]?.label ?? STATUS_META.pendente.label
 const badgeCls   = s => STATUS_META[s]?.cls   ?? 'pendente-y'
@@ -73,6 +75,7 @@ const OS_INITIAL = {
   data_atend: '', hora_atend: '', servico: '', desc_problema: '',
   tecnico_id: '', tecnico_nome_manual: '',
   data_agendada: '', hora_agendada: '',
+  faixa_horario: '', faixa_horario_custom: '',
 }
 
 const PIE_COLORS = {
@@ -193,6 +196,10 @@ export default function AdminPage() {
   const osEnderecoRef = useRef(null)
   const [generatedLink, setGeneratedLink] = useState(null)
   const [copied,        setCopied]        = useState(false)
+
+  // ── Link Relatório (modal de compartilhamento com seguradora) ──
+  const [linkRelModal,  setLinkRelModal]  = useState(null)
+  const [linkRelCopied, setLinkRelCopied] = useState(false)
   const [genPng,        setGenPng]        = useState(false)
   // modo de seleção de técnico no form de OS (select | manual)
   const [osTecnicoMode, setOsTecnicoMode] = useState('select')
@@ -386,9 +393,22 @@ export default function AdminPage() {
       const l = getLucro(r)
       return l !== null ? acc + l : acc
     }, 0)
+    // OS do mês atual (calendário, fixo)
+    const now = new Date()
+    const mesAtual = now.getMonth()
+    const anoAtual = now.getFullYear()
+    const totalMesCount = reports.filter(r => {
+      try {
+        const d = r.criado_em?.toDate?.() || new Date(r.criado_em)
+        return d.getMonth() === mesAtual && d.getFullYear() === anoAtual
+      } catch { return false }
+    }).length
+    const nomeMes = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
     return {
-      total:      reports.length,
-      hoje:       reports.filter(r => {
+      total:         reports.length,
+      totalMesCount,
+      nomeMes,
+      hoje:          reports.filter(r => {
         try {
           const d = r.criado_em?.toDate?.()
           return d && d.toISOString().slice(0, 10) === today
@@ -536,6 +556,22 @@ export default function AdminPage() {
     return `${window.location.origin}/${slug}?os=${r.id}`
   }
 
+  function buildLinkRelatorio(osId) {
+    return `${window.location.origin}/relatorio/${slug}/${osId}`
+  }
+
+  function openLinkRelModal(r) {
+    setLinkRelCopied(false)
+    setLinkRelModal(r)
+  }
+
+  function copyLinkRel(link) {
+    navigator.clipboard.writeText(link).then(() => {
+      setLinkRelCopied(true)
+      setTimeout(() => setLinkRelCopied(false), 2000)
+    })
+  }
+
   async function excluirOS(os) {
     if (!window.confirm(`Excluir OS de "${os.nome_segurado}"?\nEsta ação não pode ser desfeita.`)) return
     try {
@@ -584,8 +620,9 @@ export default function AdminPage() {
         seguradora: osForm.seguradora, num_assist: osForm.num_assist,
         nome_segurado: osForm.nome_segurado, tel_segurado: osForm.tel_segurado || '',
         endereco: enderecoFinal, cidade: osForm.cidade,
-        data_chegada: osForm.data_atend || '', hora_chegada: osForm.hora_atend || '',
-        data_agendada: osForm.data_agendada || '', hora_agendada: osForm.hora_agendada || '',
+        data_chegada: '', hora_chegada: '',
+        data_agendada: osForm.data_agendada || '', hora_agendada: '',
+        faixa_horario: osForm.faixa_horario || '', faixa_horario_custom: osForm.faixa_horario_custom || '',
         servico: osForm.servico, desc_problema: osForm.desc_problema,
         status: 'aguardando_tecnico', origem: 'admin',
         tecnico_nome: tecNome, tecnico_tel: tecTel, tecnico_id: tecId,
@@ -1287,9 +1324,9 @@ export default function AdminPage() {
             <div className="metrics-grid">
               <div className="metric-card blue">
                 <div className="metric-icon">📋</div>
-                <div className="metric-label">Total de OS</div>
-                <div className="metric-value">{stats.total}</div>
-                <div className="metric-sub">ordens cadastradas</div>
+                <div className="metric-label">Total do Mês</div>
+                <div className="metric-value">{stats.totalMesCount}</div>
+                <div className="metric-sub">{stats.nomeMes}</div>
               </div>
               <div className="metric-card orange">
                 <div className="metric-icon">📅</div>
@@ -1503,6 +1540,12 @@ export default function AdminPage() {
                         {r.status === 'aguardando_tecnico' && (
                           <button className="btn-sm btn-link"
                             onClick={() => setGeneratedLink({ link: buildLink(r), os: r.id, nome: r.nome_segurado, seguradora: r.seguradora, num_assist: r.num_assist })}>
+                            🔗 Link
+                          </button>
+                        )}
+                        {(r.status === 'processado' || r.status === 'enviado') && (
+                          <button className="btn-sm" style={{ background: '#1a5276', color: '#fff' }}
+                            onClick={() => openLinkRelModal(r)}>
                             🔗 Link
                           </button>
                         )}
@@ -2224,21 +2267,29 @@ export default function AdminPage() {
                     <input value={osForm.num_assist} onChange={e => setOsField('num_assist', e.target.value)} className={osErrors.num_assist ? 'error' : ''} placeholder="Ex: 2024-00001" />
                   </div>
                   <div className="field">
-                    <label>Data do Atendimento</label>
-                    <input type="date" value={osForm.data_atend} onChange={e => setOsField('data_atend', e.target.value)} />
-                  </div>
-                  <div className="field">
-                    <label>Horário</label>
-                    <input type="time" value={osForm.hora_atend} onChange={e => setOsField('hora_atend', e.target.value)} />
-                  </div>
-                  <div className="field">
                     <label>Data Agendada <span className="req" title="Usado na Agenda Visual">📅</span></label>
                     <input type="date" value={osForm.data_agendada} onChange={e => setOsField('data_agendada', e.target.value)} />
                   </div>
                   <div className="field">
-                    <label>Hora Agendada</label>
-                    <input type="time" value={osForm.hora_agendada} onChange={e => setOsField('hora_agendada', e.target.value)} />
+                    <label>Faixa de Horário</label>
+                    <select value={osForm.faixa_horario} onChange={e => setOsField('faixa_horario', e.target.value)}>
+                      <option value="">Selecione...</option>
+                      <option value="manha">🌅 Manhã — 08:00 às 12:00</option>
+                      <option value="tarde">☀️ Tarde — 13:00 às 17:00</option>
+                      <option value="dia_todo">📅 Manhã e Tarde — 08:00 às 17:00</option>
+                      <option value="a_combinar">🤝 A Combinar</option>
+                    </select>
                   </div>
+                  {osForm.faixa_horario && (
+                  <div className="field" style={{ marginTop: 8 }}>
+                    <label>Detalhar horário (opcional)</label>
+                    <input
+                      value={osForm.faixa_horario_custom}
+                      onChange={e => setOsField('faixa_horario_custom', e.target.value)}
+                      placeholder="Ex: 14:00, após 15h, antes do meio-dia..."
+                    />
+                  </div>
+                  )}
                 </div>
               </div>
 
@@ -2377,6 +2428,59 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* ══ MODAL: LINK DO RELATÓRIO ══ */}
+      {linkRelModal && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setLinkRelModal(null)}>
+          <div className="modal-box" style={{ maxWidth: 520 }}>
+            <div className="modal-header" style={{ background: '#1a5276' }}>
+              <h2>🔗 Link do Relatório</h2>
+              <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={() => setLinkRelModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginBottom: 10 }}>
+                Envie este link para a seguradora
+              </p>
+              <div className="link-info-cards">
+                <div className="link-info-card"><span className="link-info-lbl">Segurado</span><span className="link-info-val">{linkRelModal.nome_segurado || '—'}</span></div>
+                <div className="link-info-card"><span className="link-info-lbl">Nº Assistência</span><span className="link-info-val">{linkRelModal.num_assist || '—'}</span></div>
+                <div className="link-info-card"><span className="link-info-lbl">Seguradora</span><span className="link-info-val">{linkRelModal.seguradora || '—'}</span></div>
+              </div>
+              <div className="link-box" style={{ marginTop: 14 }}>
+                <span className="link-text">{buildLinkRelatorio(linkRelModal.id)}</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
+                <button
+                  className={`btn-copy${linkRelCopied ? ' copied' : ''}`}
+                  onClick={() => copyLinkRel(buildLinkRelatorio(linkRelModal.id))}>
+                  {linkRelCopied ? '✅ Copiado!' : '📋 Copiar Link'}
+                </button>
+                <a className="btn-whatsapp"
+                  href={`https://wa.me/?text=${encodeURIComponent(
+                    `Olá! Segue o relatório técnico do atendimento:\n\n` +
+                    `📋 OS: ${linkRelModal.num_assist || '—'}\n` +
+                    `👤 Segurado: ${linkRelModal.nome_segurado || '—'}\n` +
+                    `📍 ${linkRelModal.cidade || '—'}\n` +
+                    `🔧 ${linkRelModal.servico || '—'}\n` +
+                    `📅 ${linkRelModal.data_chegada || '—'}\n\n` +
+                    `🔗 Acesse o relatório completo:\n${buildLinkRelatorio(linkRelModal.id)}\n\n` +
+                    `O relatório contém fotos, checklist e assinaturas do prestador e do segurado.`
+                  )}`}
+                  target="_blank" rel="noopener noreferrer">
+                  📲 Enviar no WhatsApp
+                </a>
+                <button className="btn-sm" style={{ background: '#1a5276', color: '#fff', fontSize: '.85rem', padding: '8px 14px', width: '100%' }}
+                  onClick={() => window.open(buildLinkRelatorio(linkRelModal.id), '_blank')}>
+                  🔗 Abrir Relatório
+                </button>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn-sm btn-view" onClick={() => setLinkRelModal(null)}>Fechar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ══ MODAL: DETALHE DA OS ══ */}
       {selected && (
         <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) { setSelected(null); setEditAtend(false) } }}>
@@ -2394,6 +2498,7 @@ export default function AdminPage() {
                   {genPng ? '⏳' : '📱 PNG WhatsApp'}
                 </button>
                 <button className="btn-sm btn-pdf" onClick={() => generatePDF(selected)}>🖨️ PDF</button>
+                <button className="btn-sm" style={{ background: '#1a5276', color: '#fff' }} onClick={() => openLinkRelModal(selected)}>🔗 Link Relatório</button>
                 <button className="btn-sm" style={{ background: 'rgba(220,38,38,.35)', color: '#fff' }} title="Excluir OS" onClick={() => excluirOS(selected)}>🗑️</button>
                 <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={() => { setSelected(null); setEditAtend(false) }}>✕</button>
               </div>
@@ -2490,6 +2595,51 @@ export default function AdminPage() {
                     <div className="md-field"><label>Haverá Retorno</label><p>{fmtSN(selected.havera_retorno)}</p></div>
                     <div className="md-field"><label>Garantia (90 dias)</label><p>{fmtSN(selected.garantia)}</p></div>
                     <div className="md-field"><label>Excedente</label><p>{selected.excedente || '—'}</p></div>
+                  </div>
+                </div>
+              )}
+
+              {selected.resultado_visita && (
+                <div className="md-section">
+                  <h3>📍 Resultado da Visita</h3>
+                  <div className="md-grid">
+                    <div className="md-field">
+                      <label>Resultado</label>
+                      <p>
+                        {selected.resultado_visita === 'concluido'       && '✅ Serviço Concluído'}
+                        {selected.resultado_visita === 'ficou_visita'    && '🔄 Ficou na Visita'}
+                        {selected.resultado_visita === 'cliente_ausente' && '🚪 Cliente Ausente'}
+                      </p>
+                    </div>
+                    {selected.data_retorno && (
+                      <div className="md-field">
+                        <label>Data Prevista Retorno</label>
+                        <p>{fmtDate(selected.data_retorno)}</p>
+                      </div>
+                    )}
+                    {selected.ficou_pendente && (
+                      <div className="md-field span-2">
+                        <label>O que ficou pendente</label>
+                        <div className="md-text">{selected.ficou_pendente}</div>
+                      </div>
+                    )}
+                    {selected.motivo_retorno && (
+                      <div className="md-field">
+                        <label>Motivo do Retorno</label>
+                        <p>{{
+                          aguardando_peca:      '⚙️ Aguardando Peça',
+                          aprovacao_cliente:    '👤 Aprovação do Cliente',
+                          aprovacao_seguradora: '🏢 Aprovação da Seguradora',
+                          outro: `📝 ${selected.motivo_outro || 'Outro'}`,
+                        }[selected.motivo_retorno]}</p>
+                      </div>
+                    )}
+                    {selected.tentativa_contato && (
+                      <div className="md-field span-2">
+                        <label>Tentativa de Contato</label>
+                        <div className="md-text">{selected.tentativa_contato}</div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
