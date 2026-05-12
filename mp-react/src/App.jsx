@@ -18,6 +18,7 @@ import OrcamentoTecnicoPage   from './pages/OrcamentoTecnicoPage.jsx'
 import AprovarOrcamentoPage   from './pages/AprovarOrcamentoPage.jsx'
 import AgendaPage             from './pages/AgendaPage.jsx'
 import RelatorioPage          from './pages/RelatorioPage.jsx'
+import NotFoundPage           from './pages/NotFoundPage.jsx'
 
 // ── Guarda de rota para admin da empresa ─────────────────────
 // Redireciona para /login se o usuário não estiver autenticado
@@ -93,8 +94,8 @@ export default function App() {
       {/* Raiz redireciona para login */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 
-      {/* Qualquer rota desconhecida vai para a raiz */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Qualquer rota desconhecida exibe a página 404 */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }

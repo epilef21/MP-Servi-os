@@ -33,15 +33,18 @@ import {
 import { sendPasswordResetEmail, updateProfile } from 'firebase/auth'
 import { useAuth }    from '../contexts/AuthContext.jsx'
 import { useEmpresa } from '../hooks/useEmpresa.js'
+import { AdminContext } from '../contexts/AdminContext.jsx'
+import DashboardTab     from '../components/admin/DashboardTab.jsx'
+import OrdensServicoTab from '../components/admin/OrdensServicoTab.jsx'
+import OrcamentosTab    from '../components/admin/OrcamentosTab.jsx'
+import TecnicosTab      from '../components/admin/TecnicosTab.jsx'
+import SeguradosTab     from '../components/admin/SeguradosTab.jsx'
+import RelatorioTab     from '../components/admin/RelatorioTab.jsx'
+import ConfigTab        from '../components/admin/ConfigTab.jsx'
 import { generatePDF } from '../utils/pdfGenerator.js'
 import { generatePNG } from '../utils/pngGenerator.js'
 import { generatePDFCliente, generatePDFSeguradora } from '../utils/orcamentoPdfGenerator.js'
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  Legend, ResponsiveContainer, PieChart, Pie, Cell,
-} from 'recharts'
-import { agregarRelatorio, gerarRelatorioMensalPdf } from '../utils/relatorioMensalPdf.js'
-import { fmtDate, fmtBRL, getLucro, maskPhone, maskCNPJ } from '../utils/formatters.js'
+import { fmtDate, fmtBRL, getLucro, maskPhone } from '../utils/formatters.js'
 
 // ── Helpers de formatação ────────────────────────────────────
 function fmtDatetime(ts) {
@@ -54,9 +57,6 @@ function fmtDatetime(ts) {
 function fmtSN(v) {
   return v === 'sim' ? '✅ Sim' : v === 'nao' ? '❌ Não' : '—'
 }
-
-const MESES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
-const AVATAR_COLORS = ['av0','av1','av2','av3']
 
 const STATUS_META = {
   aguardando_tecnico: { label: '🔔 Aguardando',       cls: 'aguardando-t'    },
@@ -78,17 +78,6 @@ const OS_INITIAL = {
   faixa_horario: '', faixa_horario_custom: '',
 }
 
-const PIE_COLORS = {
-  aguardando_tecnico: '#f05a1a',
-  pendente:           '#f59e0b',
-  processado:         '#2d8a4e',
-  enviado:            '#1a3fa8',
-}
-
-const TECNICO_FORM_INITIAL = {
-  nome: '', telefone: '', email: '', especialidade: '', ativo: true,
-}
-
 const ORC_INITIAL = {
   tipo: '', cenario: '', seguradora: '', num_assist: '',
   nome_cliente: '', tel_cliente: '', email_cliente: '',
@@ -99,27 +88,6 @@ const ORC_INITIAL = {
   forma_pagamento: 'pix', observacoes: '', tecnico_id: '',
 }
 
-const STATUS_ORC_META = {
-  aguardando_tecnico: { label: '🟠 Aguardando',       cls: 'orc-aguardando' },
-  em_revisao:         { label: '🟡 Em Revisão',        cls: 'orc-revisao'    },
-  enviado_cliente:    { label: '🔵 Enviado ao Cliente', cls: 'orc-enviado-c'  },
-  enviado_seguradora: { label: '🟣 Enviado à Seg.',     cls: 'orc-enviado-s'  },
-  aprovado:           { label: '🟢 Aprovado',           cls: 'orc-aprovado'   },
-  reprovado:          { label: '🔴 Reprovado',          cls: 'orc-reprovado'  },
-  executado:          { label: '⚫ Executado',           cls: 'orc-executado'  },
-  cancelado:          { label: '⚫ Cancelado',           cls: 'orc-cancelado'  },
-}
-
-function orcCardCls(status) {
-  const m = {
-    aguardando_tecnico: 'aguardando', em_revisao: 'revisao',
-    enviado_cliente: 'enviado', enviado_seguradora: 'enviado',
-    aprovado: 'aprovado', reprovado: 'reprovado',
-    executado: 'executado', cancelado: 'executado',
-  }
-  return m[status] || 'aguardando'
-}
-
 function novoItemOrc() {
   return {
     id: `item_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
@@ -127,22 +95,6 @@ function novoItemOrc() {
     valor_unit: 0, valor_total: 0,
     paga_seguradora: 0, paga_cliente: 0,
   }
-}
-
-// ── Tooltip customizado para o BarChart ─────────────────────
-function CustomBarTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null
-  return (
-    <div className="custom-tooltip">
-      <div className="ct-label">{label}</div>
-      {payload.map((p, i) => (
-        <div key={i} className="ct-row">
-          <span className="ct-dot" style={{ background: p.color }} />
-          {p.name}: <strong>{p.value}</strong>
-        </div>
-      ))}
-    </div>
-  )
 }
 
 // ── Toast component ──────────────────────────────────────────
@@ -174,17 +126,8 @@ export default function AdminPage() {
   const [totalMes,  setTotalMes]  = useState(0)
 
   // ── Navegação ────────────────────────────────────────────
-  const [abaAtiva,     setAbaAtiva]     = useState('dashboard')
-  const [relMes,       setRelMes]       = useState(new Date().getMonth() + 1)
-  const [relAno,       setRelAno]       = useState(new Date().getFullYear())
-  const [relDados,     setRelDados]     = useState(null)
-  const [sidebarOpen,  setSidebarOpen]  = useState(false)
-
-  // ── Filtros (aba OS) ─────────────────────────────────────
-  const [busca,      setBusca]      = useState('')
-  const [filtStatus, setFiltStatus] = useState('')
-  const [filtData,   setFiltData]   = useState('')
-  const [filtMes,    setFiltMes]    = useState(() => new Date().toISOString().slice(0, 7))
+  const [abaAtiva,    setAbaAtiva]    = useState('dashboard')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   // ── Modais OS ────────────────────────────────────────────
   const [selected,      setSelected]      = useState(null)
@@ -219,42 +162,16 @@ export default function AdminPage() {
   const [anotacaoInterna, setAnotacaoInterna] = useState('')
   const [savingAnotacao,  setSavingAnotacao]  = useState(false)
 
-  // ── Segurados ────────────────────────────────────────────
-  const [selectedSegurado, setSelectedSegurado] = useState(null)
-
   // ── Técnicos ─────────────────────────────────────────────
-  const [tecnicos,          setTecnicos]          = useState([])
-  const [loadingTecnicos,   setLoadingTecnicos]   = useState(false)
-  const [showTecnicoModal,  setShowTecnicoModal]  = useState(false)
-  const [tecnicoEdit,       setTecnicoEdit]       = useState(null)
-  const [tecnicoFormData,   setTecnicoFormData]   = useState(TECNICO_FORM_INITIAL)
-  const [tecnicoFormErrors, setTecnicoFormErrors] = useState({})
-  const [savingTecnicoForm, setSavingTecnicoForm] = useState(false)
+  const [tecnicos,        setTecnicos]        = useState([])
+  const [loadingTecnicos, setLoadingTecnicos] = useState(false)
 
-  // ── Configurações ────────────────────────────────────────
-  const [configAba,    setConfigAba]    = useState('empresa')
-  const [configForm,   setConfigForm]   = useState({
-    nome: '', telefone: '', whatsapp: '', endereco: '',
-    cidade_estado: '', cnpj: '', site: '', seguradoras: [],
-  })
-  const [savingConfig,    setSavingConfig]     = useState(false)
-  const [resetEmailEnviado, setResetEmailEnviado] = useState(false)
-
-  // nome editável do usuário
-  const [nomeUsuario,   setNomeUsuario]   = useState('')
-  const [savingNome,    setSavingNome]    = useState(false)
-
-  // logo upload
-  const [logoUploading, setLogoUploading] = useState(false)
-  const [logoPreview,   setLogoPreview]   = useState(null)
-  const logoInputRef = useRef(null)
+  // ── Logo (lida no sidebar, atualizada pelo ConfigTab via contexto) ──
+  const [logoPreview, setLogoPreview] = useState(null)
 
   // ── Orçamentos ───────────────────────────────────────────
   const [orcamentos,      setOrcamentos]      = useState([])
   const [loadingOrc,      setLoadingOrc]      = useState(false)
-  const [orcBusca,        setOrcBusca]        = useState('')
-  const [orcFiltTipo,     setOrcFiltTipo]     = useState('')
-  const [orcFiltStatus,   setOrcFiltStatus]   = useState('')
 
   // Modal novo orçamento (3 etapas)
   const [showNovoOrc,     setShowNovoOrc]     = useState(false)
@@ -288,31 +205,12 @@ export default function AdminPage() {
     toastTimerRef.current = setTimeout(() => setToast(p => ({ ...p, visible: false })), 3000)
   }
 
-  // ── Inicializa configForm quando config/empresa carrega ──
+  // ── Inicializa logoPreview quando config/empresa carrega ──
   useEffect(() => {
-    if (config || empresa) {
-      setConfigForm({
-        nome:          config?.nome          || empresa?.nome        || '',
-        telefone:      config?.telefone      || empresa?.telefone    || '',
-        whatsapp:      config?.whatsapp      || empresa?.whatsapp    || '',
-        endereco:      config?.endereco      || empresa?.endereco    || '',
-        cidade_estado: config?.cidade_estado || empresa?.cidade_estado || '',
-        cnpj:          config?.cnpj          || empresa?.cnpj        || '',
-        site:          config?.site          || empresa?.site        || '',
-        seguradoras:   config?.seguradoras   || ['Tempo','Mapfre','Maxpar','Allianz'],
-      })
-      if (config?.logoUrl || empresa?.logoUrl) {
-        setLogoPreview(config?.logoUrl || empresa?.logoUrl)
-      }
+    if (config?.logoUrl || empresa?.logoUrl) {
+      setLogoPreview(config?.logoUrl || empresa?.logoUrl)
     }
   }, [config, empresa])
-
-  // ── Inicializa nome do usuário do Auth ───────────────────
-  useEffect(() => {
-    if (auth.currentUser?.displayName) {
-      setNomeUsuario(auth.currentUser.displayName)
-    }
-  }, [])
 
   // ── Segurança: admin pertence à empresa ──────────────────
   useEffect(() => {
@@ -378,121 +276,7 @@ export default function AdminPage() {
     setAnotacaoInterna(selected.anotacao_interna || '')
   }, [selected?.id])
 
-  // ── Métricas ─────────────────────────────────────────────
-  const today = new Date().toISOString().slice(0, 10)
-  const stats = useMemo(() => {
-    const mesReports = filtMes
-      ? reports.filter(r => {
-          try {
-            const d = r.criado_em?.toDate?.()
-            return d && d.toISOString().slice(0, 7) === filtMes
-          } catch { return false }
-        })
-      : reports
-    const lucroTotal = mesReports.reduce((acc, r) => {
-      const l = getLucro(r)
-      return l !== null ? acc + l : acc
-    }, 0)
-    // OS do mês atual (calendário, fixo)
-    const now = new Date()
-    const mesAtual = now.getMonth()
-    const anoAtual = now.getFullYear()
-    const totalMesCount = reports.filter(r => {
-      try {
-        const d = r.criado_em?.toDate?.() || new Date(r.criado_em)
-        return d.getMonth() === mesAtual && d.getFullYear() === anoAtual
-      } catch { return false }
-    }).length
-    const nomeMes = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
-    return {
-      total:         reports.length,
-      totalMesCount,
-      nomeMes,
-      hoje:          reports.filter(r => {
-        try {
-          const d = r.criado_em?.toDate?.()
-          return d && d.toISOString().slice(0, 10) === today
-        } catch { return false }
-      }).length,
-      aguardando: reports.filter(r => r.status === 'aguardando_tecnico').length,
-      pendentes:  reports.filter(r => (r.status || 'pendente') === 'pendente').length,
-      lucroTotal,
-      hasLucro:   mesReports.some(r => getLucro(r) !== null),
-      mesCount:   mesReports.length,
-    }
-  }, [reports, filtMes])
-
-  // ── Dados do gráfico de barras — últimos 6 meses ─────────
-  const chartData = useMemo(() => {
-    const now   = new Date()
-    const meses = []
-    for (let i = 5; i >= 0; i--) {
-      const d    = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const key  = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      meses.push({ key, label: MESES_ABREV[d.getMonth()], criadas: 0, finalizadas: 0 })
-    }
-    reports.forEach(r => {
-      try {
-        const d   = r.criado_em?.toDate?.()
-        if (!d) return
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-        const m   = meses.find(m => m.key === key)
-        if (!m) return
-        m.criadas++
-        if (r.status === 'processado' || r.status === 'enviado') m.finalizadas++
-      } catch { /* ignora */ }
-    })
-    return meses.map(({ label, criadas, finalizadas }) => ({ label, criadas, finalizadas }))
-  }, [reports])
-
-  // ── Dados do gráfico de pizza — distribuição por status ──
-  const pieData = useMemo(() => {
-    const counts = { aguardando_tecnico: 0, pendente: 0, processado: 0, enviado: 0 }
-    reports.forEach(r => {
-      const s = r.status || 'pendente'
-      if (s in counts) counts[s]++
-    })
-    return Object.entries(counts)
-      .filter(([, v]) => v > 0)
-      .map(([key, value]) => ({ name: badgeLabel(key).replace(/\S+ /, ''), value, color: PIE_COLORS[key] }))
-  }, [reports])
-
-  // ── OS filtradas para a aba OS ───────────────────────────
-  const filtered = useMemo(() => {
-    const b = busca.toLowerCase()
-    return reports.filter(r => {
-      const txt = `${r.nome_segurado || ''} ${r.seguradora || ''} ${r.cidade || ''} ${r.num_assist || ''} ${r.servico || ''}`.toLowerCase()
-      return (!b || txt.includes(b))
-        && (!filtStatus || (r.status || 'pendente') === filtStatus)
-        && (!filtData || r.data_chegada === filtData)
-    })
-  }, [reports, busca, filtStatus, filtData])
-
-  // ── Segurados únicos ─────────────────────────────────────
-  const segurados = useMemo(() => {
-    const map = {}
-    reports.forEach(r => {
-      const key = `${r.nome_segurado || ''}__${r.tel_segurado || ''}`
-      if (!map[key]) {
-        map[key] = { nome: r.nome_segurado || '—', tel: r.tel_segurado || '', endereco: r.endereco || '', cidade: r.cidade || '', os: [] }
-      }
-      map[key].os.push(r)
-    })
-    return Object.values(map).sort((a, b) => b.os.length - a.os.length)
-  }, [reports])
-
   const limite = verificarLimite(totalMes)
-
-  // Filtro dos orçamentos
-  const orcFiltered = useMemo(() => {
-    const b = orcBusca.toLowerCase()
-    return orcamentos.filter(o => {
-      const txt = `${o.nome_cliente||''} ${o.numero||''} ${o.tel_cliente||''}`.toLowerCase()
-      return (!b || txt.includes(b))
-        && (!orcFiltTipo   || o.tipo   === orcFiltTipo)
-        && (!orcFiltStatus || o.status === orcFiltStatus)
-    })
-  }, [orcamentos, orcBusca, orcFiltTipo, orcFiltStatus])
 
   // Badge da sidebar com quantidade em revisão
   const orcEmRevisaoCount = useMemo(
@@ -546,18 +330,16 @@ export default function AdminPage() {
     return !Object.keys(errs).length
   }
 
-  function gerarRelatorio() {
-    setRelDados(agregarRelatorio(reports, relMes, relAno))
-  }
-
   // Link curto — só o ID da OS. O FormPage busca os dados do Firestore.
-  // Resolve URLs gigantes no WhatsApp que cortavam o texto da mensagem.
+  // Inclui publicToken quando disponível para validação nas páginas públicas.
   function buildLink(r) {
-    return `${window.location.origin}/${slug}?os=${r.id}`
+    const t = r.publicToken ? `&t=${r.publicToken}` : ''
+    return `${window.location.origin}/${slug}?os=${r.id}${t}`
   }
 
-  function buildLinkRelatorio(osId) {
-    return `${window.location.origin}/relatorio/${slug}/${osId}`
+  function buildLinkRelatorio(osId, token) {
+    const t = token ? `?t=${token}` : ''
+    return `${window.location.origin}/relatorio/${slug}/${osId}${t}`
   }
 
   function openLinkRelModal(r) {
@@ -626,6 +408,7 @@ export default function AdminPage() {
         servico: osForm.servico, desc_problema: osForm.desc_problema,
         status: 'aguardando_tecnico', origem: 'admin',
         tecnico_nome: tecNome, tecnico_tel: tecTel, tecnico_id: tecId,
+        publicToken: crypto.randomUUID(),
       }
       const ref    = await criarOS(empresaId, payload)
       const newRec = { id: ref.id, ...payload, criado_em: { toDate: () => new Date() } }
@@ -748,59 +531,6 @@ export default function AdminPage() {
     navigate('/login', { replace: true })
   }
 
-  // ── Handlers de técnicos ─────────────────────────────────
-  function openTecnicoModal(tec = null) {
-    setTecnicoEdit(tec)
-    setTecnicoFormData(tec
-      ? { nome: tec.nome || '', telefone: tec.telefone || '', email: tec.email || '', especialidade: tec.especialidade || '', ativo: tec.ativo !== false }
-      : TECNICO_FORM_INITIAL
-    )
-    setTecnicoFormErrors({})
-    setShowTecnicoModal(true)
-  }
-
-  async function saveTecnicoModal() {
-    const errs = {}
-    if (!tecnicoFormData.nome.trim())     errs.nome     = true
-    if (!tecnicoFormData.telefone.trim()) errs.telefone = true
-    setTecnicoFormErrors(errs)
-    if (Object.keys(errs).length) return
-
-    setSavingTecnicoForm(true)
-    try {
-      const payload = {
-        nome:         tecnicoFormData.nome.trim(),
-        telefone:     tecnicoFormData.telefone.trim(),
-        email:        tecnicoFormData.email.trim()        || '',
-        especialidade: tecnicoFormData.especialidade.trim() || '',
-        ativo:        tecnicoFormData.ativo,
-      }
-
-      if (tecnicoEdit) {
-        await updateDoc(doc(db, 'empresas', empresaId, 'tecnicos', tecnicoEdit.id), payload)
-        setTecnicos(p => p.map(t => t.id === tecnicoEdit.id ? { ...t, ...payload } : t))
-        showToast('✅ Técnico atualizado!')
-      } else {
-        const ref = await addDoc(collection(db, 'empresas', empresaId, 'tecnicos'), {
-          ...payload, criado_em: serverTimestamp(),
-        })
-        setTecnicos(p => [...p, { id: ref.id, ...payload }])
-        showToast('✅ Técnico cadastrado!')
-      }
-      setShowTecnicoModal(false)
-    } catch (e) { showToast('Erro: ' + e.message, 'error') }
-    finally { setSavingTecnicoForm(false) }
-  }
-
-  async function toggleAtivoTecnico(tec) {
-    try {
-      const novoAtivo = !tec.ativo
-      await updateDoc(doc(db, 'empresas', empresaId, 'tecnicos', tec.id), { ativo: novoAtivo })
-      setTecnicos(p => p.map(t => t.id === tec.id ? { ...t, ativo: novoAtivo } : t))
-      showToast(novoAtivo ? '🟢 Técnico ativado' : '⚫ Técnico desativado')
-    } catch (e) { showToast('Erro: ' + e.message, 'error') }
-  }
-
   // ── Salva anotação interna da OS (nunca vai ao PDF nem PNG) ──
   async function saveAnotacao() {
     if (!empresaId || !selected) return
@@ -813,71 +543,6 @@ export default function AdminPage() {
       showToast('✅ Anotação salva!')
     } catch (e) { showToast('Erro ao salvar: ' + e.message, 'error') }
     finally { setSavingAnotacao(false) }
-  }
-
-  // ── Salva configurações da empresa ───────────────────────
-  async function saveConfig() {
-    if (!empresaId) return
-    setSavingConfig(true)
-    try {
-      const payload = {
-        nome:          configForm.nome.trim(),
-        telefone:      configForm.telefone.trim(),
-        whatsapp:      configForm.whatsapp.trim()      || '',
-        endereco:      configForm.endereco.trim()      || '',
-        cidade_estado: configForm.cidade_estado.trim() || '',
-        cnpj:          configForm.cnpj.trim()          || '',
-        site:          configForm.site.trim()          || '',
-        seguradoras:   configForm.seguradoras,
-      }
-      await updateDoc(refConfig(empresaId), payload)
-      showToast('✅ Dados salvos com sucesso!')
-    } catch (e) { showToast('Erro ao salvar: ' + e.message, 'error') }
-    finally { setSavingConfig(false) }
-  }
-
-  // ── Upload de logo ────────────────────────────────────────
-  async function handleLogoUpload(file) {
-    if (!file || !empresaId) return
-    const maxSize = 2 * 1024 * 1024
-    if (file.size > maxSize) { showToast('Arquivo muito grande. Máximo 2MB.', 'error'); return }
-    const allowed = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp']
-    if (!allowed.includes(file.type)) { showToast('Formato não suportado. Use JPG, PNG ou SVG.', 'error'); return }
-
-    setLogoUploading(true)
-    try {
-      const ext  = file.name.split('.').pop()
-      const path = `empresas/${empresaId}/logo.${ext}`
-      const ref  = storageRef(storage, path)
-      await uploadBytes(ref, file)
-      const url  = await getDownloadURL(ref)
-      setLogoPreview(url)
-      await updateDoc(refConfig(empresaId), { logoUrl: url })
-      await updateDoc(refEmpresa(empresaId), { logoUrl: url })
-      showToast('🖼️ Logo enviada com sucesso!')
-    } catch (e) { showToast('Erro no upload: ' + e.message, 'error') }
-    finally { setLogoUploading(false) }
-  }
-
-  // ── Salva nome do usuário ────────────────────────────────
-  async function saveNomeUsuario() {
-    if (!nomeUsuario.trim() || !auth.currentUser) return
-    setSavingNome(true)
-    try {
-      await updateProfile(auth.currentUser, { displayName: nomeUsuario.trim() })
-      showToast('✅ Nome atualizado!')
-    } catch (e) { showToast('Erro: ' + e.message, 'error') }
-    finally { setSavingNome(false) }
-  }
-
-  // ── Envia email de redefinição de senha ──────────────────
-  async function sendResetEmail() {
-    if (!emailUsuario) return
-    try {
-      await sendPasswordResetEmail(auth, emailUsuario)
-      setResetEmailEnviado(true)
-      setTimeout(() => setResetEmailEnviado(false), 5000)
-    } catch (e) { alert('Erro: ' + e.message) }
   }
 
   // ── Orçamentos: load ─────────────────────────────────────
@@ -1141,6 +806,7 @@ export default function AdminPage() {
         tecnico_nome:  orc.tecnico_nome  || '',
         tecnico_id:    orc.tecnico_id    || '',
         data_chegada:  '',
+        publicToken:   crypto.randomUUID(),
       }
       const ref    = await criarOS(empresaId, payload)
       const newRec = { id: ref.id, ...payload, criado_em: { toDate: () => new Date() } }
@@ -1155,16 +821,6 @@ export default function AdminPage() {
       showToast('🎉 OS criada com sucesso!')
     } catch (e) { showToast('Erro ao criar OS: ' + e.message, 'error') }
     finally { setSavingOrc(false) }
-  }
-
-  // ── Toggle seguradoras no configForm ────────────────────
-  function toggleSeguradora(seg) {
-    setConfigForm(p => ({
-      ...p,
-      seguradoras: p.seguradoras.includes(seg)
-        ? p.seguradoras.filter(s => s !== seg)
-        : [...p.seguradoras, seg],
-    }))
   }
 
   // ── Loading inicial ──────────────────────────────────────
@@ -1190,7 +846,28 @@ export default function AdminPage() {
   const tecnicosAtivos = tecnicos.filter(t => t.ativo !== false)
 
   // ── RENDER ───────────────────────────────────────────────
+  const contextValue = {
+    empresa, config, slug, empresaId, seguradoras, nomeEmpresa,
+    reports,    setReports,
+    tecnicos,   setTecnicos,   loadingTecnicos,
+    orcamentos, setOrcamentos,
+    totalMes,   setTotalMes,
+    abaAtiva,   setAbaAtiva,
+    showToast,
+    buildLink, buildLinkRelatorio, buildLinkTecnicoOrc, buildLinkClienteOrc,
+    logoPreview, setLogoPreview,
+    // aba OS
+    loading, error, updating, limite,
+    changeStatus, setSelected, setGeneratedLink, openLinkRelModal,
+    // aba Orçamentos
+    loadingOrc, loadOrcamentos,
+    openRevisarOrcamento, copyOrcLink,
+    handlePDFCliente, handlePDFSeguradora,
+    abrirConverterOS, excluirOrcamento,
+  }
+
   return (
+    <AdminContext.Provider value={contextValue}>
     <div className="admin-layout">
 
       {/* ── TOAST ── */}
@@ -1319,913 +996,35 @@ export default function AdminPage() {
         {/* ══════════════════════════════════════════════════
             ABA: DASHBOARD
         ══════════════════════════════════════════════════ */}
-        {abaAtiva === 'dashboard' && (
-          <div className="tab-content">
-            <div className="metrics-grid">
-              <div className="metric-card blue">
-                <div className="metric-icon">📋</div>
-                <div className="metric-label">Total do Mês</div>
-                <div className="metric-value">{stats.totalMesCount}</div>
-                <div className="metric-sub">{stats.nomeMes}</div>
-              </div>
-              <div className="metric-card orange">
-                <div className="metric-icon">📅</div>
-                <div className="metric-label">Hoje</div>
-                <div className="metric-value">{stats.hoje}</div>
-                <div className="metric-sub">registradas hoje</div>
-              </div>
-              <div className="metric-card yellow">
-                <div className="metric-icon">⏳</div>
-                <div className="metric-label">Pendentes</div>
-                <div className="metric-value">{stats.pendentes}</div>
-                <div className="metric-sub">aguardando revisão</div>
-              </div>
-              <div className="metric-card green">
-                <div className="metric-icon">💰</div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div className="metric-label">Lucro do Mês</div>
-                  <input
-                    type="month" value={filtMes}
-                    onChange={e => setFiltMes(e.target.value)}
-                    style={{ border: '1px solid var(--border)', borderRadius: 5, padding: '2px 6px', fontSize: '.68rem', fontFamily: 'Barlow,sans-serif', background: 'var(--light)', color: 'var(--text)', outline: 'none' }}
-                  />
-                </div>
-                {stats.hasLucro
-                  ? <div className={`metric-value${stats.lucroTotal >= 0 ? ' green' : ' red'}`}>{fmtBRL(stats.lucroTotal)}</div>
-                  : <div className="metric-value" style={{ fontSize: '1.1rem', color: 'var(--muted)' }}>Sem dados</div>
-                }
-                <div className="metric-sub">{stats.mesCount} OS com financeiro</div>
-              </div>
-            </div>
-
-            <div className="dashboard-grid">
-              <div className="chart-card">
-                <div className="chart-card-title">📈 Atividade dos Últimos 6 Meses</div>
-                {reports.length === 0
-                  ? <div className="chart-empty">Nenhuma OS registrada ainda.</div>
-                  : (
-                    <ResponsiveContainer width="100%" height={240}>
-                      <BarChart data={chartData} margin={{ top: 4, right: 12, left: -16, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e8eef6" />
-                        <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#6b7c93' }} />
-                        <YAxis tick={{ fontSize: 12, fill: '#6b7c93' }} allowDecimals={false} />
-                        <Tooltip content={<CustomBarTooltip />} />
-                        <Legend wrapperStyle={{ fontSize: 12, paddingTop: 12 }} />
-                        <Bar dataKey="criadas"     name="OS Criadas"      fill="#1a3fa8" radius={[4,4,0,0]} />
-                        <Bar dataKey="finalizadas" name="OS Finalizadas"  fill="#f05a1a" radius={[4,4,0,0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  )
-                }
-              </div>
-
-              <div className="chart-card">
-                <div className="chart-card-title">🕐 Últimas OS</div>
-                {reports.length === 0
-                  ? <div className="chart-empty">Nenhuma OS ainda.</div>
-                  : (
-                    <div className="recent-os-list">
-                      {reports.slice(0, 5).map(r => (
-                        <div key={r.id} className="recent-os-item" onClick={() => { setSelected(r); setAbaAtiva('os') }}>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div className="recent-os-name">{r.nome_segurado || '—'}</div>
-                            <div className="recent-os-meta">{r.cidade || '—'} · {fmtDate(r.data_chegada)}</div>
-                          </div>
-                          <span className={`badge ${badgeCls(r.status)}`} style={{ fontSize: '.65rem' }}>{badgeLabel(r.status)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )
-                }
-              </div>
-            </div>
-
-            <div className="dashboard-bottom">
-              <div className="chart-card">
-                <div className="chart-card-title">🍩 Distribuição por Status</div>
-                {pieData.length === 0
-                  ? <div className="chart-empty">Sem dados.</div>
-                  : (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-                      <ResponsiveContainer width={200} height={200}>
-                        <PieChart>
-                          <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} dataKey="value" paddingAngle={3}>
-                            {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                          </Pie>
-                          <Tooltip formatter={(v, n) => [v, n]} />
-                        </PieChart>
-                      </ResponsiveContainer>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        {pieData.map((d, i) => (
-                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '.85rem' }}>
-                            <span style={{ width: 12, height: 12, borderRadius: '50%', background: d.color, flexShrink: 0 }} />
-                            <span style={{ color: 'var(--text)', fontWeight: 500 }}>{d.name}</span>
-                            <span style={{ fontFamily: 'Barlow Condensed,sans-serif', fontWeight: 900, fontSize: '1.1rem', color: 'var(--text)', marginLeft: 'auto' }}>{d.value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                }
-              </div>
-
-              <div className="chart-card">
-                <div className="chart-card-title">📦 Plano Atual</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  <div>
-                    <span className="plan-badge" style={{ fontSize: '.9rem', padding: '6px 16px' }}>
-                      🏷️ {planoAtual.charAt(0).toUpperCase() + planoAtual.slice(1)}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {[
-                      { label: 'OS este mês', value: `${totalMes} / ${planoInfo.limiteOS === -1 ? '∞' : planoInfo.limiteOS}` },
-                      { label: 'Preço',       value: `R$ ${planoInfo.preco}/mês` },
-                    ].map(({ label, value }) => (
-                      <div key={label} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: 8 }}>
-                        <span style={{ fontSize: '.82rem', color: 'var(--muted)' }}>{label}</span>
-                        <span style={{ fontSize: '.9rem', fontWeight: 700, color: 'var(--text)' }}>{value}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {planoInfo.limiteOS !== -1 && (
-                    <div className="usage-bar-wrap">
-                      <div className="usage-bar-track">
-                        <div className={`usage-bar-fill ${usageCls}`} style={{ width: `${usagePct}%` }} />
-                      </div>
-                      <div className="usage-bar-labels">
-                        <span>{totalMes} usadas</span>
-                        <span>{usagePct}%</span>
-                      </div>
-                    </div>
-                  )}
-                  {limite.aviso && (
-                    <div style={{ background: '#fff8ec', borderRadius: 8, padding: '10px 14px', fontSize: '.8rem', color: 'var(--warn-text)', fontWeight: 600 }}>
-                      ⚠️ {limite.restantes} OS restantes no plano
-                    </div>
-                  )}
-                  {limite.bloqueado && (
-                    <div style={{ background: '#fff5f5', borderRadius: 8, padding: '10px 14px', fontSize: '.8rem', color: 'var(--danger)', fontWeight: 600 }}>
-                      🚫 Limite atingido — entre em contato para upgrade
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {abaAtiva === 'dashboard' && <DashboardTab />}
 
         {/* ══════════════════════════════════════════════════
             ABA: ORDENS DE SERVIÇO
         ══════════════════════════════════════════════════ */}
-        {abaAtiva === 'os' && (
-          <div className="tab-content">
-            <div className="filter-bar" style={{ marginBottom: 20 }}>
-              <span className="filter-label">Filtrar:</span>
-              <input className="filter-input flex-1" placeholder="🔍 Segurado, seguradora, cidade..."
-                value={busca} onChange={e => setBusca(e.target.value)} />
-              <select className="filter-input" value={filtStatus} onChange={e => setFiltStatus(e.target.value)}>
-                <option value="">Todos os status</option>
-                <option value="aguardando_tecnico">🔔 Aguardando Técnico</option>
-                <option value="pendente">⏳ Pendentes</option>
-                <option value="processado">✅ Processados</option>
-                <option value="enviado">📤 Enviados</option>
-              </select>
-              <input type="date" className="filter-input" value={filtData} onChange={e => setFiltData(e.target.value)} />
-              {(busca || filtStatus || filtData) && (
-                <button className="btn-sm btn-view" onClick={() => { setBusca(''); setFiltStatus(''); setFiltData('') }}>✕ Limpar</button>
-              )}
-            </div>
-
-            <div style={{ fontSize: '.82rem', color: 'var(--muted)', marginBottom: 16, fontWeight: 600 }}>
-              {filtered.length} ordem{filtered.length !== 1 ? 'ns' : ''} de serviço
-            </div>
-
-            {loading && <div className="loading-state"><div className="spinner" /><div className="loading-text">Carregando...</div></div>}
-            {error && !loading && <div className="err-msg">⚠️ {error}</div>}
-
-            {!loading && !error && filtered.length === 0 && (
-              <div className="empty-state"><div className="e-icon">📭</div><p>Nenhuma OS encontrada.</p></div>
-            )}
-
-            {!loading && !error && filtered.length > 0 && (
-              <div className="os-cards-grid">
-                {filtered.map(r => {
-                  const lucro = getLucro(r)
-                  return (
-                    <div key={r.id} className="os-card" onClick={() => setSelected(r)}>
-                      <div className="os-card-header">
-                        <span className={`badge ${badgeCls(r.status)}`}>{badgeLabel(r.status)}</span>
-                        {r.avaliacao_nota && (
-                          <span style={{ color: '#f0a020', fontWeight: 700, fontSize: '.85rem' }}>{'★'.repeat(r.avaliacao_nota)}</span>
-                        )}
-                      </div>
-
-                      <div className="os-card-name">{r.nome_segurado || '—'}</div>
-                      <div className="os-card-seg">{r.seguradora || '—'}{r.cidade ? ` · ${r.cidade}` : ''}</div>
-
-                      <div className="os-card-body" style={{ marginTop: 10 }}>
-                        {r.servico && <div className="os-card-row">🔧 <strong>{r.servico}</strong></div>}
-                        {r.data_chegada && <div className="os-card-row">📅 {fmtDate(r.data_chegada)}</div>}
-                        {r.tecnico_nome && <div className="os-card-row">👷 {r.tecnico_nome}</div>}
-                        {lucro !== null && (
-                          <div className="os-card-row">
-                            💰 <strong style={{ color: lucro >= 0 ? 'var(--success)' : 'var(--danger)' }}>{fmtBRL(lucro)}</strong>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="os-card-footer" onClick={e => e.stopPropagation()}>
-                        <button className="btn-sm btn-view" onClick={() => setSelected(r)}>Ver detalhes</button>
-                        {r.status === 'aguardando_tecnico' && (
-                          <button className="btn-sm btn-link"
-                            onClick={() => setGeneratedLink({ link: buildLink(r), os: r.id, nome: r.nome_segurado, seguradora: r.seguradora, num_assist: r.num_assist })}>
-                            🔗 Link
-                          </button>
-                        )}
-                        {(r.status === 'processado' || r.status === 'enviado') && (
-                          <button className="btn-sm" style={{ background: '#1a5276', color: '#fff' }}
-                            onClick={() => openLinkRelModal(r)}>
-                            🔗 Link
-                          </button>
-                        )}
-                        {(r.status || 'pendente') === 'pendente' && (
-                          <button className="btn-sm btn-ok" disabled={updating} onClick={() => changeStatus(r.id, 'processado')}>✓</button>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
+        {abaAtiva === 'os' && <OrdensServicoTab />}
 
         {/* ══════════════════════════════════════════════════
             ABA: ORÇAMENTOS
         ══════════════════════════════════════════════════ */}
-        {abaAtiva === 'orcamentos' && (
-          <div className="tab-content">
-
-            {/* Filtros */}
-            <div className="filter-bar">
-              <input
-                className="filter-input flex-1"
-                placeholder="🔍 Buscar por nome, número..."
-                value={orcBusca}
-                onChange={e => setOrcBusca(e.target.value)}
-              />
-              <select className="filter-input" value={orcFiltTipo} onChange={e => setOrcFiltTipo(e.target.value)}>
-                <option value="">Todos os tipos</option>
-                <option value="linha_branca">🏠 Linha Branca</option>
-                <option value="emergencial">⚡ Emergencial</option>
-                <option value="particular">👤 Particular</option>
-              </select>
-              <select className="filter-input" value={orcFiltStatus} onChange={e => setOrcFiltStatus(e.target.value)}>
-                <option value="">Todos os status</option>
-                <option value="aguardando_tecnico">🟠 Aguardando</option>
-                <option value="em_revisao">🟡 Em Revisão</option>
-                <option value="enviado_cliente">🔵 Enviado ao Cliente</option>
-                <option value="enviado_seguradora">🟣 Enviado à Seg.</option>
-                <option value="aprovado">🟢 Aprovado</option>
-                <option value="reprovado">🔴 Reprovado</option>
-                <option value="executado">⚫ Executado</option>
-              </select>
-              <button
-                className="btn-sm btn-view"
-                onClick={loadOrcamentos}
-                disabled={loadingOrc}
-                style={{ whiteSpace:'nowrap' }}
-              >
-                🔄 Atualizar
-              </button>
-            </div>
-
-            {loadingOrc && (
-              <div className="loading-state"><div className="spinner" /><p className="loading-text">Carregando orçamentos...</p></div>
-            )}
-
-            {!loadingOrc && orcFiltered.length === 0 && (
-              <div className="empty-state">
-                <div className="e-icon">📄</div>
-                <p style={{ fontWeight:600, fontSize:'1rem', marginBottom:6 }}>
-                  {orcamentos.length === 0 ? 'Nenhum orçamento criado' : 'Nenhum orçamento encontrado'}
-                </p>
-                <p style={{ fontSize:'.85rem' }}>
-                  {orcamentos.length === 0
-                    ? 'Clique em "+ Novo Orçamento" para começar.'
-                    : 'Tente ajustar os filtros acima.'}
-                </p>
-              </div>
-            )}
-
-            {!loadingOrc && orcFiltered.length > 0 && (
-              <div className="orc-cards-grid">
-                {orcFiltered.map(orc => {
-                  const smeta = STATUS_ORC_META[orc.status] || STATUS_ORC_META.aguardando_tecnico
-                  const totalMostrar = orc.total_geral > 0 ? orc.total_geral : null
-                  return (
-                    <div key={orc.id} className={`orc-card ${orcCardCls(orc.status)}`}>
-                      <div className="orc-card-top">
-                        <span className={`badge ${smeta.cls}`}>{smeta.label}</span>
-                        <span className="orc-card-numero">{orc.numero}</span>
-                      </div>
-                      <div className="orc-card-name">{orc.nome_cliente || '—'}</div>
-                      <div className="orc-card-tel">{orc.tel_cliente || ''}</div>
-                      <div className="orc-card-equip">
-                        {orc.tipo === 'linha_branca'
-                          ? `${orc.tipo_equipamento || ''} ${orc.marca || ''} · ${orc.cidade || ''}`
-                          : orc.cidade || ''}
-                      </div>
-                      <div className="orc-card-meta">
-                        <div className="orc-card-meta-item">📅 {fmtDate(orc.criado_em)}</div>
-                        {totalMostrar !== null && <div className="orc-card-meta-item"><strong>{fmtBRL(totalMostrar)}</strong></div>}
-                        {orc.tecnico_nome && <div className="orc-card-meta-item">👷 {orc.tecnico_nome}</div>}
-                      </div>
-                      {orc.status === 'aguardando_tecnico' && (
-                        <div style={{ marginBottom:6 }}>
-                          <span className="link-disponivel-badge">🔗 Link disponível</span>
-                        </div>
-                      )}
-                      <div className="orc-card-actions">
-                        <button className="btn-sm btn-view" onClick={() => openRevisarOrcamento(orc)}>
-                          {orc.status === 'em_revisao' ? '✏️ Revisar' : '👁️ Ver'}
-                        </button>
-                        {orc.status === 'aguardando_tecnico' && (
-                          <>
-                            <a className="btn-sm btn-ok" style={{ textDecoration:'none' }} target="_blank" rel="noopener noreferrer"
-                              href={`https://wa.me/${orc.tecnico_tel ? '55'+orc.tecnico_tel.replace(/\D/g,'') : ''}?text=${encodeURIComponent(`Olá ${orc.tecnico_nome||'Técnico'}! 👷\nNovo orçamento para avaliar no local:\n🔗 ${buildLinkTecnicoOrc(orc.id)}`)}`}>
-                              📲 Enviar
-                            </a>
-                            <button className="btn-sm" style={{ background:'var(--light)', color:'var(--primary)', border:'1px solid var(--border)' }}
-                              onClick={() => copyOrcLink(buildLinkTecnicoOrc(orc.id))}>
-                              📋 Copiar
-                            </button>
-                          </>
-                        )}
-                        {(orc.total_cliente > 0 || (orc.status === 'aprovado' && orc.total_geral > 0)) && (
-                          <button className="btn-sm btn-pdf" onClick={() => handlePDFCliente(orc)}>📄 PDF</button>
-                        )}
-                        {orc.total_seguradora > 0 && (
-                          <button className="btn-sm btn-pdf" style={{ background:'#6c3483' }} onClick={() => handlePDFSeguradora(orc)}>📋 Seg.</button>
-                        )}
-                        {orc.status === 'aprovado' && !orc.os_vinculada && (
-                          <button className="btn-sm btn-ok" onClick={() => abrirConverterOS(orc)}>🚀 OS</button>
-                        )}
-                        <button className="btn-sm" style={{ background:'#fee2e2', color:'#dc2626', border:'1px solid #fca5a5', marginLeft:'auto' }}
-                          title="Excluir orçamento" onClick={() => excluirOrcamento(orc)}>🗑️</button>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
+        {abaAtiva === 'orcamentos' && <OrcamentosTab />}
 
         {/* ══════════════════════════════════════════════════
             ABA: SEGURADOS
         ══════════════════════════════════════════════════ */}
-        {abaAtiva === 'segurados' && (
-          <div className="tab-content">
-            <div style={{ fontSize: '.82rem', color: 'var(--muted)', marginBottom: 16, fontWeight: 600 }}>
-              {segurados.length} segurado{segurados.length !== 1 ? 's' : ''} únicos
-            </div>
-
-            {segurados.length === 0 && (
-              <div className="empty-state"><div className="e-icon">👥</div><p>Nenhum segurado encontrado.</p></div>
-            )}
-
-            <div className="segurados-list">
-              {segurados.map((s, idx) => {
-                const ultima   = s.os[0]
-                const comNota  = s.os.filter(o => o.avaliacao_nota)
-                const media    = comNota.length
-                  ? (comNota.reduce((acc, o) => acc + o.avaliacao_nota, 0) / comNota.length).toFixed(1)
-                  : null
-
-                return (
-                  <div key={idx} className="segurado-item" onClick={() => setSelectedSegurado(s)}>
-                    <div className="segurado-avatar">{s.nome ? s.nome[0].toUpperCase() : '?'}</div>
-                    <div className="segurado-info">
-                      <div className="segurado-name">{s.nome}</div>
-                      <div className="segurado-meta">
-                        {s.cidade || '—'}
-                        {s.tel && ` · ${s.tel}`}
-                        {ultima?.data_chegada && ` · Último: ${fmtDate(ultima.data_chegada)}`}
-                      </div>
-                    </div>
-                    <div className="segurado-stats">
-                      <div className="seg-stat">
-                        <div className="seg-stat-val">{s.os.length}</div>
-                        <div className="seg-stat-label">OS</div>
-                      </div>
-                      {media && (
-                        <div className="seg-stat">
-                          <div className="seg-stat-val seg-stars">★ {media}</div>
-                          <div className="seg-stat-label">Média</div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
+        {abaAtiva === 'segurados' && <SeguradosTab onSelectOS={setSelected} />}
 
         {/* ══════════════════════════════════════════════════
             ABA: TÉCNICOS
         ══════════════════════════════════════════════════ */}
-        {abaAtiva === 'tecnicos' && (
-          <div className="tab-content">
-            {/* Header da aba */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
-              <div>
-                <h2 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '1.4rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '.5px' }}>
-                  👷 Técnicos da Equipe
-                </h2>
-                <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: 2 }}>{nomeEmpresa}</p>
-              </div>
-              <button className="btn-new-os" onClick={() => openTecnicoModal()}>
-                + Adicionar Técnico
-              </button>
-            </div>
-
-            {loadingTecnicos && (
-              <div className="loading-state"><div className="spinner" /><div className="loading-text">Carregando técnicos...</div></div>
-            )}
-
-            {!loadingTecnicos && tecnicos.length === 0 && (
-              <div className="empty-state" style={{ paddingTop: 60 }}>
-                <div className="e-icon">👷</div>
-                <p style={{ fontWeight: 600, fontSize: '1rem', marginBottom: 6 }}>Nenhum técnico cadastrado</p>
-                <p style={{ fontSize: '.85rem' }}>Adicione seu primeiro técnico!</p>
-                <button className="btn-new-os" style={{ marginTop: 16 }} onClick={() => openTecnicoModal()}>
-                  + Adicionar Técnico
-                </button>
-              </div>
-            )}
-
-            {!loadingTecnicos && tecnicos.length > 0 && (
-              <div className="tecnico-cards-grid">
-                {tecnicos.map((tec, idx) => (
-                  <div key={tec.id} className="tecnico-card">
-                    <div className={`tecnico-avatar ${AVATAR_COLORS[idx % 4]}`}>
-                      {tec.nome ? tec.nome[0].toUpperCase() : '?'}
-                    </div>
-                    <div className="tecnico-name">{tec.nome}</div>
-                    <div className="tecnico-tel">{tec.telefone}</div>
-                    {tec.especialidade && (
-                      <div className="tecnico-esp">{tec.especialidade}</div>
-                    )}
-                    <span className={`tecnico-badge ${tec.ativo !== false ? 'ativo' : 'inativo'}`}>
-                      {tec.ativo !== false ? '🟢 Ativo' : '⚫ Inativo'}
-                    </span>
-                    <div className="tecnico-card-actions">
-                      <button className="btn-sm btn-view" onClick={() => openTecnicoModal(tec)}>
-                        ✏️ Editar
-                      </button>
-                      <button
-                        className="btn-sm"
-                        style={{ background: tec.ativo !== false ? '#f5f5f5' : 'var(--success)', color: tec.ativo !== false ? '#666' : '#fff' }}
-                        onClick={() => toggleAtivoTecnico(tec)}
-                      >
-                        {tec.ativo !== false ? 'Desativar' : 'Ativar'}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        {abaAtiva === 'tecnicos' && <TecnicosTab />}
 
         {/* ══════════════════════════════════════════════════
             ABA: CONFIGURAÇÕES
         ══════════════════════════════════════════════════ */}
-        {abaAtiva === 'config' && (
-          <div className="tab-content">
-            <div className="config-tabs-bar">
-              {[
-                { id: 'empresa', label: '🏢 Minha Empresa' },
-                { id: 'conta',   label: '👤 Minha Conta'   },
-              ].map(t => (
-                <button key={t.id} className={`config-tab-btn${configAba === t.id ? ' active' : ''}`}
-                  onClick={() => setConfigAba(t.id)}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-
-            {/* ── Sub-aba: Minha Empresa ── */}
-            {configAba === 'empresa' && (
-              <div style={{ maxWidth: 620 }}>
-
-                {/* Upload de logo */}
-                <h3 className="config-section-title" style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.6px', paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 18 }}>
-                  Logo da Empresa
-                </h3>
-                <div
-                  className="logo-upload-area"
-                  onClick={() => !logoUploading && logoInputRef.current?.click()}
-                  style={{ marginBottom: 24, cursor: logoUploading ? 'not-allowed' : 'pointer', opacity: logoUploading ? .7 : 1 }}
-                >
-                  <input
-                    ref={logoInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/svg+xml,image/webp"
-                    onChange={e => e.target.files[0] && handleLogoUpload(e.target.files[0])}
-                  />
-                  {logoPreview
-                    ? <img src={logoPreview} alt="Logo atual" className="logo-preview" />
-                    : <div className="logo-upload-icon">🖼️</div>
-                  }
-                  <div className="logo-upload-text">
-                    {logoUploading
-                      ? '⏳ Enviando...'
-                      : <><strong>Clique para enviar</strong> ou arraste a logo<br /><span style={{ fontSize: '.75rem' }}>JPG, PNG ou SVG • Máx. 2MB</span></>
-                    }
-                  </div>
-                </div>
-
-                {/* Dados da empresa */}
-                <h3 style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.6px', paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 18 }}>
-                  Dados da Empresa
-                </h3>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
-                  <div className="field">
-                    <label className="form-label">Nome da empresa <span style={{ color: '#e53e3e' }}>*</span></label>
-                    <input className="form-input"
-                      value={configForm.nome}
-                      onChange={e => setConfigForm(p => ({ ...p, nome: e.target.value }))}
-                      placeholder="Nome da empresa" />
-                  </div>
-                  <div className="field">
-                    <label className="form-label">CNPJ</label>
-                    <input className="form-input"
-                      value={configForm.cnpj}
-                      onChange={e => setConfigForm(p => ({ ...p, cnpj: maskCNPJ(e.target.value) }))}
-                      placeholder="00.000.000/0000-00" />
-                  </div>
-                  <div className="field">
-                    <label className="form-label">Telefone principal <span style={{ color: '#e53e3e' }}>*</span></label>
-                    <input className="form-input" type="tel"
-                      value={configForm.telefone}
-                      onChange={e => setConfigForm(p => ({ ...p, telefone: maskPhone(e.target.value) }))}
-                      placeholder="(XX) XXXXX-XXXX" />
-                  </div>
-                  <div className="field">
-                    <label className="form-label">WhatsApp (link flutuante)</label>
-                    <input className="form-input" type="tel"
-                      value={configForm.whatsapp}
-                      onChange={e => setConfigForm(p => ({ ...p, whatsapp: maskPhone(e.target.value) }))}
-                      placeholder="(XX) XXXXX-XXXX" />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 14, marginBottom: 14 }}>
-                  <div className="field">
-                    <label className="form-label">Endereço completo</label>
-                    <input className="form-input"
-                      value={configForm.endereco}
-                      onChange={e => setConfigForm(p => ({ ...p, endereco: e.target.value }))}
-                      placeholder="Rua, número, bairro" />
-                  </div>
-                  <div className="field">
-                    <label className="form-label">Cidade / Estado</label>
-                    <input className="form-input"
-                      value={configForm.cidade_estado}
-                      onChange={e => setConfigForm(p => ({ ...p, cidade_estado: e.target.value }))}
-                      placeholder="Ex: São Paulo - SP" />
-                  </div>
-                </div>
-
-                <div className="field" style={{ marginBottom: 24 }}>
-                  <label className="form-label">Site (opcional)</label>
-                  <input className="form-input" type="url"
-                    value={configForm.site}
-                    onChange={e => setConfigForm(p => ({ ...p, site: e.target.value }))}
-                    placeholder="https://www.suaempresa.com.br" />
-                </div>
-
-                {/* Seguradoras */}
-                <h3 style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.6px', paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 18 }}>
-                  Seguradoras que você atende
-                </h3>
-                <div className="config-check-grid" style={{ marginBottom: 28 }}>
-                  {['Mapfre','Tempo','Maxpar','Allianz','Porto Seguro','Tokio Marine'].map(seg => (
-                    <div
-                      key={seg}
-                      className={`config-check-item${configForm.seguradoras.includes(seg) ? ' checked' : ''}`}
-                      onClick={() => toggleSeguradora(seg)}
-                    >
-                      <div className="config-check-box">
-                        {configForm.seguradoras.includes(seg) && <span style={{ color: '#fff', fontSize: '.8rem', fontWeight: 700 }}>✓</span>}
-                      </div>
-                      <span className="config-check-label">{seg}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <button className="btn-primary" onClick={saveConfig} disabled={savingConfig} style={{ padding: '10px 28px', fontSize: '.9rem' }}>
-                  {savingConfig ? '⏳ Salvando...' : '💾 Salvar dados'}
-                </button>
-              </div>
-            )}
-
-            {/* ── Sub-aba: Minha Conta ── */}
-            {configAba === 'conta' && (
-              <div style={{ maxWidth: 520 }}>
-
-                {/* Avatar + nome */}
-                <h3 style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.6px', paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 18 }}>
-                  Informações da Conta
-                </h3>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 24 }}>
-                  <div className="config-big-avatar">{inicialUsuario}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '.72rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 5 }}>
-                      Seu nome
-                    </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <input
-                        className="form-input"
-                        value={nomeUsuario}
-                        onChange={e => setNomeUsuario(e.target.value)}
-                        placeholder="Seu nome completo"
-                        style={{ flex: 1 }}
-                      />
-                      <button className="btn-sm btn-ok" onClick={saveNomeUsuario} disabled={savingNome} style={{ whiteSpace: 'nowrap' }}>
-                        {savingNome ? '⏳' : '💾 Salvar'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="config-info-row">
-                  <span className="config-info-label">E-mail</span>
-                  <span className="config-info-value">{emailUsuario || '—'}</span>
-                </div>
-
-                {auth.currentUser?.metadata?.creationTime && (
-                  <div className="config-info-row">
-                    <span className="config-info-label">Membro desde</span>
-                    <span className="config-info-value">
-                      {new Date(auth.currentUser.metadata.creationTime).toLocaleDateString('pt-BR')}
-                    </span>
-                  </div>
-                )}
-
-                {/* Informações do plano */}
-                <div style={{ marginTop: 28 }}>
-                  <h3 style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.6px', paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 18 }}>
-                    Plano e Uso
-                  </h3>
-
-                  <div className="config-info-row">
-                    <span className="config-info-label">Plano atual</span>
-                    <span className="plan-badge">{planoAtual.charAt(0).toUpperCase() + planoAtual.slice(1)}</span>
-                  </div>
-
-                  <div className="config-info-row">
-                    <span className="config-info-label">Limite de OS/mês</span>
-                    <span className="config-info-value">
-                      {planoInfo.limiteOS === -1 ? '∞ Ilimitado' : planoInfo.limiteOS}
-                    </span>
-                  </div>
-
-                  <div className="config-info-row" style={{ borderBottom: planoInfo.limiteOS !== -1 ? '1px solid var(--border)' : 'none' }}>
-                    <span className="config-info-label">OS usadas este mês</span>
-                    <span className="config-info-value">{totalMes}</span>
-                  </div>
-
-                  {planoInfo.limiteOS !== -1 && (
-                    <div style={{ paddingTop: 10 }}>
-                      <div className="usage-bar-wrap">
-                        <div className="usage-bar-track">
-                          <div className={`usage-bar-fill ${usageCls}`} style={{ width: `${usagePct}%` }} />
-                        </div>
-                        <div className="usage-bar-labels">
-                          <span>{totalMes} de {planoInfo.limiteOS} OS usadas</span>
-                          <span>{usagePct}% do limite</span>
-                        </div>
-                      </div>
-                      {usagePct >= 80 && (
-                        <div style={{ background: usagePct >= 100 ? '#fff5f5' : '#fff8ec', border: `1px solid ${usagePct >= 100 ? '#fcc' : '#fce4b0'}`, borderRadius: 8, padding: '10px 14px', fontSize: '.82rem', color: usagePct >= 100 ? 'var(--danger)' : 'var(--warn-text)', fontWeight: 600, marginTop: 10 }}>
-                          {usagePct >= 100
-                            ? '🚫 Limite atingido — entre em contato para fazer upgrade do plano.'
-                            : `⚠️ Você usou ${usagePct}% do limite. Considere fazer upgrade do plano.`
-                          }
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Segurança */}
-                <div style={{ marginTop: 28 }}>
-                  <h3 style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.6px', paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 18 }}>
-                    Segurança
-                  </h3>
-                  {resetEmailEnviado
-                    ? (
-                      <div style={{ background: 'var(--success-bg)', border: '1px solid #b2dfc5', borderRadius: 10, padding: '12px 16px', fontSize: '.88rem', color: 'var(--success)', fontWeight: 600 }}>
-                        ✅ E-mail enviado! Verifique sua caixa de entrada.
-                      </div>
-                    ) : (
-                      <div>
-                        <p style={{ fontSize: '.85rem', color: 'var(--muted)', marginBottom: 12 }}>
-                          Um link de redefinição será enviado para <strong>{emailUsuario}</strong>.
-                        </p>
-                        <button className="btn-sm btn-view" onClick={sendResetEmail}>
-                          🔑 Enviar link de redefinição de senha
-                        </button>
-                      </div>
-                    )
-                  }
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        {abaAtiva === 'config' && <ConfigTab />}
 
         {/* ══ RELATÓRIO MENSAL ══════════════════════════════════════ */}
-        {abaAtiva === 'relatorio' && (
-          <div className="tab-content">
-
-            {/* Seletor de período */}
-            <div className="filter-bar" style={{ marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
-              <span className="filter-label">Período:</span>
-              <select
-                className="filter-input"
-                value={`${relMes}-${relAno}`}
-                onChange={e => {
-                  const [m, a] = e.target.value.split('-').map(Number)
-                  setRelMes(m)
-                  setRelAno(a)
-                  setRelDados(null)
-                }}
-              >
-                {(() => {
-                  const MESES_NOMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
-                  const now = new Date()
-                  const opts = []
-                  for (let i = 0; i < 12; i++) {
-                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-                    const m = d.getMonth() + 1
-                    const a = d.getFullYear()
-                    opts.push(<option key={`${m}-${a}`} value={`${m}-${a}`}>{MESES_NOMES[d.getMonth()]} {a}</option>)
-                  }
-                  return opts
-                })()}
-              </select>
-              <button
-                className="btn-primary"
-                onClick={gerarRelatorio}
-                style={{ minWidth: 160 }}
-              >
-                📊 Gerar Relatório
-              </button>
-            </div>
-
-            {/* Estado vazio — ainda não gerou */}
-            {!relDados && (
-              <div className="empty-state">
-                <div className="e-icon">📊</div>
-                <p>Selecione um período e clique em <strong>Gerar Relatório</strong> para ver os dados consolidados.</p>
-              </div>
-            )}
-
-            {/* Resultados */}
-            {relDados && (
-              <>
-                {/* Resumo geral — cartões de métricas */}
-                <div className="metrics-grid" style={{ marginBottom: 24 }}>
-                  <div className="metric-card blue">
-                    <div className="metric-icon">📋</div>
-                    <div className="metric-label">Total de OS</div>
-                    <div className="metric-value">{relDados.totalOS}</div>
-                    <div className="metric-sub">no período</div>
-                  </div>
-                  <div className="metric-card orange">
-                    <div className="metric-icon">💼</div>
-                    <div className="metric-label">Com Financeiro</div>
-                    <div className="metric-value">{relDados.osComLucro}</div>
-                    <div className="metric-sub">OS com dados de lucro</div>
-                  </div>
-                  <div className="metric-card green">
-                    <div className="metric-icon">💰</div>
-                    <div className="metric-label">Lucro Total</div>
-                    <div className={`metric-value${relDados.lucroTotal >= 0 ? ' green' : ' red'}`}>{fmtBRL(relDados.lucroTotal)}</div>
-                    <div className="metric-sub">no período</div>
-                  </div>
-                  <div className="metric-card yellow">
-                    <div className="metric-icon">📈</div>
-                    <div className="metric-label">Média por OS</div>
-                    <div className="metric-value">{fmtBRL(relDados.mediaPorOS)}</div>
-                    <div className="metric-sub">OS com financeiro</div>
-                  </div>
-                </div>
-
-                {/* Tabela por status (REL-02) */}
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary)', marginBottom: 10 }}>📋 OS por Status</div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.88rem' }}>
-                    <thead>
-                      <tr style={{ background: 'var(--primary)', color: '#fff' }}>
-                        <th style={{ padding: '8px 12px', textAlign: 'left', borderRadius: '6px 0 0 0' }}>Status</th>
-                        <th style={{ padding: '8px 12px', textAlign: 'right' }}>Quantidade</th>
-                        <th style={{ padding: '8px 12px', textAlign: 'right', borderRadius: '0 6px 0 0' }}>Percentual</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(relDados.porStatus).map(([status, count], idx) => {
-                        const pct = relDados.totalOS > 0 ? ((count / relDados.totalOS) * 100).toFixed(1) : '0.0'
-                        const labels = { aguardando_tecnico: '🔔 Aguardando Técnico', pendente: '⏳ Pendente', processado: '✅ Processado', enviado: '📤 Enviado' }
-                        return (
-                          <tr key={status} style={{ background: idx % 2 === 0 ? 'var(--light)' : '#fff', borderBottom: '1px solid var(--border)' }}>
-                            <td style={{ padding: '7px 12px' }}>{labels[status] || status}</td>
-                            <td style={{ padding: '7px 12px', textAlign: 'right', fontWeight: 700 }}>{count}</td>
-                            <td style={{ padding: '7px 12px', textAlign: 'right', color: 'var(--muted)' }}>{pct}%</td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Tabela por seguradora (REL-03) */}
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary)', marginBottom: 10 }}>🏢 Por Seguradora</div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.88rem' }}>
-                    <thead>
-                      <tr style={{ background: 'var(--primary)', color: '#fff' }}>
-                        <th style={{ padding: '8px 12px', textAlign: 'left', borderRadius: '6px 0 0 0' }}>Seguradora</th>
-                        <th style={{ padding: '8px 12px', textAlign: 'right' }}>OS</th>
-                        <th style={{ padding: '8px 12px', textAlign: 'right', borderRadius: '0 6px 0 0' }}>Lucro Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(relDados.porSeguradora)
-                        .sort((a, b) => b[1].lucro - a[1].lucro)
-                        .map(([seg, { count, lucro }], idx) => (
-                          <tr key={seg} style={{ background: idx % 2 === 0 ? 'var(--light)' : '#fff', borderBottom: '1px solid var(--border)' }}>
-                            <td style={{ padding: '7px 12px' }}>{seg}</td>
-                            <td style={{ padding: '7px 12px', textAlign: 'right', fontWeight: 700 }}>{count}</td>
-                            <td style={{ padding: '7px 12px', textAlign: 'right', color: lucro >= 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 700 }}>{fmtBRL(lucro)}</td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Tabela por técnico (REL-04) */}
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary)', marginBottom: 10 }}>👷 Por Técnico</div>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.88rem' }}>
-                    <thead>
-                      <tr style={{ background: 'var(--primary)', color: '#fff' }}>
-                        <th style={{ padding: '8px 12px', textAlign: 'left', borderRadius: '6px 0 0 0' }}>Técnico</th>
-                        <th style={{ padding: '8px 12px', textAlign: 'right' }}>OS</th>
-                        <th style={{ padding: '8px 12px', textAlign: 'right', borderRadius: '0 6px 0 0' }}>Lucro Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(relDados.porTecnico)
-                        .sort((a, b) => b[1].lucro - a[1].lucro)
-                        .map(([tec, { count, lucro }], idx) => (
-                          <tr key={tec} style={{ background: idx % 2 === 0 ? 'var(--light)' : '#fff', borderBottom: '1px solid var(--border)' }}>
-                            <td style={{ padding: '7px 12px' }}>{tec}</td>
-                            <td style={{ padding: '7px 12px', textAlign: 'right', fontWeight: 700 }}>{count}</td>
-                            <td style={{ padding: '7px 12px', textAlign: 'right', color: lucro >= 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 700 }}>{fmtBRL(lucro)}</td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Botão download PDF (REL-05) */}
-                <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-                  <button
-                    className="btn-primary"
-                    onClick={() => gerarRelatorioMensalPdf(relDados, relMes, relAno, empresa?.nome)}
-                  >
-                    ⬇️ Baixar PDF
-                  </button>
-                  <button
-                    className="btn-sm btn-view"
-                    onClick={() => setRelDados(null)}
-                  >
-                    ✕ Limpar
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
+        {abaAtiva === 'relatorio' && <RelatorioTab />}
 
       </div>{/* fim admin-content */}
 
@@ -2446,12 +1245,12 @@ export default function AdminPage() {
                 <div className="link-info-card"><span className="link-info-lbl">Seguradora</span><span className="link-info-val">{linkRelModal.seguradora || '—'}</span></div>
               </div>
               <div className="link-box" style={{ marginTop: 14 }}>
-                <span className="link-text">{buildLinkRelatorio(linkRelModal.id)}</span>
+                <span className="link-text">{buildLinkRelatorio(linkRelModal.id, linkRelModal.publicToken)}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
                 <button
                   className={`btn-copy${linkRelCopied ? ' copied' : ''}`}
-                  onClick={() => copyLinkRel(buildLinkRelatorio(linkRelModal.id))}>
+                  onClick={() => copyLinkRel(buildLinkRelatorio(linkRelModal.id, linkRelModal.publicToken))}>
                   {linkRelCopied ? '✅ Copiado!' : '📋 Copiar Link'}
                 </button>
                 <a className="btn-whatsapp"
@@ -2462,14 +1261,14 @@ export default function AdminPage() {
                     `📍 ${linkRelModal.cidade || '—'}\n` +
                     `🔧 ${linkRelModal.servico || '—'}\n` +
                     `📅 ${linkRelModal.data_chegada || '—'}\n\n` +
-                    `🔗 Acesse o relatório completo:\n${buildLinkRelatorio(linkRelModal.id)}\n\n` +
+                    `🔗 Acesse o relatório completo:\n${buildLinkRelatorio(linkRelModal.id, linkRelModal.publicToken)}\n\n` +
                     `O relatório contém fotos, checklist e assinaturas do prestador e do segurado.`
                   )}`}
                   target="_blank" rel="noopener noreferrer">
                   📲 Enviar no WhatsApp
                 </a>
                 <button className="btn-sm" style={{ background: '#1a5276', color: '#fff', fontSize: '.85rem', padding: '8px 14px', width: '100%' }}
-                  onClick={() => window.open(buildLinkRelatorio(linkRelModal.id), '_blank')}>
+                  onClick={() => window.open(buildLinkRelatorio(linkRelModal.id, linkRelModal.publicToken), '_blank')}>
                   🔗 Abrir Relatório
                 </button>
               </div>
@@ -2548,7 +1347,7 @@ export default function AdminPage() {
                   <div className="md-grid">
                     <div className="md-field"><label>Nome</label><p>{selected.nome_segurado || '—'}</p></div>
                     <div className="md-field"><label>Telefone</label><p>{selected.tel_segurado || '—'}</p></div>
-                    <div className="md-field"><label>Endereço</label><p>{selected.endereco || '—'}</p></div>
+                    <div className="md-field"><label>Endereço</label><p>{selected.endereco ? `${selected.endereco}${selected.numero ? `, ${selected.numero}` : ''}` : '—'}</p></div>
                     <div className="md-field"><label>Cidade</label><p>{selected.cidade || '—'}</p></div>
                   </div>
                 ) : (
@@ -2931,80 +1730,6 @@ export default function AdminPage() {
             </div>
             <div className="modal-footer">
               <button className="btn-sm btn-view" onClick={() => setSelectedSegurado(null)}>Fechar</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ══ MODAL: ADICIONAR / EDITAR TÉCNICO ══ */}
-      {showTecnicoModal && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowTecnicoModal(false)}>
-          <div className="modal-box" style={{ maxWidth: 520 }}>
-            <div className="modal-header">
-              <h2>{tecnicoEdit ? '✏️ Editar Técnico' : '👷 Novo Técnico'}</h2>
-              <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }}
-                onClick={() => setShowTecnicoModal(false)}>✕</button>
-            </div>
-            <div className="modal-body">
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                <div className="field" style={{ gridColumn: '1/-1' }}>
-                  <label>Nome completo <span className="req">*</span></label>
-                  <input
-                    value={tecnicoFormData.nome}
-                    onChange={e => setTecnicoFormData(p => ({ ...p, nome: e.target.value }))}
-                    className={tecnicoFormErrors.nome ? 'error' : ''}
-                    placeholder="Nome completo do técnico"
-                  />
-                </div>
-                <div className="field">
-                  <label>Telefone <span className="req">*</span></label>
-                  <input
-                    type="tel"
-                    value={tecnicoFormData.telefone}
-                    onChange={e => setTecnicoFormData(p => ({ ...p, telefone: maskPhone(e.target.value) }))}
-                    className={tecnicoFormErrors.telefone ? 'error' : ''}
-                    placeholder="(XX) XXXXX-XXXX"
-                  />
-                </div>
-                <div className="field">
-                  <label>E-mail (opcional)</label>
-                  <input
-                    type="email"
-                    value={tecnicoFormData.email}
-                    onChange={e => setTecnicoFormData(p => ({ ...p, email: e.target.value }))}
-                    placeholder="email@exemplo.com"
-                  />
-                </div>
-                <div className="field" style={{ gridColumn: '1/-1' }}>
-                  <label>Especialidade (opcional)</label>
-                  <input
-                    value={tecnicoFormData.especialidade}
-                    onChange={e => setTecnicoFormData(p => ({ ...p, especialidade: e.target.value }))}
-                    placeholder="Ex: Hidráulica, Elétrica"
-                  />
-                </div>
-
-                <div style={{ gridColumn: '1/-1' }}>
-                  <div className="toggle-wrap">
-                    <label className="toggle-switch">
-                      <input
-                        type="checkbox"
-                        checked={tecnicoFormData.ativo}
-                        onChange={e => setTecnicoFormData(p => ({ ...p, ativo: e.target.checked }))}
-                      />
-                      <span className="toggle-slider" />
-                    </label>
-                    <span className="toggle-label">{tecnicoFormData.ativo ? '🟢 Ativo' : '⚫ Inativo'}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button className="btn-sm" style={{ background: 'var(--light)', color: 'var(--muted)', border: '1px solid var(--border)' }}
-                onClick={() => setShowTecnicoModal(false)}>Cancelar</button>
-              <button className="btn-primary" onClick={saveTecnicoModal} disabled={savingTecnicoForm} style={{ padding: '9px 22px', fontSize: '.9rem' }}>
-                {savingTecnicoForm ? '⏳ Salvando...' : '💾 Salvar'}
-              </button>
             </div>
           </div>
         </div>
@@ -3567,5 +2292,6 @@ export default function AdminPage() {
       )}
 
     </div>
+    </AdminContext.Provider>
   )
 }

@@ -102,7 +102,8 @@ async function handleCriarOS(dados, sendResponse) {
     sendResponse({
       success: true,
       data: result,
-      osUrl: `${APP_URL}/${empresaSlug}/admin?os=${result.osId}`
+      osUrl:   `${APP_URL}/${empresaSlug}/admin?os=${result.osId}`,
+      formUrl: `${APP_URL}/${empresaSlug}?os=${result.osId}`
     });
 
   } catch (error) {

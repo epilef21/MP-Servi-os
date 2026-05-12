@@ -11,6 +11,10 @@ import {
   PLANOS,
   doc,
   setDoc,
+  collection,
+  query,
+  where,
+  getDocs,
 } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -72,6 +76,14 @@ export default function CadastroPage() {
     setLoading(true)
 
     try {
+      // 0. Verifica se o slug já está em uso por outra empresa
+      const slugSnap = await getDocs(query(collection(db, 'empresas'), where('slug', '==', slugPreview)))
+      if (!slugSnap.empty) {
+        setErro(`O link "${slugPreview}" já está sendo usado por outra empresa. Tente um nome diferente.`)
+        setLoading(false)
+        return
+      }
+
       // 1. Cria o usuário no Firebase Auth
       const user = await cadastrar(form.email, form.senha)
 

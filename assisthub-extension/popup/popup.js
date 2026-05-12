@@ -29,6 +29,7 @@ async function verificarPortalAtivo() {
     const portais = {
       'portal.tempoassist.com.br': 'Tempo Assist',
       'novo-portal-prestador.prd.tempoassist.cloud': 'Portal Juvo (Tempo Assist)',
+      'prestador.maxpar.com': 'Maxpar',
       'sistemas.maxpar.com.br': 'Maxpar',
       'portal.allianz.com.br': 'Allianz',
       'vianet.webmondial.com.br': 'Mondial Assistance'
@@ -108,8 +109,14 @@ async function criarOS() {
 
     $('status').innerHTML = `
       <span class="success">✅ OS criada com sucesso!</span><br>
-      <a class="os-link" href="${result.osUrl}" target="_blank">Abrir no AssistHub →</a>
+      <a class="os-link" href="${result.osUrl}" target="_blank">Abrir no AssistHub →</a><br>
+      <button id="btn-copy-link" class="btn-copy" data-url="${result.formUrl}">📋 Copiar link do técnico</button>
     `;
+    document.getElementById('btn-copy-link').addEventListener('click', function () {
+      navigator.clipboard.writeText(this.dataset.url).then(() => {
+        this.textContent = '✅ Link copiado!';
+      });
+    });
 
     chrome.tabs.create({ url: result.osUrl });
 
@@ -175,6 +182,8 @@ const CAMPOS_OS = [
   { id: 'f-tipo',   label: 'Serviço',    key: 'tipo_sinistro' },
   { id: 'f-os',     label: 'Nº OS',      key: 'numero_os' },
   { id: 'f-data',   label: 'Data',       key: 'data_chegada',   placeholder: 'DD/MM/AAAA' },
+  { id: 'f-hora-i', label: 'Hora início', key: 'hora_chegada',  placeholder: 'HH:MM' },
+  { id: 'f-hora-f', label: 'Hora fim',    key: 'hora_saida',    placeholder: 'HH:MM' },
   { id: 'f-desc',   label: 'Descrição',  key: 'descricao',      full: true, textarea: true }
 ];
 
@@ -364,8 +373,28 @@ function extrairOSNaPagina() {
       return '';
     };
 
+    // Retorna TODOS os valores de células não-label após um label (ex: "Serviço" → ["CONSERTO RESIDENCIAL", "AR-CONDICIONADO"])
+    const getCellMulti = function(label) {
+      const nl = norm(label);
+      const values = [];
+      for (const cell of document.querySelectorAll('td, th')) {
+        if (norm(cell.textContent) !== nl) continue;
+        let sib = cell.nextElementSibling;
+        while (sib && values.length < 4) {
+          if (isLabelLike(sib)) break;
+          const v = getElemVal(sib);
+          // Para se parece com "Palavra: valor" embutido (outro label inline)
+          if (v && v.length > 1 && !/^\w+:\s/.test(v)) values.push(v);
+          else if (v && /^\w+:\s/.test(v)) break;
+          sib = sib.nextElementSibling;
+        }
+        if (values.length) break;
+      }
+      return values.join(' / ');
+    };
+
     const produtoRaw    = getCell('Produto');
-    const servicoRaw    = getCell('Serviço')    || getCell('Servico');
+    const servicoRaw    = getCellMulti('Serviço') || getCellMulti('Servico') || getCell('Serviço') || getCell('Servico');
     const localRaw      = getCell('Local');
     const importanteRaw = getCell('Importante');
     const assistencia   = getMondialOSNumber();
@@ -380,17 +409,29 @@ function extrairOSNaPagina() {
     const endereco  = lastComma > 0 ? localRaw.slice(0, lastComma).trim() : localRaw;
     const numero    = lastComma > 0 ? localRaw.slice(lastComma + 2).trim() : '';
 
-    const telMatch = importanteRaw.match(/\+?55?\s*\(?\d{2}\)?\s*\d{4,5}[-\s]?\d{4}/);
-    let tel = telMatch ? telMatch[0].replace(/\D/g, '') : '';
+    // Telefone: busca "TEL: XXXXXXXXXX" primeiro, depois regex flexível (sem exigir código do país)
+    let tel = '';
+    const telDirectMatch = importanteRaw.match(/TEL[:\s]+(\d{10,11})/i);
+    if (telDirectMatch) {
+      tel = telDirectMatch[1];
+    } else {
+      const telMatch = importanteRaw.match(/(\+?55\s*)?[\(]?\d{2}[\)]?\s*9?\d{4}[-\s]?\d{4}/);
+      tel = telMatch ? telMatch[0].replace(/\D/g, '') : '';
+    }
     if (tel.length === 13 && tel.startsWith('55')) tel = tel.slice(2);
     if (tel.length === 12 && tel.startsWith('55')) tel = tel.slice(2);
 
-    let dataAgendamento = '';
-    for (const el of document.querySelectorAll('td, div, span, p, b, font')) {
-      if (el.children.length === 0) {
-        const m = (el.textContent || '').match(/(\d{2}\/\d{2}\/\d{4})/);
-        if (m) { dataAgendamento = m[1]; break; }
+    // Data e horário: busca "agendada entre DD/MM/YYYY HH:MM e DD/MM/YYYY HH:MM" no banner
+    let dataAgendamento = '', hora_chegada = '', hora_saida = '';
+    for (const el of document.querySelectorAll('strong, b, td, div, p, span')) {
+      const t = cleanVal(el.textContent || '');
+      const mH = t.match(/entre\s+\d{2}\/\d{2}\/\d{4}\s+(\d{2}:\d{2})\s+e\s+\d{2}\/\d{2}\/\d{4}\s+(\d{2}:\d{2})/i);
+      if (mH) { hora_chegada = mH[1]; hora_saida = mH[2]; }
+      if (!dataAgendamento) {
+        const mD = t.match(/(\d{2}\/\d{2}\/\d{4})/);
+        if (mD) dataAgendamento = mD[1];
       }
+      if (dataAgendamento && hora_chegada) break;
     }
 
     const d = {
@@ -405,7 +446,9 @@ function extrairOSNaPagina() {
       tipo_sinistro: servicoRaw,
       descricao:     getCell('Problema') || getCell('Referências') || getCell('Referencia'),
       numero_os:     assistencia,
-      data_chegada:  dataAgendamento
+      data_chegada:  dataAgendamento,
+      hora_chegada,
+      hora_saida
     };
 
     if (!d.nome_segurado && !d.endereco)
@@ -438,12 +481,20 @@ function extrairOSNaPagina() {
       return '';
     };
 
-    // Tipo de serviço: extraído do card da lista ("2.71356348/1 - ELETRICISTA - 17505460 - ...")
-    let tipo_sinistro = '';
-    for (const sp of document.querySelectorAll('span')) {
-      if (!sp.children.length) {
-        const m = sp.textContent.trim().match(/^[\d./]+ - ([A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇÀÈ\s]+) - \d{5,}/);
-        if (m) { tipo_sinistro = m[1].trim(); break; }
+    // Tipo de serviço: prefere o painel de detalhes (label semântico), fallback para card da lista
+    let tipo_sinistro = getLabelVal('Nome da cobertura') || getLabelVal('Serviço') || getLabelVal('Tipo de Serviço') || '';
+    if (!tipo_sinistro) {
+      // Fallback: primeiro card do número de OS atual
+      const osNum = getLabelVal('Assistência');
+      for (const sp of document.querySelectorAll('span')) {
+        if (!sp.children.length) {
+          const t = sp.textContent.trim();
+          // Só aceita se o texto contém o número de OS atual
+          if (osNum && t.startsWith(osNum.split('/')[0])) {
+            const m = t.match(/[\d./]+ - ([A-ZÁÉÍÓÚÂÊÎÔÛÃÕÇÀÈ\s]+) - \d{5,}/);
+            if (m) { tipo_sinistro = m[1].trim(); break; }
+          }
+        }
       }
     }
 
@@ -460,20 +511,29 @@ function extrairOSNaPagina() {
         bairro = (parts[4] || '').trim();
         const em = endRaw.match(/^(.*?)(\d+)(.*)$/);
         endereco = em ? em[1].trim() : endRaw;
-        numero   = em ? em[2].trim() : '';
+        // "0" representa S/N — ignora
+        numero = (em && em[2] !== '0') ? em[2].trim() : '';
         break;
       }
     }
 
-    // Data agendamento: "Previsão início" → "02/05/2026, 08:00:00"
-    const dataRaw  = getLabelVal('Previsão início');
-    const dataMatch = dataRaw.match(/(\d{2}\/\d{2}\/\d{4})/);
+    // Data e horário: "Previsão início" → "11/05/2026, 16:00:00" / "Previsão fim" → "11/05/2026, 19:59:00"
+    const inicioRaw = getLabelVal('Previsão início');
+    const fimRaw    = getLabelVal('Previsão fim');
+    const dataMatch = inicioRaw.match(/(\d{2}\/\d{2}\/\d{4})/);
     const data_chegada = dataMatch ? dataMatch[1] : '';
+    const horaInicioM  = inicioRaw.match(/(\d{2}:\d{2})/);
+    const horaFimM     = fimRaw.match(/(\d{2}:\d{2})/);
+    const hora_chegada = horaInicioM ? horaInicioM[1] : '';
+    const hora_saida   = horaFimM   ? horaFimM[1]    : '';
+
+    // Telefone: tenta múltiplos labels
+    const tel_raw = getLabelVal('Telefone') || getLabelVal('Contato') || getLabelVal('Tel.') || getLabelVal('Telefone Segurado') || '';
 
     const d = {
       seguradora:    getLabelVal('Cliente'),
       nome_segurado: getLabelVal('Segurado'),
-      tel_segurado:  getLabelVal('Telefone').replace(/\D/g, ''),
+      tel_segurado:  tel_raw.replace(/\D/g, ''),
       endereco,
       numero,
       bairro,
@@ -482,7 +542,9 @@ function extrairOSNaPagina() {
       tipo_sinistro,
       descricao:     '',
       numero_os:     getLabelVal('Assistência'),
-      data_chegada
+      data_chegada,
+      hora_chegada,
+      hora_saida
     };
 
     if (!d.nome_segurado && !d.numero_os)
@@ -508,30 +570,64 @@ function extrairOSNaPagina() {
   if (LABEL_MAP[hostname]) {
     const map = LABEL_MAP[hostname];
     const enderecoRaw = getByLabel(map.endereco);
-    // Maxpar: "Rua X - Número - Bairro - Cidade - restante..."
-    // Separa os campos a partir do padrão "parte1 - parte2 - parte3 - parte4 - ..."
+
+    // Número: tenta label separado primeiro, depois extrai do split do endereço
+    const numLbls = ['Número', 'Nº', 'N°', 'Numero', 'Número/Complemento'];
+    let numero = '';
+    for (const lbl of numLbls) {
+      const v = getByLabel(lbl);
+      if (v) { numero = v; break; }
+    }
+
+    // Split do endereço: "Rua X - Núm - Bairro - Cidade"
     const partes = enderecoRaw.split(/\s*-\s*/);
+    if (!numero && /^\d/.test((partes[1] || '').trim())) {
+      numero = partes[1].trim();
+    }
+
+    // Extrai data E horário do card "Agendamento" em uma única passagem
+    let data_chegada = '', hora_chegada = '', hora_saida = '';
+    for (const el of document.querySelectorAll('span,div,p,td,b,strong,h3,h4')) {
+      if (el.textContent?.trim() === 'Agendamento' && el.children.length === 0) {
+        const box = el.parentElement?.parentElement || el.parentElement;
+        if (box) {
+          const txt = box.textContent;
+          const dm = txt.match(/(\d{2}\/\d{2}\/\d{4})/);
+          if (dm) data_chegada = dm[1];
+          const hm = txt.match(/(\d{1,2})h(\d{2})\s*[-–]\s*(\d{1,2})h(\d{2})/);
+          if (hm) {
+            hora_chegada = `${hm[1].padStart(2, '0')}:${hm[2]}`;
+            hora_saida   = `${hm[3].padStart(2, '0')}:${hm[4]}`;
+          }
+          break;
+        }
+      }
+    }
+    // Fallback data: qualquer elemento folha com data
+    if (!data_chegada) {
+      for (const el of document.querySelectorAll('span,p,b,strong,td')) {
+        if (el.children.length === 0) {
+          const m = el.textContent?.trim().match(/(\d{2}\/\d{2}\/\d{4})/);
+          if (m) { data_chegada = m[1]; break; }
+        }
+      }
+    }
+
     const d = {
       seguradora:    map.seguradora,
       nome_segurado: getByLabel(map.nome_segurado),
       tel_segurado:  getByLabel(map.tel_segurado),
       endereco:      partes[0] || enderecoRaw,
-      numero:        partes[1] || '',
+      numero,
       bairro:        partes[2] || '',
       cidade:        partes[3] || '',
       cep:           '',
       tipo_sinistro: getByLabel(map.tipo_sinistro),
       descricao:     getByLabel(map.descricao),
       numero_os:     getByLabel(map.numero_os) || getOSCardText(/[A-Z]\d{6,}(\/\d+)?/),
-      data_chegada:  (() => {
-        for (const el of document.querySelectorAll('p,span,div,strong,b,h3,h4')) {
-          if (el.children.length === 0) {
-            const m = el.textContent?.trim().match(/^(\d{2}\/\d{2}\/\d{4})$/);
-            if (m) return m[1];
-          }
-        }
-        return '';
-      })()
+      data_chegada,
+      hora_chegada,
+      hora_saida
     };
     if (d.tel_segurado) d.tel_segurado = d.tel_segurado.replace(/\D/g, '');
     if (!d.nome_segurado && !d.endereco)

@@ -3,7 +3,7 @@
 // Acessível em /avaliacao/:slug/:osId — sem autenticação
 // ============================================================
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {
   db,
   getEmpresaBySlug,
@@ -25,6 +25,8 @@ function fmtDate(d) {
 
 export default function AvaliacaoPage() {
   const { slug, osId } = useParams()
+  const [searchParams] = useSearchParams()
+  const linkToken = searchParams.get('t')
 
   // ── Estado de carregamento / dados ──────────────────────
   const [loading,     setLoading]     = useState(true)
@@ -65,6 +67,14 @@ export default function AvaliacaoPage() {
         }
 
         const dadosOs = { id: osSnap.id, ...osSnap.data() }
+
+        // Valida token: se a OS tem publicToken, o link precisa trazer o correto
+        if (dadosOs.publicToken && linkToken !== dadosOs.publicToken) {
+          setErro('Link de avaliação inválido. Solicite um novo link.')
+          setLoading(false)
+          return
+        }
+
         setOs(dadosOs)
         setEmpresaId(empresa.id)
 

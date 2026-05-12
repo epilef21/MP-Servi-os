@@ -155,11 +155,43 @@ service cloud.firestore {
         // Criação: apenas o dono da empresa ou superadmin
         allow create: if eDonoEmpresa(empresaId) || eSuperAdmin();
 
-        // Atualização sem restrição de auth: permite que o técnico
-        // (preenche diagnóstico + itens) e o cliente (assina + aprova)
-        // atualizem via link público sem precisar estar logado.
-        // O admin também pode atualizar (revisão de valores).
-        allow update: if true;
+        // Atualização com restrição por papel:
+        // - Admin/superadmin: irrestrita
+        // - Técnico sem auth: somente quando status='aguardando_tecnico',
+        //   seta para 'em_revisao' e só toca campos técnicos
+        // - Cliente sem auth aprova: somente quando status='enviado_cliente',
+        //   seta para 'aprovado' e só toca campos de aprovação
+        // - Cliente sem auth reprova: somente quando status='enviado_cliente',
+        //   seta para 'reprovado' e só toca campos de reprovação
+        allow update: if
+          eDonoEmpresa(empresaId) || eSuperAdmin()
+          ||
+          (
+            resource.data.status == 'aguardando_tecnico' &&
+            request.resource.data.status == 'em_revisao' &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'status', 'diagnostico', 'itens', 'total_geral', 'total_cliente',
+              'total_seguradora', 'forma_pagamento', 'prazo_execucao',
+              'observacoes', 'fotos', 'num_serie', 'marca', 'modelo',
+              'voltagem', 'preenchido_em'
+            ])
+          )
+          ||
+          (
+            resource.data.status == 'enviado_cliente' &&
+            request.resource.data.status == 'aprovado' &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'status', 'aprovado_por', 'assinatura_cliente', 'aprovado_em'
+            ])
+          )
+          ||
+          (
+            resource.data.status == 'enviado_cliente' &&
+            request.resource.data.status == 'reprovado' &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'status', 'motivo_reprovacao'
+            ])
+          );
 
         // Exclusão: apenas o dono da empresa ou superadmin
         allow delete: if eDonoEmpresa(empresaId) || eSuperAdmin();

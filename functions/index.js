@@ -37,8 +37,16 @@ exports.criarOSFromExtension = onRequest({
   const {
     nome_segurado, tel_segurado, endereco, numero,
     cidade, bairro, cep, tipo_sinistro, descricao,
-    numero_os, seguradora, empresaSlug, origem, data_chegada
+    numero_os, seguradora, empresaSlug, origem, data_chegada,
+    hora_chegada, hora_saida
   } = body;
+
+  // Converte DD/MM/AAAA → YYYY-MM-DD para a Agenda (que usa formato ISO)
+  function toISO(ddmmyyyy) {
+    if (!ddmmyyyy) return '';
+    const p = ddmmyyyy.split('/');
+    return p.length === 3 ? `${p[2]}-${p[1]}-${p[0]}` : '';
+  }
 
   if (!nome_segurado || !endereco || !empresaSlug) {
     res.status(400).json({ error: 'Campos obrigatórios faltando.' });
@@ -99,6 +107,10 @@ exports.criarOSFromExtension = onRequest({
     num_assist:    numero_os     || '',
     seguradora:    seguradora    || '',
     data_chegada:  data_chegada  || '',
+    hora_chegada:  hora_chegada  || '',
+    hora_saida:    hora_saida    || '',
+    data_agendada: toISO(data_chegada),
+    hora_agendada: hora_chegada  || '',
     origem:           origem        || 'chrome_extension',
     criado_em:        FieldValue.serverTimestamp(),
     criado_por:       uid,

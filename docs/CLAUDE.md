@@ -19,6 +19,82 @@ Maxpar, Allianz). Substitui papel, WhatsApp e planilha
 por um fluxo 100% digital.
 
 ---
+---
+
+## FLUXO REAL DO NEGÓCIO (CRÍTICO — LER ANTES DE IMPLEMENTAR)
+
+### Como funciona na prática
+
+1. Seguradora aciona via app/portal
+2. Admin aceita e despacha técnico pelo WhatsApp
+3. Técnico chega no local
+4. Técnico coleta a SENHA do cliente
+   → 4 últimos dígitos do celular OU token de 4 dígitos
+   → Comprova presença física no local
+5. Técnico faz diagnóstico e manda LAUDO
+   → Sempre por WhatsApp ou ligação — NUNCA pelo sistema
+   → Motivo: cliente não dá detalhes na OS
+   → Técnico chega e descobre o problema real
+6. Admin avalia o laudo e consulta a seguradora:
+   → O cliente tem limite de material?
+   → Quanto é o limite?
+   → O serviço está coberto?
+7. Admin libera execução (por WhatsApp para o técnico)
+8. Técnico executa APENAS o que está na OS
+   → Nunca serviços extras solicitados pelo cliente
+   → Ex: OS é "troca de torneira" → não olha a válvula
+9. Técnico preenche checklist e coleta assinaturas
+10. Admin tarifa (MO + deslocamento) e envia à seguradora
+    → Cada seguradora tem seu processo
+    → Algumas: WhatsApp / Outras: portal próprio
+
+### Regras críticas de negócio
+
+SENHA:
+- Sempre fornecida pelo cliente
+- 4 últimos dígitos do celular OU token de 4 dígitos
+- Obrigatória — comprova presença
+
+LIMITES DE MATERIAL:
+- Variam por seguradora E por contrato do cliente
+- Mapfre: ~R$300 MO + material (mas depende do contrato)
+- Allianz: ~R$100 MO + material (passou → ligar para aprovar)
+- SEMPRE consultar — nunca assumir o limite
+- Técnico colocar material sem aprovação = PREJUÍZO
+  (não pode cobrar o cliente depois)
+
+ESCOPO DO SERVIÇO:
+- Executar APENAS o que está descrito na OS
+- Cliente sempre pede serviços extras → RECUSAR
+- Ex: OS "troca torneira" → cliente quer olhar válvula → NÃO
+
+TÉCNICOS:
+- Trabalham de forma autônoma
+- Têm agenda própria de serviços particulares
+- Disponibilidade sempre por consulta (WhatsApp)
+- Dificuldade com tecnologia — sistema deve ser simples
+- Nem toda cidade tem técnico de confiança disponível
+- Cada técnico tem seu próprio preço (marido de aluguel)
+
+SEGURADORAS ATENDIDAS:
+- Tempo (portal web)
+- Mapfre (app mobile)
+- Maxpar (portal web)
+- Allianz (portal web)
+- Cada uma tem processo diferente de envio do checklist
+
+### O que NÃO implementar por causa da realidade do negócio
+
+- ❌ Trava esperando liberação do admin no formulário
+  → Técnico não vai esperar, vai ligar
+- ❌ Laudo pelo sistema
+  → WhatsApp e ligação funcionam melhor
+- ❌ Notificação push para técnico
+  → Maioria não vai configurar
+- ❌ Regras fixas de limite por seguradora
+  → Cada contrato é diferente — sempre consultar
+- ❌ Automação de despacho de técnico
+  → Disponibilidade sempre por consulta manual
 
 ## ESTRUTURA DO PROJETO
 mp-react/

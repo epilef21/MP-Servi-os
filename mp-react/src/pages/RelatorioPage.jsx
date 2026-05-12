@@ -4,7 +4,7 @@
 // Acessível por seguradoras via link compartilhado
 // ============================================================
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {
   db,
   collection,
@@ -32,6 +32,8 @@ function SN({ v }) {
 
 export default function RelatorioPage() {
   const { slug, osId } = useParams()
+  const [searchParams] = useSearchParams()
+  const linkToken = searchParams.get('t')
   const [loading,  setLoading]  = useState(true)
   const [erro,     setErro]     = useState(null)
   const [os,       setOs]       = useState(null)
@@ -60,7 +62,12 @@ export default function RelatorioPage() {
           setErro('Relatório não encontrado.')
           return
         }
-        setOs({ id: osSnap.id, ...osSnap.data() })
+        const dadosOs = { id: osSnap.id, ...osSnap.data() }
+        if (dadosOs.publicToken && linkToken !== dadosOs.publicToken) {
+          setErro('Link do relatório inválido. Solicite um novo link ao prestador.')
+          return
+        }
+        setOs(dadosOs)
       } catch (e) {
         setErro('Erro ao carregar o relatório. Tente novamente.')
       } finally {

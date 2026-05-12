@@ -64,12 +64,13 @@ export default function FormPage() {
   const corPrimaria  = config?.corPrimaria || '#1a3fa8'
 
   // ── Modo OS pré-preenchida (link do admin) ───────────────
-  const osId       = searchParams.get('os') || null
+  const osId        = searchParams.get('os') || null
+  const linkToken   = searchParams.get('t')  || null
   const isPrefilled = !!osId
   // tel_segurado nunca é bloqueado — técnico sempre pode preencher/editar
+  // desc_problema não entra na lista fixa — é avaliado dinamicamente via isLocked
   const LOCKED = isPrefilled
-    ? ['seguradora', 'num_assist', 'nome_segurado',
-       'endereco', 'cidade', 'servico', 'desc_problema']
+    ? ['seguradora', 'num_assist', 'nome_segurado', 'endereco', 'cidade', 'servico']
     : []
 
   // Se a URL tem parâmetros inline (links antigos), usa eles como seed inicial.
@@ -113,7 +114,9 @@ export default function FormPage() {
   const [submitted,    setSubmitted]    = useState(false)
   const [submitId,     setSubmitId]     = useState('')
   const [submitOsId,   setSubmitOsId]   = useState('')   // ID completo para link de avaliação
-  const [tecnicoNome,  setTecnicoNome]  = useState('')   // nome do técnico salvo na OS
+  const [tecnicoNome,      setTecnicoNome]      = useState('')
+  const [submitPublicToken, setSubmitPublicToken] = useState('')
+  const [erroToken,         setErroToken]         = useState(false)
   const [progress,     setProgress]     = useState(0)
   const [hasDraft,     setHasDraft]     = useState(false)
   const [isOnline,     setIsOnline]     = useState(navigator.onLine)
@@ -166,6 +169,11 @@ export default function FormPage() {
       .then(snap => {
         if (!snap.exists()) return
         const d = snap.data()
+        // Valida token: se a OS tem publicToken e o link não trouxe o correto, bloqueia
+        if (d.publicToken && linkToken !== d.publicToken) {
+          setErroToken(true)
+          return
+        }
         setForm(prev => ({
           ...prev,
           seguradora:    d.seguradora    || '',
@@ -215,7 +223,12 @@ export default function FormPage() {
     setForm(p => ({ ...p, [k]: v }))
     if (errors[k]) setErrors(p => ({ ...p, [k]: false }))
   }
-  const isLocked = k => LOCKED.includes(k)
+  // desc_problema: só trava se tiver valor — se vier vazio da extensão, técnico preenche manual
+  const isLocked = k => {
+    if (LOCKED.includes(k)) return true
+    if (k === 'desc_problema' && isPrefilled && form.desc_problema?.trim()) return true
+    return false
+  }
 
   function toggleCheckup(id) {
     setCheckup(p => ({ ...p, [id]: { checked: !p[id]?.checked, quant: p[id]?.quant || '' } }))
@@ -316,7 +329,8 @@ export default function FormPage() {
 
     // Status final baseado no resultado da visita
     let statusFinal = 'pendente'
-    if (form.resultado_visita === 'ficou_visita') statusFinal = 'ficou_visita'
+    if (form.resultado_visita === 'ficou_visita')    statusFinal = 'ficou_visita'
+    if (form.resultado_visita === 'cliente_ausente') statusFinal = 'cliente_ausente'
 
     const base = sanitizePayload({
       ...form,
@@ -335,7 +349,6 @@ export default function FormPage() {
         // Atualiza OS existente da empresa (modo pré-preenchido)
         await atualizarOS(empresaId, osId, {
           ...base,
-          status:        'pendente',
           finalizado_em: serverTimestamp(),
         })
         id = osId
@@ -352,10 +365,13 @@ export default function FormPage() {
       setSubmitId(id.slice(0, 8).toUpperCase())
       setSubmitOsId(id)
 
-      // Busca técnico salvo na OS para incluir na mensagem ao segurado
+      // Busca técnico e publicToken salvos na OS para usar na mensagem ao segurado
       try {
         const osSnap = await getDoc(doc(db, 'empresas', empresaId, 'checklist', id))
-        if (osSnap.exists()) setTecnicoNome(osSnap.data().tecnico_nome || '')
+        if (osSnap.exists()) {
+          setTecnicoNome(osSnap.data().tecnico_nome || '')
+          setSubmitPublicToken(osSnap.data().publicToken || '')
+        }
       } catch { /* silencioso — campo é opcional */ }
 
       setSubmitted(true)
@@ -385,7 +401,8 @@ export default function FormPage() {
 
   // ── Monta mensagem WhatsApp para o segurado ──────────────
   function buildNotifSegurado() {
-    const avaliacaoUrl = `${window.location.origin}/avaliacao/${slug}/${submitOsId}`
+    const t = submitPublicToken ? `?t=${submitPublicToken}` : ''
+    const avaliacaoUrl = `${window.location.origin}/avaliacao/${slug}/${submitOsId}${t}`
     const msg =
       `Olá ${form.nome_segurado}! 😊\n\n` +
       `Seu atendimento foi concluído com sucesso! ✅\n\n` +
@@ -424,6 +441,19 @@ export default function FormPage() {
     return (
       <div style={{ textAlign: 'center', padding: '4rem 2rem', fontFamily: 'Barlow, sans-serif' }}>
         <p style={{ color: 'var(--danger)' }}>⚠️ {erroEmpresa}</p>
+      </div>
+    )
+  }
+
+  // ── Link inválido (token não confere) ────────────────────
+  if (erroToken) {
+    return (
+      <div style={{ textAlign: 'center', padding: '4rem 2rem', fontFamily: 'Barlow, sans-serif' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
+        <h2 style={{ color: 'var(--danger)', marginBottom: 8 }}>Link inválido</h2>
+        <p style={{ color: 'var(--muted)', fontSize: '.9rem' }}>
+          Este link não é válido ou já foi alterado. Peça um novo link para o responsável.
+        </p>
       </div>
     )
   }
