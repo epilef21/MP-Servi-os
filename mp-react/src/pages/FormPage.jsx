@@ -361,7 +361,7 @@ export default function FormPage() {
         id = ref.id
       }
 
-      localStorage.removeItem(DRAFT_KEY)
+      try { localStorage.removeItem(DRAFT_KEY) } catch { /* browser pode bloquear storage */ }
       setSubmitId(id.slice(0, 8).toUpperCase())
       setSubmitOsId(id)
 
@@ -384,7 +384,7 @@ export default function FormPage() {
 
   // ── Descarta rascunho ────────────────────────────────────
   function clearDraft() {
-    localStorage.removeItem(DRAFT_KEY)
+    try { localStorage.removeItem(DRAFT_KEY) } catch { /* browser pode bloquear storage */ }
     setForm(INITIAL)
     setHasDraft(false)
   }
