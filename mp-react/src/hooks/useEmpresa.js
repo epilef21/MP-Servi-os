@@ -100,3 +100,10 @@ export function useEmpresa() {
     verificarLimite,
   }
 }
+
+// Helper de teste — limpa o cache de módulo entre testes para isolamento correto.
+// Uso: importar _clearCacheForTest no beforeEach dos testes de useEmpresa.
+// Não usar em código de produção.
+export function _clearCacheForTest() {
+  Object.keys(cache).forEach(k => delete cache[k])
+}

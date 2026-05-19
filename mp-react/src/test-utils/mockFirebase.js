@@ -55,5 +55,7 @@ export function createFirebaseMocks() {
     },
     refChecklist: vi.fn(),
     refConfig: vi.fn(),
+    getEmpresaBySlug: vi.fn().mockResolvedValue(null),
+    getConfigEmpresa: vi.fn().mockResolvedValue({}),
   }
 }

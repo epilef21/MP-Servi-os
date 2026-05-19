@@ -23,8 +23,8 @@ import NotFoundPage           from './pages/NotFoundPage.jsx'
 // ── Guarda de rota para admin da empresa ─────────────────────
 // Redireciona para /login se o usuário não estiver autenticado
 function RotaAdmin({ children }) {
-  const { estaLogado } = useAuth()
-  if (!estaLogado) return <Navigate to="/login" replace />
+  const { estaLogado, empresaId } = useAuth()
+  if (!estaLogado || !empresaId) return <Navigate to="/login" replace />
   return children
 }
 
