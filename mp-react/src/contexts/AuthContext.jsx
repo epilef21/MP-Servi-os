@@ -13,7 +13,6 @@ import {
   signOut,
   doc,
   getDoc,
-  SUPERADMIN_EMAIL,
 } from '../firebase'
 
 // ── Criação do contexto ──────────────────────────────────────
@@ -26,6 +25,21 @@ export function AuthProvider({ children }) {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
   const [loadingAuth,  setLoadingAuth]  = useState(true) // aguarda resolução inicial do Auth
 
+  // Checa se o custom claim de superadmin está ativo e não expirou
+  async function checkSuperAdminClaim(user) {
+    try {
+      const tokenResult = await user.getIdTokenResult()
+      const claims = tokenResult.claims
+      return (
+        claims.role === 'superadmin' &&
+        typeof claims.superadmin_until === 'number' &&
+        claims.superadmin_until > Math.floor(Date.now() / 1000)
+      )
+    } catch {
+      return false
+    }
+  }
+
   // Escuta mudanças de estado do Firebase Auth
   // Disparado automaticamente no carregamento e ao logar/deslogar
   useEffect(() => {
@@ -33,8 +47,8 @@ export function AuthProvider({ children }) {
       if (user) {
         setUsuario(user)
 
-        // Verifica se é o superadmin pelo e-mail
-        if (user.email === SUPERADMIN_EMAIL) {
+        const superAdmin = await checkSuperAdminClaim(user)
+        if (superAdmin) {
           setIsSuperAdmin(true)
           setEmpresaId(null)
         } else {
@@ -92,6 +106,15 @@ export function AuthProvider({ children }) {
     return credencial.user
   }
 
+  // Força refresh do ID token e reavalia o claim de superadmin.
+  // Chamado pelo SuperAdminPage após verifySuperAdmin Cloud Function ter sucesso.
+  async function refreshSuperAdminClaim() {
+    if (!usuario) return
+    await usuario.getIdToken(true) // invalida cache do token
+    const superAdmin = await checkSuperAdminClaim(usuario)
+    setIsSuperAdmin(superAdmin)
+  }
+
   const valor = {
     usuario,
     empresaId,
@@ -100,6 +123,7 @@ export function AuthProvider({ children }) {
     login,
     logout,
     cadastrar,
+    refreshSuperAdminClaim,
     // Atalhos úteis nos componentes
     estaLogado:    !!usuario,
     emailUsuario:  usuario?.email ?? null,

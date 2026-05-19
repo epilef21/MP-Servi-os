@@ -5,6 +5,7 @@
 // ============================================================
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getFunctions, httpsCallable } from 'firebase/functions'
 import {
   db,
   listarTodasEmpresas,
@@ -15,6 +16,7 @@ import {
   query,
   where,
   PLANOS,
+  SUPERADMIN_EMAIL,
 } from '../firebase'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -41,21 +43,43 @@ async function contarOSMes(empresaId) {
 
 export default function SuperAdminPage() {
   const navigate = useNavigate()
-  const { logout, isSuperAdmin, loadingAuth } = useAuth()
+  const { logout, usuario, isSuperAdmin, loadingAuth, refreshSuperAdminClaim } = useAuth()
 
   const [empresas,      setEmpresas]      = useState([])
   const [osPoEmpresa,   setOsPorEmpresa]  = useState({})
   const [loading,       setLoading]       = useState(true)
   const [erro,          setErro]          = useState('')
   const [filtro,        setFiltro]        = useState('')
-  const [salvando,      setSalvando]      = useState(null) // empresaId sendo salvo
+  const [salvando,      setSalvando]      = useState(null)
 
-  // Redireciona se não for superadmin após auth resolver
-  useEffect(() => {
-    if (!loadingAuth && !isSuperAdmin) {
-      navigate('/login', { replace: true })
+  // Estados do modal de verificação de senha
+  const [senhaAdmin,    setSenhaAdmin]    = useState('')
+  const [verificando,   setVerificando]   = useState(false)
+  const [erroSenha,     setErroSenha]     = useState('')
+
+  const isSuperAdminEmail = usuario?.email === SUPERADMIN_EMAIL
+
+  // Nota: proteção por renderização condicional abaixo (sem navigate para evitar loop)
+
+  // Chama Cloud Function verifySuperAdmin e, em caso de sucesso,
+  // força refresh do token para ativar o custom claim
+  async function handleVerificarSenha(e) {
+    e.preventDefault()
+    setErroSenha('')
+    setVerificando(true)
+    try {
+      const functions = getFunctions()
+      const verifySuperAdmin = httpsCallable(functions, 'verifySuperAdmin')
+      await verifySuperAdmin({ password: senhaAdmin })
+      await refreshSuperAdminClaim()
+      setSenhaAdmin('')
+    } catch (err) {
+      const msg = err?.message || 'Erro ao verificar senha.'
+      setErroSenha(msg.includes('Senha incorreta') ? 'Senha incorreta.' : msg)
+    } finally {
+      setVerificando(false)
     }
-  }, [loadingAuth, isSuperAdmin, navigate])
+  }
 
   // Carrega lista de empresas e contagem de OS do mês
   const carregarEmpresas = useCallback(async () => {
@@ -139,6 +163,74 @@ export default function SuperAdminPage() {
   const totalOSMes    = Object.values(osPoEmpresa).reduce((a, b) => a + b, 0)
 
   if (loadingAuth) return null
+
+  // Acesso não autorizado: email não corresponde ao superadmin
+  // Usa renderização condicional em vez de navigate() para evitar loop
+  if (!loadingAuth && usuario && !isSuperAdminEmail) {
+    return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', background: 'var(--light)',
+        flexDirection: 'column', gap: '16px',
+      }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>
+          Acesso não autorizado.
+        </p>
+        <button className="btn btn-primary" onClick={() => navigate('/login', { replace: true })}>
+          Voltar ao login
+        </button>
+      </div>
+    )
+  }
+
+  // Superadmin com e-mail correto mas sem claim válido — pede senha
+  if (isSuperAdminEmail && !isSuperAdmin) {
+    return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', background: 'var(--light)',
+      }}>
+        <div className="card" style={{ width: '100%', maxWidth: '400px', padding: '32px 28px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+            <img src="/logo.png" height="36" alt="AssistHub" style={{ marginBottom: '12px' }} />
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary)', margin: 0 }}>
+              Verificação de acesso
+            </h2>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+              Digite a senha do painel superadmin para continuar.
+            </p>
+          </div>
+          <form onSubmit={handleVerificarSenha}>
+            <div className="form-group" style={{ marginBottom: '16px' }}>
+              <label className="form-label">Senha de acesso</label>
+              <input
+                type="password"
+                className="form-control"
+                value={senhaAdmin}
+                onChange={e => setSenhaAdmin(e.target.value)}
+                required
+                autoFocus
+                disabled={verificando}
+              />
+            </div>
+            {erroSenha && (
+              <div className="alert alert-danger" style={{ marginBottom: '12px', padding: '8px 12px', fontSize: '0.85rem' }}>
+                {erroSenha}
+              </div>
+            )}
+            <button
+              type="submit"
+              className="btn btn-primary"
+              style={{ width: '100%' }}
+              disabled={verificando || !senhaAdmin}
+            >
+              {verificando ? 'Verificando…' : 'Entrar no painel'}
+            </button>
+          </form>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--light)' }}>

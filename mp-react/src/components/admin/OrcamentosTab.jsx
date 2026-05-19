@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { fmtBRL, fmtDate } from '../../utils/formatters.js'
 
-const STATUS_ORC_META = {
+export const STATUS_ORC_META = {
   aguardando_tecnico: { label: '🟠 Aguardando',        cls: 'orc-aguardando' },
   em_revisao:         { label: '🟡 Em Revisão',         cls: 'orc-revisao'    },
   enviado_cliente:    { label: '🔵 Enviado ao Cliente',  cls: 'orc-enviado-c'  },

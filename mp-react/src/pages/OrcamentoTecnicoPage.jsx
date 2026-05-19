@@ -7,6 +7,8 @@ import { useParams } from 'react-router-dom'
 import imageCompression from 'browser-image-compression'
 import { db, doc, getDoc, updateDoc, serverTimestamp, uploadFoto } from '../firebase.js'
 import { useEmpresa } from '../hooks/useEmpresa.js'
+import { validarUpload } from '../utils/validarUpload.js'
+import { comprimirImagem } from '../utils/comprimirImagem.js'
 
 // Converte string de valor monetário ("120,50" ou "120.50") para float
 function parseBRL(v) {
@@ -146,12 +148,31 @@ export default function OrcamentoTecnicoPage() {
     return Object.keys(e).length === 0
   }
 
-  function handleFotoSelect(e) {
+  async function handleFotoSelect(e) {
     const files = Array.from(e.target.files)
-    const novas = files.map(f => ({ file: f, preview: URL.createObjectURL(f) }))
-    setFotos(prev => [...prev, ...novas])
+    e.target.value = ''
     setErroFoto('')
-    e.target.value = '' // permite re-selecionar o mesmo arquivo
+
+    const aprovadas = []
+    const erros = []
+
+    for (const file of files) {
+      try {
+        await validarUpload(file)
+        const comprimido = await comprimirImagem(file)
+        aprovadas.push({ file: comprimido, preview: URL.createObjectURL(comprimido) })
+      } catch (err) {
+        erros.push(`"${file.name}": ${err.message}`)
+      }
+    }
+
+    if (erros.length > 0) {
+      setErroFoto(`Arquivo(s) rejeitado(s): ${erros.join('; ')}`)
+    }
+
+    if (aprovadas.length > 0) {
+      setFotos(prev => [...prev, ...aprovadas])
+    }
   }
 
   function removerFoto(idx) {

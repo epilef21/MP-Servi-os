@@ -10,6 +10,8 @@ import {
   doc, getDoc, serverTimestamp, uploadFoto,
 } from '../firebase.js'
 import { useEmpresa } from '../hooks/useEmpresa.js'
+import { validarUpload } from '../utils/validarUpload.js'
+import { comprimirImagem } from '../utils/comprimirImagem.js'
 
 // ── Chave do rascunho inclui o slug para isolar por empresa ─
 const getDraftKey = (slug) => `mp_form_draft_${slug}`
@@ -260,11 +262,40 @@ export default function FormPage() {
   }
 
   // ── Fotos ────────────────────────────────────────────────
-  function handleFotoSelect(e) {
+  const MAX_FOTOS = 5
+
+  async function handleFotoSelect(e) {
     const files = Array.from(e.target.files)
-    const newFotos = files.map(f => ({ file: f, preview: URL.createObjectURL(f) }))
-    setFotos(p => [...p, ...newFotos])
     e.target.value = ''
+
+    const disponivel = MAX_FOTOS - fotos.length
+    if (disponivel <= 0) {
+      alert(`Limite de ${MAX_FOTOS} fotos atingido.`)
+      return
+    }
+
+    const aprovadas = []
+    const erros = []
+
+    for (const file of files.slice(0, disponivel)) {
+      try {
+        await validarUpload(file)
+        const comprimido = await comprimirImagem(file)
+        aprovadas.push({ file: comprimido, preview: URL.createObjectURL(comprimido) })
+      } catch (err) {
+        erros.push(`"${file.name}": ${err.message}`)
+      }
+    }
+
+    if (files.length > disponivel) {
+      alert(`Apenas ${disponivel} foto(s) adicionada(s). Limite de ${MAX_FOTOS} fotos por OS.`)
+    } else if (erros.length > 0) {
+      alert(`Arquivo(s) rejeitado(s):\n\n${erros.join('\n')}`)
+    }
+
+    if (aprovadas.length > 0) {
+      setFotos(p => [...p, ...aprovadas])
+    }
   }
   function removeFoto(idx) {
     setFotos(p => {
@@ -860,7 +891,7 @@ export default function FormPage() {
           <div className="foto-upload-icon">📷</div>
           <div className="foto-upload-text">
             <strong>Toque para adicionar fotos</strong><br />
-            Aceita múltiplas imagens
+            Máximo 5 fotos por OS ({fotos.length}/5 adicionadas)
           </div>
         </label>
         {uploadingFoto && <p className="foto-upload-progress">⏳ Enviando fotos...</p>}

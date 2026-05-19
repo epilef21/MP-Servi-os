@@ -139,13 +139,15 @@ mp-react/
 ---
 
 ## VARIÁVEIS DE AMBIENTE (.env)
-VITE_FIREBASE_API_KEY=AIzaSyA3vITYav6RNoAC4ujU2xbxod_o-cWZFk0
+# Valores reais estão no .env local (não commitado).
+# Use .env.example como referência.
+VITE_FIREBASE_API_KEY=<ver .env local>
 VITE_FIREBASE_AUTH_DOMAIN=checklist-53795.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=checklist-53795
 VITE_FIREBASE_STORAGE_BUCKET=checklist-53795.firebasestorage.app
-VITE_FIREBASE_MESSAGING_SENDER_ID=294280485643
-VITE_FIREBASE_APP_ID=1:294280485643:web:fce323bf3731cba88ba00e
-VITE_ADMIN_PASSWORD=mp@admin2024
+VITE_FIREBASE_MESSAGING_SENDER_ID=<ver .env local>
+VITE_FIREBASE_APP_ID=<ver .env local>
+# VITE_ADMIN_PASSWORD foi removido em Mai/2026 — autenticação migrada para bcrypt + custom claims
 
 ---
 
@@ -317,11 +319,11 @@ OS criada com dados do orçamento
 
 ## CREDENCIAIS E ACESSOS
 SuperAdmin:
-Email: tvf23407@gmail.com
+Email: <guardado no 1Password/gestor de senhas — não colocar aqui>
+Senha painel: <hash bcrypt em functions/.env — não colocar aqui>
 Acesso: /superadmin
 Empresa de teste:
 Slug: mp-servicos
-Email: mpservicos834@gmail.com
 Admin: mp-servi-os.vercel.app/mp-servicos/admin
 Firebase Console:
 Projeto: checklist-53795

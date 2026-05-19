@@ -36,7 +36,7 @@ import { useEmpresa } from '../hooks/useEmpresa.js'
 import { AdminContext } from '../contexts/AdminContext.jsx'
 import DashboardTab     from '../components/admin/DashboardTab.jsx'
 import OrdensServicoTab from '../components/admin/OrdensServicoTab.jsx'
-import OrcamentosTab    from '../components/admin/OrcamentosTab.jsx'
+import OrcamentosTab, { STATUS_ORC_META } from '../components/admin/OrcamentosTab.jsx'
 import TecnicosTab      from '../components/admin/TecnicosTab.jsx'
 import SeguradosTab     from '../components/admin/SeguradosTab.jsx'
 import RelatorioTab     from '../components/admin/RelatorioTab.jsx'
@@ -466,6 +466,7 @@ export default function AdminPage() {
       bairro:        selected.bairro        || '',
       cidade:        selected.cidade        || '',
       cep:           selected.cep           || '',
+      desc_problema: selected.desc_problema || '',
     })
     setEditAtend(true)
   }
@@ -1363,11 +1364,14 @@ export default function AdminPage() {
                 )}
               </div>
 
-              {(selected.desc_problema || selected.desc_servico) && (
+              {(editAtend || selected.desc_problema || selected.desc_servico) && (
                 <div className="md-section">
                   <h3>📝 Descrições</h3>
                   <div className="md-grid col-1">
-                    {selected.desc_problema && <div className="md-field"><label>Descrição do Problema</label><div className="md-text">{selected.desc_problema}</div></div>}
+                    {editAtend
+                      ? <div className="md-field"><label>Descrição do Problema</label><textarea className="inline-input" rows={3} style={{ resize:'vertical', width:'100%' }} value={atendForm.desc_problema} onChange={e => setAtendForm(p=>({...p, desc_problema: e.target.value}))} placeholder="Descreva o problema..." /></div>
+                      : (selected.desc_problema && <div className="md-field"><label>Descrição do Problema</label><div className="md-text">{selected.desc_problema}</div></div>)
+                    }
                     {selected.avarias && <div className="md-field"><label>Avarias Pré-Existentes</label><div className="md-text">{selected.avarias}</div></div>}
                     {selected.desc_servico && <div className="md-field"><label>Serviço Realizado</label><div className="md-text">{selected.desc_servico}</div></div>}
                     {selected.pecas && <div className="md-field"><label>Peças / Materiais</label><div className="md-text">{selected.pecas}</div></div>}

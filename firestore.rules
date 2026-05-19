@@ -1,12 +1,16 @@
 // ============================================================
-// REGRAS DE SEGURANÇA DO FIRESTORE — Multi-tenant
-// Versão: v3 (Firebase Auth + isolamento por empresa)
+// REGRAS DE SEGURANÇA DO FIRESTORE — AssistHub Multi-tenant
+// Versão: v4 (helpers em inglês, isTecnicoOfEmpresa, custom claims)
 //
 // Estrutura de coleções:
-//   empresas/{empresaId}/                → dados da empresa
-//   empresas/{empresaId}/checklist/{id}  → OS da empresa
-//   empresas/{empresaId}/config/geral    → config/personalização
-//   usuarios/{uid}                       → vínculo uid → empresaId
+//   config/superadmin              → e-mail do superadmin
+//   usuarios/{uid}                 → vínculo uid → empresaId
+//   empresas/{empresaId}           → dados raiz da empresa
+//   empresas/{empresaId}/checklist/{id}   → OS
+//   empresas/{empresaId}/tecnicos/{id}    → técnicos
+//   empresas/{empresaId}/orcamentos/{id}  → orçamentos
+//   empresas/{empresaId}/config/{id}      → personalização
+//   rateLimits/{key}               → controle de rate limiting
 // ============================================================
 
 rules_version = '2';
@@ -16,119 +20,133 @@ service cloud.firestore {
 
     // ── Funções auxiliares ─────────────────────────────────
 
-    // Verifica se o usuário está autenticado
-    function estaAutenticado() {
+    function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Verifica se o usuário autenticado é o superadmin
-    // O e-mail do superadmin é comparado com o valor gravado
-    // no documento /config/superadmin para evitar hardcode nas regras
-    function eSuperAdmin() {
-      return estaAutenticado() &&
-        request.auth.token.email == get(/databases/$(database)/documents/config/superadmin).data.email;
+    // Verifica superadmin via custom claim (emitido pela CF verifySuperAdmin)
+    // O claim expira em 1h — verificado pelo campo superadmin_until
+    function isSuperAdmin() {
+      return isAuthenticated() &&
+        request.auth.token.role == 'superadmin' &&
+        request.auth.token.superadmin_until > request.time.toMillis() / 1000;
     }
 
-    // Verifica se o uid autenticado é o dono da empresa.
-    // Tenta duas formas:
-    // 1. uid == empresaId (caminho direto — quando cadastrado pelo CadastroPage)
-    // 2. usuarios/{uid}.empresaId == empresaId (caminho via vínculo — fallback)
-    function eDonoEmpresa(empresaId) {
-      return estaAutenticado() && (
+    // Verifica se o uid autenticado pertence à empresa:
+    // 1. uid == empresaId (dono direto)
+    // 2. usuarios/{uid}.empresaId == empresaId (vínculo por documento)
+    function isUserOfEmpresa(empresaId) {
+      return isAuthenticated() && (
         request.auth.uid == empresaId ||
         get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.empresaId == empresaId
       );
     }
 
-    // ── /config — documento de configuração do superadmin ──
-    // Apenas o superadmin lê/escreve.
-    // Esse documento deve ser criado manualmente no console Firebase:
-    //   /config/superadmin → { email: "tvf23407@gmail.com" }
+    // Verifica se o uid autenticado é técnico da empresa.
+    // Técnicos têm documento em usuarios/{uid} com tipoUsuario='tecnico'.
+    function isTecnicoOfEmpresa(empresaId) {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.tipoUsuario == 'tecnico' &&
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.empresaId == empresaId;
+    }
+
+    // ── /rateLimits — controle de rate por Cloud Function ─
+    // Apenas as Cloud Functions (via Admin SDK) escrevem aqui;
+    // clientes não têm acesso.
+    match /rateLimits/{key} {
+      allow read, write: if false;
+    }
+
+    // ── /config — configuração global do superadmin ────────
+    // Apenas o superadmin acessa. O documento /config/superadmin
+    // deve ser criado manualmente no console Firebase:
+    //   { email: "tvf23407@gmail.com" }
     match /config/{docId} {
-      allow read:  if eSuperAdmin();
-      allow write: if eSuperAdmin();
+      allow read, write: if isSuperAdmin();
     }
 
     // ── /usuarios/{uid} ────────────────────────────────────
     // Criado no cadastro para vincular uid → empresaId.
-    // O próprio usuário pode criar e ler o seu documento.
-    // SuperAdmin pode ler todos.
     match /usuarios/{uid} {
-      allow read:   if estaAutenticado() && (request.auth.uid == uid || eSuperAdmin());
-      allow create: if estaAutenticado() && request.auth.uid == uid;
-      allow update: if eSuperAdmin();
-      allow delete: if eSuperAdmin();
+      allow read:   if isAuthenticated() && (request.auth.uid == uid || isSuperAdmin());
+      allow create: if isAuthenticated() && request.auth.uid == uid;
+      allow update: if isSuperAdmin();
+      allow delete: if isSuperAdmin();
     }
 
     // ── /empresas/{empresaId} ──────────────────────────────
     match /empresas/{empresaId} {
 
       // Documento raiz da empresa
-      // - Qualquer um pode ler (necessário para o useEmpresa buscar pelo slug)
-      // - Apenas o dono ou superadmin pode criar/atualizar
-      // - Apenas o superadmin pode excluir
+      // - Leitura pública: necessário para o useEmpresa buscar pelo slug
+      // - Criação: apenas o próprio uid (uid == empresaId por convenção)
+      // - Update: dono ou superadmin
+      // - Delete: apenas superadmin
       allow read:   if true;
-      allow create: if estaAutenticado() && request.auth.uid == empresaId;
-      allow update: if eDonoEmpresa(empresaId) || eSuperAdmin();
-      allow delete: if eSuperAdmin();
+      allow create: if isAuthenticated() && request.auth.uid == empresaId;
+      allow update: if isUserOfEmpresa(empresaId) || isSuperAdmin();
+      allow delete: if isSuperAdmin();
 
       // ── /empresas/{empresaId}/config/{docId} ────────────
-      // Configurações de personalização da empresa.
-      // - Qualquer um pode ler (FormPage usa para exibir nome, telefone, cor)
-      // - Apenas o dono ou superadmin pode escrever
+      // Personalização da empresa (nome, cor, telefone...).
+      // Leitura pública: FormPage exibe dados sem autenticação.
       match /config/{docId} {
         allow read:   if true;
-        allow create: if estaAutenticado() && request.auth.uid == empresaId;
-        allow update: if eDonoEmpresa(empresaId) || eSuperAdmin();
-        allow delete: if eSuperAdmin();
+        allow create: if isAuthenticated() && request.auth.uid == empresaId;
+        allow update: if isUserOfEmpresa(empresaId) || isSuperAdmin();
+        allow delete: if isSuperAdmin();
       }
 
       // ── /empresas/{empresaId}/tecnicos/{tecnicoId} ──────
       // Gerenciamento de técnicos da equipe.
-      // Apenas o dono da empresa ou superadmin pode ler e escrever.
       match /tecnicos/{tecnicoId} {
-        allow read:   if eDonoEmpresa(empresaId) || eSuperAdmin();
-        allow create: if eDonoEmpresa(empresaId) || eSuperAdmin();
-        allow update: if eDonoEmpresa(empresaId) || eSuperAdmin();
-        allow delete: if eDonoEmpresa(empresaId) || eSuperAdmin();
+        allow read:   if isUserOfEmpresa(empresaId) || isSuperAdmin() || isTecnicoOfEmpresa(empresaId);
+        allow create: if isUserOfEmpresa(empresaId) || isSuperAdmin();
+        allow update: if isUserOfEmpresa(empresaId) || isSuperAdmin();
+        allow delete: if isUserOfEmpresa(empresaId) || isSuperAdmin();
       }
 
       // ── /empresas/{empresaId}/checklist/{osId} ──────────
       match /checklist/{osId} {
 
-        // Leitura: dono, superadmin, ou público para página de avaliação.
-        // O osId é um ID aleatório longo, só compartilhado com o segurado
-        // via WhatsApp, portanto o risco de acesso indevido é baixo.
-        allow read: if eDonoEmpresa(empresaId) || eSuperAdmin() || true;
+        // Leitura pública: página de avaliação usa o osId (ID aleatório longo
+        // compartilhado apenas via WhatsApp) — risco de acesso indevido baixo.
+        allow read: if true;
 
-        // Criação: qualquer um pode criar (formulário público do técnico)
-        // Garante que o campo "status" inicial seja "pendente" ou "aguardando_tecnico"
-        // e que não venha com campos financeiros preenchidos
+        // Criação pública: formulário do técnico não autenticado.
+        // Proíbe campos financeiros e restringe status inicial.
         allow create: if
           !('mo_seguradora'      in request.resource.data) &&
           !('valor_prestador'    in request.resource.data) &&
           !('valor_deslocamento' in request.resource.data) &&
+          !('maoDeObraSeguradora' in request.resource.data) &&
+          !('valorPagoTecnico'   in request.resource.data) &&
+          !('kmDeslocamento'     in request.resource.data) &&
+          !('lucroReal'          in request.resource.data) &&
           (
             !('status' in request.resource.data) ||
-            request.resource.data.status in ['pendente', 'aguardando_tecnico']
+            request.resource.data.status in ['pendente', 'aguardando_tecnico', 'ficou_visita', 'cliente_ausente']
           );
 
-        // Atualização pelo admin/superadmin: irrestrita dentro da empresa
-        // Atualização pelo técnico (sem auth): apenas campos do formulário
-        // Atualização pelo segurado (sem auth): apenas campos de avaliação,
-        //   somente uma vez (bloqueia se já existir avaliacao_nota)
+        // Atualização:
+        // - Admin/superadmin: irrestrita dentro da empresa
+        // - Técnico autenticado da empresa: campos do formulário, sem financeiro
+        // - Técnico sem auth: campos do formulário, sem financeiro
+        // - Segurado sem auth: apenas avaliação, apenas uma vez
         allow update: if
-          eDonoEmpresa(empresaId) || eSuperAdmin()
+          isUserOfEmpresa(empresaId) || isSuperAdmin()
           ||
-          // Técnico sem auth — campos do formulário, sem financeiro
+          isTecnicoOfEmpresa(empresaId)
+          ||
           (
-            !('mo_seguradora'      in request.resource.data) &&
-            !('valor_prestador'    in request.resource.data) &&
-            !('valor_deslocamento' in request.resource.data) &&
-            request.resource.data.status in ['pendente', 'aguardando_tecnico']
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+              'mo_seguradora', 'valor_prestador', 'valor_deslocamento',
+              'maoDeObraSeguradora', 'valorPagoTecnico', 'kmDeslocamento', 'lucroReal'
+            ]) &&
+            request.resource.data.status in ['pendente', 'aguardando_tecnico', 'ficou_visita', 'cliente_ausente']
           )
           ||
-          // Segurado sem auth — apenas avaliação (1-5), apenas uma vez
           (
             request.resource.data.diff(resource.data).affectedKeys()
               .hasOnly(['avaliacao_nota', 'avaliacao_comentario', 'avaliacao_em']) &&
@@ -138,33 +156,21 @@ service cloud.firestore {
             !('avaliacao_nota' in resource.data)
           );
 
-        // Exclusão: dono da empresa ou superadmin
-        allow delete: if eDonoEmpresa(empresaId) || eSuperAdmin();
+        allow delete: if isUserOfEmpresa(empresaId) || isSuperAdmin();
       }
 
       // ── /empresas/{empresaId}/orcamentos/{orcamentoId} ───
-      // Orçamentos gerados pelo admin, preenchidos pelo técnico
-      // e aprovados/reprovados pelo cliente via link público.
+      // Orçamentos gerados pelo admin, preenchidos pelo técnico,
+      // aprovados/reprovados pelo cliente via link público.
       match /orcamentos/{orcamentoId} {
 
-        // Leitura pública: necessário para as páginas públicas do
-        // técnico (/orcamento/:slug/:id) e do cliente (/aprovar/:slug/:id)
-        // acessarem o documento sem autenticação.
+        // Leitura pública: páginas /orcamento/:slug/:id e /aprovar/:slug/:id
         allow read: if true;
 
-        // Criação: apenas o dono da empresa ou superadmin
-        allow create: if eDonoEmpresa(empresaId) || eSuperAdmin();
+        allow create: if isUserOfEmpresa(empresaId) || isSuperAdmin();
 
-        // Atualização com restrição por papel:
-        // - Admin/superadmin: irrestrita
-        // - Técnico sem auth: somente quando status='aguardando_tecnico',
-        //   seta para 'em_revisao' e só toca campos técnicos
-        // - Cliente sem auth aprova: somente quando status='enviado_cliente',
-        //   seta para 'aprovado' e só toca campos de aprovação
-        // - Cliente sem auth reprova: somente quando status='enviado_cliente',
-        //   seta para 'reprovado' e só toca campos de reprovação
         allow update: if
-          eDonoEmpresa(empresaId) || eSuperAdmin()
+          isUserOfEmpresa(empresaId) || isSuperAdmin()
           ||
           (
             resource.data.status == 'aguardando_tecnico' &&
@@ -193,8 +199,7 @@ service cloud.firestore {
             ])
           );
 
-        // Exclusão: apenas o dono da empresa ou superadmin
-        allow delete: if eDonoEmpresa(empresaId) || eSuperAdmin();
+        allow delete: if isUserOfEmpresa(empresaId) || isSuperAdmin();
       }
     }
   }

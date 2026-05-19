@@ -66,16 +66,23 @@ async function extrairDados() {
     if (!tab?.id) throw new Error('Nenhuma aba ativa encontrada.');
 
     // Injeta a função de extração diretamente na página (não depende de content script pré-carregado)
-    const [result] = await chrome.scripting.executeScript({
+    const execResults = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: extrairOSNaPagina
     });
 
+    const result = execResults?.[0];
     if (!result?.result?.success) {
-      throw new Error(result?.result?.error || 'Falha ao extrair dados.');
+      const msg = result?.result?.error
+        || result?.error?.message
+        || 'Falha ao extrair dados. Verifique se a OS está aberta.';
+      throw new Error(msg);
     }
 
     dadosExtraidos = result.result.data;
+    if (dadosExtraidos.descricao && dadosExtraidos.descricao.length < 4) {
+      dadosExtraidos.descricao = '';
+    }
     renderizarDados(dadosExtraidos);
     $('btn-criar-os').classList.remove('hidden');
     setStatus('Dados extraídos com sucesso!', 'success');
@@ -194,8 +201,9 @@ function renderizarDados(dados) {
     const val = dados[key] || '';
     const cls = `campo-grupo${full ? ' full' : ''}`;
     const ph  = placeholder || '';
+    const escVal = val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const inp = textarea
-      ? `<textarea id="${id}" class="campo-input campo-textarea">${val}</textarea>`
+      ? `<textarea id="${id}" class="campo-input campo-textarea">${escVal}</textarea>`
       : `<input id="${id}" class="campo-input" type="text" value="${val.replace(/"/g, '&quot;')}" placeholder="${ph}" />`;
     return `<div class="${cls}"><label class="campo-label">${label}</label>${inp}</div>`;
   }).join('');
@@ -457,6 +465,7 @@ function extrairOSNaPagina() {
   }
   // ── Portal Juvo / Tempo Assist (novo-portal-prestador.prd.tempoassist.cloud) ──
   if (hostname === 'novo-portal-prestador.prd.tempoassist.cloud') {
+    try {
 
     // Busca valor pelo label semântico (span.label → span.text-content adjacente)
     const getLabelVal = function(label) {
@@ -498,7 +507,9 @@ function extrairOSNaPagina() {
       }
     }
 
-    // Endereço: "17505460 - MARILIA - SP - RUA ALEXANDRE GUIZARDI220CASA - JARDIM PEROLA"
+    // Endereço: dois formatos possíveis:
+    // 5 partes: "17505460 - MARILIA - SP - RUA GUIZARDI220 - JARDIM PEROLA" (nº embutido na rua)
+    // 6 partes: "17501300 - MARILIA - SP - RUA DONA JULIA NOMURA - 181 - BAIRRO FRAGATA" (nº separado)
     let cep = '', cidade = '', endereco = '', numero = '', bairro = '';
     for (const sp of document.querySelectorAll('span.text-content')) {
       const t = sp.textContent.trim();
@@ -506,21 +517,34 @@ function extrairOSNaPagina() {
         const parts = t.split(/\s*-\s*/);
         cep    = (parts[0] || '').replace(/\D/g, '');
         cidade = (parts[1] || '').trim();
-        // parts[2] = estado, parts[3] = rua+numero+complemento, parts[4] = bairro
+        // parts[2] = estado, parts[3] = rua (com ou sem número embutido)
         const endRaw = (parts[3] || '').trim();
-        bairro = (parts[4] || '').trim();
         const em = endRaw.match(/^(.*?)(\d+)(.*)$/);
-        endereco = em ? em[1].trim() : endRaw;
-        // "0" representa S/N — ignora
-        numero = (em && em[2] !== '0') ? em[2].trim() : '';
+        if (em) {
+          // Número embutido na string da rua (ex: "RUA GUIZARDI220")
+          endereco = em[1].trim();
+          numero   = em[2] !== '0' ? em[2] : '';
+          bairro   = (parts[4] || '').trim();
+        } else {
+          // Número em campo separado (ex: parts[4]="181", parts[5]="BAIRRO FRAGATA")
+          endereco = endRaw;
+          const candidato = (parts[4] || '').trim();
+          if (/^\d+$/.test(candidato) && candidato !== '0') {
+            numero = candidato;
+            bairro = (parts[5] || '').trim();
+          } else {
+            numero = '';
+            bairro = candidato;
+          }
+        }
         break;
       }
     }
 
     // Data e horário: "Previsão início" → "11/05/2026, 16:00:00" / "Previsão fim" → "11/05/2026, 19:59:00"
-    const inicioRaw = getLabelVal('Previsão início');
-    const fimRaw    = getLabelVal('Previsão fim');
-    const dataMatch = inicioRaw.match(/(\d{2}\/\d{2}\/\d{4})/);
+    const inicioRaw = getLabelVal('Previsão início') || getLabelVal('Data início') || getLabelVal('Agendado') || '';
+    const fimRaw    = getLabelVal('Previsão fim')    || getLabelVal('Data fim')    || '';
+    const dataMatch    = inicioRaw.match(/(\d{2}\/\d{2}\/\d{4})/);
     const data_chegada = dataMatch ? dataMatch[1] : '';
     const horaInicioM  = inicioRaw.match(/(\d{2}:\d{2})/);
     const horaFimM     = fimRaw.match(/(\d{2}:\d{2})/);
@@ -550,6 +574,10 @@ function extrairOSNaPagina() {
     if (!d.nome_segurado && !d.numero_os)
       return { success: false, error: 'Abra uma OS para capturar os dados.' };
     return { success: true, data: d };
+
+    } catch (e) {
+      return { success: false, error: 'Erro na extração (Juvo): ' + e.message };
+    }
   }
 
   if (SELECTORS[hostname]) {

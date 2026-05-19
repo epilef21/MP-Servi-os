@@ -1,6 +1,6 @@
 // ============================================================
-// REGRAS DO FIREBASE STORAGE — Multi-tenant
-// Fotos isoladas por empresa: empresas/{empresaId}/fotos/...
+// REGRAS DO FIREBASE STORAGE — AssistHub Multi-tenant
+// v3: custom claim para superadmin, 2MB (compressão client-side), tipos restritos
 // ============================================================
 
 rules_version = '2';
@@ -9,32 +9,50 @@ service firebase.storage {
   match /b/{bucket}/o {
 
     // ── Fotos das OS por empresa ───────────────────────────
-    // Qualquer um pode fazer upload (técnico sem login)
-    // Restrito a imagens com no máximo 5 MB
-    // Qualquer um pode ler (necessário para exibir no admin e no PDF)
-    // Apenas o dono da empresa ou superadmin pode excluir
+    // Leitura pública: necessário para exibição no admin e PDF
+    // Upload sem auth: técnico sem login envia fotos no campo
+    // Restrições: somente jpeg/png/webp, máx 2 MB (compressão client-side garante ≤1 MB)
+    // Delete: apenas dono da empresa ou superadmin (custom claim)
     match /empresas/{empresaId}/fotos/{allPaths=**} {
-      allow read:   if true;
+      allow read: if true;
+
       allow create: if
-        request.resource.size < 5 * 1024 * 1024 &&
-        request.resource.contentType.matches('image/.*');
+        request.resource.size <= 2 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/(jpeg|png|webp)');
+
       allow delete: if
-        request.auth != null &&
-        (request.auth.uid == empresaId ||
-         request.auth.token.email == 'tvf23407@gmail.com');
+        request.auth != null && (
+          request.auth.uid == empresaId ||
+          (request.auth.token.role == 'superadmin' &&
+           request.auth.token.superadmin_until > request.time.toMillis() / 1000)
+        );
     }
 
     // ── Logo da empresa ────────────────────────────────────
-    // Apenas o dono autenticado pode fazer upload e atualizar
-    // Qualquer um pode ler (exibida na sidebar e no formulário público)
+    // Leitura pública: exibida na sidebar e no formulário público
+    // Upload/update: apenas o dono autenticado (uid == empresaId)
+    // Delete: dono ou superadmin (custom claim)
     match /empresas/{empresaId}/{fileName} {
-      allow read:   if true;
-      allow create: if request.auth != null && request.auth.uid == empresaId;
-      allow update: if request.auth != null && request.auth.uid == empresaId;
-      allow delete: if
+      allow read: if true;
+
+      allow create: if
         request.auth != null &&
-        (request.auth.uid == empresaId ||
-         request.auth.token.email == 'tvf23407@gmail.com');
+        request.auth.uid == empresaId &&
+        request.resource.size <= 2 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/(jpeg|png|webp)');
+
+      allow update: if
+        request.auth != null &&
+        request.auth.uid == empresaId &&
+        request.resource.size <= 2 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/(jpeg|png|webp)');
+
+      allow delete: if
+        request.auth != null && (
+          request.auth.uid == empresaId ||
+          (request.auth.token.role == 'superadmin' &&
+           request.auth.token.superadmin_until > request.time.toMillis() / 1000)
+        );
     }
   }
 }

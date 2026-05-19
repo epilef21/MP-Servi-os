@@ -3,8 +3,8 @@
 // Redireciona superadmin para /superadmin,
 // admin de empresa para /:slug/admin
 // ============================================================
-import { useState, useEffect } from 'react'
-import { useNavigate, Link, useSearchParams } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate, Link, useSearchParams, Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { db, doc, getDoc, auth, SUPERADMIN_EMAIL } from '../firebase'
 
@@ -20,23 +20,26 @@ export default function LoginPage() {
   const [showSenha,       setShowSenha]       = useState(false)
   const [extensaoOk,      setExtensaoOk]      = useState(false)
 
+  // Garante que a navegação pós-login acontece só uma vez por montagem do componente
+  const didNavigate = useRef(false)
+
   // Parâmetros passados pela extensão Chrome
   const extId   = searchParams.get('ext_id')
   const extMode = searchParams.get('extension') === 'auth' && !!extId
 
-  // Redireciona quem já estava logado ao acessar /login (ex: refresh de página)
-  // Se vier com ?extension=auth, envia o token para a extensão em vez de redirecionar
+  // Empresa admin: resolve slug via Firestore e navega (useEffect só para o caso assíncrono)
   useEffect(() => {
-    if (!estaLogado) return
-    if (isSuperAdmin) { navigate('/superadmin', { replace: true }); return }
+    if (!estaLogado) { didNavigate.current = false; return }
+    if (didNavigate.current) return
+    if (isSuperAdmin || emailUsuario === SUPERADMIN_EMAIL) return  // tratado no render
     if (!empresaId) return
 
+    didNavigate.current = true
     getDoc(doc(db, 'empresas', empresaId)).then(async snap => {
       if (!snap.exists()) return
       const slug = snap.data().slug
 
       if (extMode) {
-        // Já logado + modo extensão: envia token direto sem pedir login novamente
         try {
           const user = auth.currentUser
           if (user) {
@@ -44,9 +47,7 @@ export default function LoginPage() {
             await enviarTokenParaExtensao(extId, token, slug)
             setExtensaoOk(true)
           }
-        } catch {
-          // Se falhar silenciosamente, o formulário de login aparece normalmente
-        }
+        } catch { /* silencioso */ }
         return
       }
 
@@ -63,9 +64,8 @@ export default function LoginPage() {
       // login() retorna o user do Firebase Auth imediatamente
       const user = await login(email.trim(), senha)
 
-      // Superadmin — redireciona direto (extensão não se aplica ao superadmin)
+      // Superadmin — deixa o useEffect redirecionar após onAuthStateChanged atualizar
       if (user.email === SUPERADMIN_EMAIL) {
-        navigate('/superadmin', { replace: true })
         return
       }
 
@@ -139,6 +139,11 @@ export default function LoginPage() {
         }
       )
     })
+  }
+
+  // Superadmin logado e não em modo extensão → redireciona declarativamente (sem useEffect)
+  if (!extMode && estaLogado && (isSuperAdmin || emailUsuario === SUPERADMIN_EMAIL)) {
+    return <Navigate to="/superadmin" replace />
   }
 
   // Tela de sucesso mostrada após conectar a extensão
