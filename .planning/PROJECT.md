@@ -2,7 +2,7 @@
 
 ## Current Milestone: v1.0 Test Coverage (Em andamento)
 
-**Status:** Phases 1-2 completas, Phases 3-4 pendentes.
+**Status:** Phases 1-3 completas, Phase 4 pendente.
 
 ---
 
@@ -49,9 +49,12 @@ INFRA-01..08 — Vitest 4.1.5 + RTL + jsdom configurados, smoke test verde, rend
 UTIL-01..04 — fmtDate/fmtBRL/getLucro/maskPhone/maskCNPJ extraídos para formatters.js, 30 testes verdes.
 DATA-01..06 — criarOS/atualizarOS/getOSdaEmpresa/getEmpresaBySlug/cadastrarEmpresa/contarOSdoMes testados, 17 testes verdes.
 
+### Validated in Phase 3 (Auth e Roteamento)
+
+AUTH-01..13 — AuthContext (loading, empresaId, superadmin, logout), RotaAdmin/RotaSuperAdmin guards, useEmpresa com cache — 13 testes verdes. RotaAdmin corrigido para verificar empresaId (correção de segurança AUTH-07).
+
 ### Active
 
-- [ ] Testes do fluxo de autenticação e multi-tenancy (login, rota por slug, guards)
 - [ ] Testes do fluxo de OS (criar, editar, fechar, listar)
 - [ ] Testes do fluxo de orçamento (gerar, técnico preenche, cliente aprova)
 
