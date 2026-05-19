@@ -724,22 +724,19 @@ beforeEach(() => {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **AUTH-07: Comportamento do guard ou requisito incorreto?**
    - O que sabemos: `RotaAdmin` verifica APENAS `estaLogado`, não `empresaId`.
-   - O que está unclear: O requisito é uma correção intencionada de segurança ou um erro na especificação?
-   - Recomendação: Corrigir o guard durante Phase 3 (adicionar `!empresaId` ao if). Pequena correção de segurança.
+   - RESOLVED: Corrigir o guard (adicionar `!empresaId` ao if) — implementado em 03-02 Task 1.
 
 2. **AUTH-02: Descrição do requisito vs. comportamento real**
    - O que sabemos: AuthContext usa Firestore, não claims, para `empresaId`.
-   - O que está unclear: Deve-se corrigir a descrição do requisito ou testar o comportamento real documentando a discrepância?
-   - Recomendação: Testar o comportamento real; documentar no arquivo de teste que a resolução é via Firestore (não claims diretas).
+   - RESOLVED: Testar o comportamento real via Firestore; documentado no arquivo de teste — implementado em 03-01 Task 1.
 
 3. **getConfigEmpresa no mock**
    - O que sabemos: `createFirebaseMocks()` não inclui `getConfigEmpresa`.
-   - O que está unclear: Deve-se atualizar `mockFirebase.js` ou usar vi.mock inline nos testes de useEmpresa?
-   - Recomendação: Adicionar `getConfigEmpresa: vi.fn()` ao `createFirebaseMocks()` para manter o factory completo.
+   - RESOLVED: Adicionado `getConfigEmpresa: vi.fn()` ao `createFirebaseMocks()` e ao vi.mock inline — implementado em 03-02 Task 1.
 
 ---
 
