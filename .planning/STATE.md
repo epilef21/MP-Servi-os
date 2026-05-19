@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-05-05)
 ## Current Position
 
 Milestone: v1.0 Test Coverage — em progresso
-Phase: 3 of 4 (v1.0 scope) — Ready to plan
-Plan: 2 of 2 (Phase 2 plans) — Complete
-Status: Phase 2 complete (2026-05-05) — 50 testes passando, UTIL-01..04 e DATA-01..06 cobertos.
-Last activity: 2026-05-05 — Phase 2 complete — formatters.js extraído, formatters.test.js (30 testes) e firebase.test.js (17 testes) criados
+Phase: 4 of 4 (v1.0 scope) — Ready to plan
+Plan: 2 of 2 (Phase 3 plans) — Complete
+Status: Phase 3 complete (2026-05-19) — 13 testes passando, AUTH-01..13 cobertos. RotaAdmin corrigido para verificar empresaId.
+Last activity: 2026-05-19 — Phase 3 complete — authContext.test.jsx (5 testes) e rotasEmpresa.test.jsx (8 testes) criados; _clearCacheForTest e mock getEmpresaBySlug/getConfigEmpresa adicionados
 
-Progress (v1.0): [████░░░░░░] 50% (Phases 1-2 complete, Phases 3-4 pending)
+Progress (v1.0): [██████░░░░] 75% (Phases 1-3 complete, Phase 4 pending)
 Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 
 ## Performance Metrics
@@ -31,7 +31,7 @@ Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 |-------|-------|-----------|----------|
 | 1. Infraestrutura | 2 | 2 | 8 min |
 | 2. Camada Base | 2 | 2 | ~12 min |
-| 3. Auth e Roteamento | 2 | 0 | — |
+| 3. Auth e Roteamento | 2 | 2 | ~6 min |
 | 4. Fluxos Críticos | 2 | 0 | — |
 | 5. Compressão de Imagens | 1 | 1 | ~4 min |
 | 6. Relatório Mensal em PDF | 2 | 2 | ~8 min |
@@ -60,10 +60,15 @@ Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 - v1.1: campo lucroReal já salvo em cada documento de OS em empresas/{empresaId}/checklist/{osId} — sem migration necessária
 - 05-01: compressão ocorre no handleSubmit (não no handleFotoSelect) — evita bloqueio async na seleção
 - 05-01: estado `comprimindo` (não uploadingFoto) — reflete que o feedback corresponde à fase de compressão
+- 03-01: Padrão C de mock: vi.mock('../firebase') inline + .mockImplementation() por describe (clearMocks:true não limpa implementations)
+- 03-02: Guards locais no arquivo de teste (Opção B) — sem modificar exportações do App.jsx
+- 03-02: renderHook com wrapper MemoryRouter+Routes — obrigatório para hooks que usam useParams() e useNavigate()
+- 03-02: _clearCacheForTest exportado de useEmpresa.js (prefixo _ = uso só em testes)
+- 03-02: RotaAdmin agora verifica !empresaId além de !estaLogado (correção de segurança AUTH-07)
 
 ### Pending Todos
 
-- Executar Phases 3-4 do milestone v1.0 (Auth e Roteamento, Fluxos Críticos)
+- Executar Phase 4 do milestone v1.0 (Fluxos Críticos — OS e Orçamento)
 
 ### Blockers/Concerns
 
@@ -74,6 +79,6 @@ Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 
 ## Session Continuity
 
-Last session: 2026-05-05
-Stopped at: Phase 2 completa — 50 testes passando (smoke 3, formatters 30, firebase 17). Próximo: /gsd-discuss-phase 3 ou /gsd-plan-phase 3
+Last session: 2026-05-19
+Stopped at: Phase 3 completa — 63 testes passando (smoke 3, formatters 30, firebase 17, authContext 5, rotasEmpresa 8). Próximo: /gsd-plan-phase 4 ou /gsd-execute-phase 4
 Resume file: None

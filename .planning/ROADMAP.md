@@ -16,7 +16,7 @@ As Phases 5 e 6 pertencem ao milestone v1.1 Produto Core e são independentes da
 
 - [x] **Phase 1: Infraestrutura de Testes** - Configurar Vitest, RTL, mocks globais e smoke test passando
 - [x] **Phase 2: Camada Base** - Testar utilitários puros e funções de acesso ao Firestore em isolamento
-- [ ] **Phase 3: Auth e Roteamento** - Testar AuthContext, guards de rota e hook useEmpresa
+- [x] **Phase 3: Auth e Roteamento** - Testar AuthContext, guards de rota e hook useEmpresa
 - [ ] **Phase 4: Fluxos Críticos** - Testar CRUD de OS e fluxo completo de orçamento
 - [x] **Phase 5: Compressão de Imagens** - Técnico pode enviar fotos comprimidas no orçamento com feedback visual
 - [x] **Phase 6: Relatório Mensal em PDF** - Admin pode gerar e baixar relatório mensal com OS, lucro e breakdown
@@ -79,10 +79,10 @@ Plans:
 Plans:
 
 **Wave 1**
-- [ ] 03-01-PLAN.md — Testes do AuthContext (AUTH-01..05): loading, empresaId via Firestore, superadmin, logout
+- [x] 03-01-PLAN.md — Testes do AuthContext (AUTH-01..05): loading, empresaId via Firestore, superadmin, logout
 
 **Wave 2** *(bloqueado pelo Wave 1)*
-- [ ] 03-02-PLAN.md — Testes de RotaAdmin, RotaSuperAdmin e useEmpresa (AUTH-06..13): fix RotaAdmin + _clearCacheForTest + 8 testes
+- [x] 03-02-PLAN.md — Testes de RotaAdmin, RotaSuperAdmin e useEmpresa (AUTH-06..13): fix RotaAdmin + _clearCacheForTest + 8 testes
 
 **UI hint**: yes
 **Complexity**: high
@@ -163,7 +163,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Infraestrutura de Testes | 2/2 | Complete | 2026-05-03 |
 | 2. Camada Base | 2/2 | Complete | 2026-05-05 |
-| 3. Auth e Roteamento | 0/2 | Planned | - |
+| 3. Auth e Roteamento | 2/2 | Complete | 2026-05-19 |
 | 4. Fluxos Críticos | 0/2 | Not started | - |
 | 5. Compressão de Imagens | 1/1 | Complete | 2026-05-04 |
 | 6. Relatório Mensal em PDF | 2/2 | Complete | 2026-05-05 |
@@ -190,19 +190,19 @@ Plans:
 | DATA-04 | getEmpresaBySlug busca por slug e retorna null quando não existe | Phase 2 | Complete (02-02) |
 | DATA-05 | cadastrarEmpresa cria documento e retorna dados | Phase 2 | Complete (02-02) |
 | DATA-06 | verificarLimite retorna true/false por plano e contagem | Phase 2 | Complete (02-02) |
-| AUTH-01 | AuthContext exibe loading enquanto onAuthStateChanged pende | Phase 3 | Pending (03-01) |
-| AUTH-02 | AuthContext resolve usuário com empresaId via Firestore | Phase 3 | Pending (03-01) |
-| AUTH-03 | AuthContext usa fallback Firestore quando empresas/{uid} não existe | Phase 3 | Pending (03-01) |
-| AUTH-04 | AuthContext identifica superadmin pelo email | Phase 3 | Pending (03-01) |
-| AUTH-05 | AuthContext limpa estado e redireciona no logout | Phase 3 | Pending (03-01) |
-| AUTH-06 | RotaAdmin redireciona para login sem autenticação | Phase 3 | Pending (03-02) |
-| AUTH-07 | RotaAdmin redireciona para login sem empresaId | Phase 3 | Pending (03-02) |
-| AUTH-08 | RotaAdmin renderiza conteúdo para admin válido | Phase 3 | Pending (03-02) |
-| AUTH-09 | RotaSuperAdmin redireciona usuário normal para / | Phase 3 | Pending (03-02) |
-| AUTH-10 | RotaSuperAdmin renderiza conteúdo para superadmin | Phase 3 | Pending (03-02) |
-| AUTH-11 | useEmpresa resolve slug e retorna dados do Firestore | Phase 3 | Pending (03-02) |
-| AUTH-12 | useEmpresa redireciona para /empresa-nao-encontrada | Phase 3 | Pending (03-02) |
-| AUTH-13 | useEmpresa retorna cache sem nova chamada Firestore | Phase 3 | Pending (03-02) |
+| AUTH-01 | AuthContext exibe loading enquanto onAuthStateChanged pende | Phase 3 | Complete (03-01) |
+| AUTH-02 | AuthContext resolve usuário com empresaId via Firestore | Phase 3 | Complete (03-01) |
+| AUTH-03 | AuthContext usa fallback Firestore quando empresas/{uid} não existe | Phase 3 | Complete (03-01) |
+| AUTH-04 | AuthContext identifica superadmin pelo email | Phase 3 | Complete (03-01) |
+| AUTH-05 | AuthContext limpa estado e redireciona no logout | Phase 3 | Complete (03-01) |
+| AUTH-06 | RotaAdmin redireciona para login sem autenticação | Phase 3 | Complete (03-02) |
+| AUTH-07 | RotaAdmin redireciona para login sem empresaId | Phase 3 | Complete (03-02) |
+| AUTH-08 | RotaAdmin renderiza conteúdo para admin válido | Phase 3 | Complete (03-02) |
+| AUTH-09 | RotaSuperAdmin redireciona usuário normal para / | Phase 3 | Complete (03-02) |
+| AUTH-10 | RotaSuperAdmin renderiza conteúdo para superadmin | Phase 3 | Complete (03-02) |
+| AUTH-11 | useEmpresa resolve slug e retorna dados do Firestore | Phase 3 | Complete (03-02) |
+| AUTH-12 | useEmpresa redireciona para /empresa-nao-encontrada | Phase 3 | Complete (03-02) |
+| AUTH-13 | useEmpresa retorna cache sem nova chamada Firestore | Phase 3 | Complete (03-02) |
 | OS-01 | Admin pode criar OS via formulário | Phase 4 | Pending |
 | OS-02 | Admin pode editar dados de OS existente | Phase 4 | Pending |
 | OS-03 | Admin pode alterar status de OS | Phase 4 | Pending |
