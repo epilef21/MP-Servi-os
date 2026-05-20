@@ -1,8 +1,8 @@
 # AssistHub — Projeto
 
-## Current Milestone: v1.0 Test Coverage (Em andamento)
+## Milestone: v1.0 Test Coverage — COMPLETO (2026-05-20)
 
-**Status:** Phases 1-3 completas, Phase 4 pendente.
+**Status:** Todas as 4 fases completas. 75 testes passando (INFRA + UTIL + DATA + AUTH + OS + ORC).
 
 ---
 
@@ -53,10 +53,16 @@ DATA-01..06 — criarOS/atualizarOS/getOSdaEmpresa/getEmpresaBySlug/cadastrarEmp
 
 AUTH-01..13 — AuthContext (loading, empresaId, superadmin, logout), RotaAdmin/RotaSuperAdmin guards, useEmpresa com cache — 13 testes verdes. RotaAdmin corrigido para verificar empresaId (correção de segurança AUTH-07).
 
+### Validated in Phase 4 (Fluxos Críticos)
+
+OS-01..06 — CRUD de OS via stub components: criarOS, atualizarOS, deleteDoc, getOSdaEmpresa — 6 testes verdes. AdminPage.jsx não renderizado.
+ORC-01..06 — Fluxo técnico→cliente de orçamento: OrcamentoTecnicoPage e AprovarOrcamentoPage com SignatureCanvas mock — 6 testes verdes.
+
+**Milestone v1.0 Test Coverage completo:** 75 testes passando em 7 arquivos de teste.
+
 ### Active
 
-- [ ] Testes do fluxo de OS (criar, editar, fechar, listar)
-- [ ] Testes do fluxo de orçamento (gerar, técnico preenche, cliente aprova)
+(Nenhum — milestone v1.0 concluído)
 
 ### Out of Scope
 
