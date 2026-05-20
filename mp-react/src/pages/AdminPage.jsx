@@ -40,7 +40,8 @@ import OrcamentosTab, { STATUS_ORC_META } from '../components/admin/OrcamentosTa
 import TecnicosTab      from '../components/admin/TecnicosTab.jsx'
 import SeguradosTab     from '../components/admin/SeguradosTab.jsx'
 import RelatorioTab     from '../components/admin/RelatorioTab.jsx'
-import ConfigTab        from '../components/admin/ConfigTab.jsx'
+import ConfigTab             from '../components/admin/ConfigTab.jsx'
+import ImportarMapfreModal   from '../components/admin/ImportarMapfreModal.jsx'
 import { generatePDF } from '../utils/pdfGenerator.js'
 import { generatePNG } from '../utils/pngGenerator.js'
 import { generatePDFCliente, generatePDFSeguradora } from '../utils/orcamentoPdfGenerator.js'
@@ -130,8 +131,9 @@ export default function AdminPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   // ── Modais OS ────────────────────────────────────────────
-  const [selected,      setSelected]      = useState(null)
-  const [showOsForm,    setShowOsForm]    = useState(false)
+  const [selected,           setSelected]           = useState(null)
+  const [showOsForm,         setShowOsForm]         = useState(false)
+  const [showImportarMapfre, setShowImportarMapfre] = useState(false)
   const [osForm,        setOsForm]        = useState(OS_INITIAL)
   const [osErrors,      setOsErrors]      = useState({})
   const [osCepLoading,  setOsCepLoading]  = useState(false)
@@ -981,14 +983,25 @@ export default function AdminPage() {
                 </button>
               )
               : (
-                <button
-                  className="btn-new-os"
-                  onClick={() => setShowOsForm(true)}
-                  disabled={limite.bloqueado}
-                  title={limite.bloqueado ? `Limite de ${limite.limite} OS/mês atingido` : 'Nova OS'}
-                >
-                  + Nova OS
-                </button>
+                <>
+                  <button
+                    className="btn-sm btn-view"
+                    onClick={() => setShowImportarMapfre(true)}
+                    disabled={limite.bloqueado}
+                    title="Importar OS da Mapfre via texto OCR"
+                    style={{ fontSize: '.82rem' }}
+                  >
+                    📱 Importar Mapfre
+                  </button>
+                  <button
+                    className="btn-new-os"
+                    onClick={() => setShowOsForm(true)}
+                    disabled={limite.bloqueado}
+                    title={limite.bloqueado ? `Limite de ${limite.limite} OS/mês atingido` : 'Nova OS'}
+                  >
+                    + Nova OS
+                  </button>
+                </>
               )
             }
           </div>
@@ -1038,6 +1051,18 @@ export default function AdminPage() {
       >
         +
       </button>
+
+      {/* ══ MODAL: IMPORTAR MAPFRE ══ */}
+      {showImportarMapfre && (
+        <ImportarMapfreModal
+          onClose={() => setShowImportarMapfre(false)}
+          onImportar={campos => {
+            setOsForm(prev => ({ ...prev, ...campos }))
+            setShowImportarMapfre(false)
+            setShowOsForm(true)
+          }}
+        />
+      )}
 
       {/* ══ MODAL: NOVA OS ══ */}
       {showOsForm && (
