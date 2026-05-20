@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-05-05)
 
 **Core value:** Produto confiável e completo — fluxos críticos cobertos por testes e features core entregues.
-**Current focus:** v1.0 Test Coverage — Phases 3-4 pendentes (Auth e Roteamento, Fluxos Críticos)
+**Current focus:** v1.0 Test Coverage — Phase 4 pendente (Fluxos Críticos — discuss completo, pronto para planejar)
 
 ## Current Position
 
 Milestone: v1.0 Test Coverage — em progresso
 Phase: 4 of 4 (v1.0 scope) — Ready to plan
 Plan: 2 of 2 (Phase 3 plans) — Complete
-Status: Phase 3 complete (2026-05-19) — 13 testes passando, AUTH-01..13 cobertos. RotaAdmin corrigido para verificar empresaId.
-Last activity: 2026-05-19 — Phase 3 complete — authContext.test.jsx (5 testes) e rotasEmpresa.test.jsx (8 testes) criados; _clearCacheForTest e mock getEmpresaBySlug/getConfigEmpresa adicionados
+Status: Phase 4 discuss completo (2026-05-19) — 04-CONTEXT.md criado com decisões para OS e Orçamento.
+Last activity: 2026-05-19 — Phase 4 discuss completo — decisões: stub components para OS (AdminPage não renderizado), vi.mock('react-signature-canvas') para ORC, mocks adicionais para imageCompression/uploadFoto/validarUpload/comprimirImagem
 
 Progress (v1.0): [██████░░░░] 75% (Phases 1-3 complete, Phase 4 pending)
 Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
@@ -65,9 +65,14 @@ Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 - 03-02: renderHook com wrapper MemoryRouter+Routes — obrigatório para hooks que usam useParams() e useNavigate()
 - 03-02: _clearCacheForTest exportado de useEmpresa.js (prefixo _ = uso só em testes)
 - 03-02: RotaAdmin agora verifica !empresaId além de !estaLogado (correção de segurança AUTH-07)
+- 04-discuss: OS-01..06 usa stub components mínimos no arquivo de teste (AdminPage não renderizado)
+- 04-discuss: ORC-01..06 renderiza OrcamentoTecnicoPage e AprovarOrcamentoPage diretamente
+- 04-discuss: vi.mock('react-signature-canvas') com toDataURL fake para ORC-02/ORC-05
+- 04-discuss: mocks adicionais — browser-image-compression, validarUpload, comprimirImagem, uploadFoto/serverTimestamp/deleteDoc em firebase
 
 ### Pending Todos
 
+- Planejar Phase 4 via /gsd-plan-phase 4 (discuss completo — 04-CONTEXT.md disponível)
 - Executar Phase 4 do milestone v1.0 (Fluxos Críticos — OS e Orçamento)
 
 ### Blockers/Concerns
@@ -80,5 +85,5 @@ Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 ## Session Continuity
 
 Last session: 2026-05-19
-Stopped at: Phase 3 completa — 63 testes passando (smoke 3, formatters 30, firebase 17, authContext 5, rotasEmpresa 8). Próximo: /gsd-plan-phase 4 ou /gsd-execute-phase 4
+Stopped at: Phase 4 discuss completo — 04-CONTEXT.md criado. Próximo: /gsd-plan-phase 4
 Resume file: None
