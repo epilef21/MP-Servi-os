@@ -102,8 +102,15 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: Testes de CRUD de Ordens de Serviço (OS-01..06)
-- [ ] 04-02: Testes do fluxo de Orçamento técnico → cliente (ORC-01..06)
+
+**Wave 1** *(ambos independentes — podem rodar em paralelo)*
+- [ ] 04-01-PLAN.md — Testes de CRUD de OS via stub components (OS-01..06)
+- [ ] 04-02-PLAN.md — Testes do fluxo de Orçamento técnico→cliente, componentes reais (ORC-01..06)
+
+**Cross-cutting constraints:**
+- vi.mock('../firebase') com Padrão C obrigatório em ambos os arquivos de teste
+- _clearCacheForTest() no beforeEach em orcamentoFluxo.test.jsx (cache de useEmpresa)
+- AdminPage.jsx nunca importado em nenhum arquivo de teste desta fase
 
 **UI hint**: yes
 **Complexity**: high

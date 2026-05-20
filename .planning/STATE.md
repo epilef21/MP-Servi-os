@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-05-05)
 ## Current Position
 
 Milestone: v1.0 Test Coverage — em progresso
-Phase: 4 of 4 (v1.0 scope) — Ready to plan
-Plan: 2 of 2 (Phase 3 plans) — Complete
-Status: Phase 4 discuss completo (2026-05-19) — 04-CONTEXT.md criado com decisões para OS e Orçamento.
-Last activity: 2026-05-19 — Phase 4 discuss completo — decisões: stub components para OS (AdminPage não renderizado), vi.mock('react-signature-canvas') para ORC, mocks adicionais para imageCompression/uploadFoto/validarUpload/comprimirImagem
+Phase: 4 of 4 (v1.0 scope) — Ready to execute
+Plan: 2 of 2 (Phase 4 plans) — Complete
+Status: Phase 4 planejamento completo (2026-05-19) — 04-01-PLAN.md (OS-01..06) e 04-02-PLAN.md (ORC-01..06) verificados e aprovados.
+Last activity: 2026-05-19 — Phase 4 planned — 2 planos Wave 1 independentes: osFluxo.test.jsx (stub components) + orcamentoFluxo.test.jsx (componentes reais + SignatureCanvas mock async)
 
-Progress (v1.0): [██████░░░░] 75% (Phases 1-3 complete, Phase 4 pending)
+Progress (v1.0): [██████░░░░] 75% (Phases 1-3 complete, Phase 4 ready to execute)
 Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 
 ## Performance Metrics
