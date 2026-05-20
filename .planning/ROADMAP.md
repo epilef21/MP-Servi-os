@@ -17,7 +17,7 @@ As Phases 5 e 6 pertencem ao milestone v1.1 Produto Core e são independentes da
 - [x] **Phase 1: Infraestrutura de Testes** - Configurar Vitest, RTL, mocks globais e smoke test passando
 - [x] **Phase 2: Camada Base** - Testar utilitários puros e funções de acesso ao Firestore em isolamento
 - [x] **Phase 3: Auth e Roteamento** - Testar AuthContext, guards de rota e hook useEmpresa
-- [ ] **Phase 4: Fluxos Críticos** - Testar CRUD de OS e fluxo completo de orçamento
+- [x] **Phase 4: Fluxos Críticos** - Testar CRUD de OS e fluxo completo de orçamento
 - [x] **Phase 5: Compressão de Imagens** - Técnico pode enviar fotos comprimidas no orçamento com feedback visual
 - [x] **Phase 6: Relatório Mensal em PDF** - Admin pode gerar e baixar relatório mensal com OS, lucro e breakdown
 
@@ -104,8 +104,8 @@ Plans:
 Plans:
 
 **Wave 1** *(ambos independentes — podem rodar em paralelo)*
-- [ ] 04-01-PLAN.md — Testes de CRUD de OS via stub components (OS-01..06)
-- [ ] 04-02-PLAN.md — Testes do fluxo de Orçamento técnico→cliente, componentes reais (ORC-01..06)
+- [x] 04-01-PLAN.md — Testes de CRUD de OS via stub components (OS-01..06)
+- [x] 04-02-PLAN.md — Testes do fluxo de Orçamento técnico→cliente, componentes reais (ORC-01..06)
 
 **Cross-cutting constraints:**
 - vi.mock('../firebase') com Padrão C obrigatório em ambos os arquivos de teste
@@ -171,7 +171,7 @@ Plans:
 | 1. Infraestrutura de Testes | 2/2 | Complete | 2026-05-03 |
 | 2. Camada Base | 2/2 | Complete | 2026-05-05 |
 | 3. Auth e Roteamento | 2/2 | Complete | 2026-05-19 |
-| 4. Fluxos Críticos | 0/2 | Not started | - |
+| 4. Fluxos Críticos | 2/2 | Complete | 2026-05-20 |
 | 5. Compressão de Imagens | 1/1 | Complete | 2026-05-04 |
 | 6. Relatório Mensal em PDF | 2/2 | Complete | 2026-05-05 |
 
@@ -210,18 +210,18 @@ Plans:
 | AUTH-11 | useEmpresa resolve slug e retorna dados do Firestore | Phase 3 | Complete (03-02) |
 | AUTH-12 | useEmpresa redireciona para /empresa-nao-encontrada | Phase 3 | Complete (03-02) |
 | AUTH-13 | useEmpresa retorna cache sem nova chamada Firestore | Phase 3 | Complete (03-02) |
-| OS-01 | Admin pode criar OS via formulário | Phase 4 | Pending |
-| OS-02 | Admin pode editar dados de OS existente | Phase 4 | Pending |
-| OS-03 | Admin pode alterar status de OS | Phase 4 | Pending |
-| OS-04 | Admin pode excluir OS e ela desaparece da lista | Phase 4 | Pending |
-| OS-05 | Lista de OS exibe estado vazio corretamente | Phase 4 | Pending |
-| OS-06 | Lista de OS exibe conjunto retornado pelo Firebase | Phase 4 | Pending |
-| ORC-01 | Técnico preenche formulário de orçamento com itens | Phase 4 | Pending |
-| ORC-02 | Técnico assina orçamento digitalmente antes de enviar | Phase 4 | Pending |
-| ORC-03 | Orçamento é salvo no Firestore com dados corretos | Phase 4 | Pending |
-| ORC-04 | Cliente visualiza orçamento na página de aprovação | Phase 4 | Pending |
-| ORC-05 | Cliente aprova orçamento e assinatura é registrada | Phase 4 | Pending |
-| ORC-06 | Orçamento aprovado atualiza status no Firestore | Phase 4 | Pending |
+| OS-01 | Admin pode criar OS via formulário | Phase 4 | Complete (04-01) |
+| OS-02 | Admin pode editar dados de OS existente | Phase 4 | Complete (04-01) |
+| OS-03 | Admin pode alterar status de OS | Phase 4 | Complete (04-01) |
+| OS-04 | Admin pode excluir OS e ela desaparece da lista | Phase 4 | Complete (04-01) |
+| OS-05 | Lista de OS exibe estado vazio corretamente | Phase 4 | Complete (04-01) |
+| OS-06 | Lista de OS exibe conjunto retornado pelo Firebase | Phase 4 | Complete (04-01) |
+| ORC-01 | Técnico preenche formulário de orçamento com itens | Phase 4 | Complete (04-02) |
+| ORC-02 | Técnico assina orçamento digitalmente antes de enviar | Phase 4 | Complete (04-02) |
+| ORC-03 | Orçamento é salvo no Firestore com dados corretos | Phase 4 | Complete (04-02) |
+| ORC-04 | Cliente visualiza orçamento na página de aprovação | Phase 4 | Complete (04-02) |
+| ORC-05 | Cliente aprova orçamento e assinatura é registrada | Phase 4 | Complete (04-02) |
+| ORC-06 | Orçamento aprovado atualiza status no Firestore | Phase 4 | Complete (04-02) |
 | IMG-01 | Fotos comprimidas para máx 400KB antes do upload ao Storage | Phase 5 | Complete (05-01) |
 | IMG-02 | Interface exibe feedback visual durante compressão | Phase 5 | Complete (05-01) |
 | IMG-03 | Mensagem de erro amigável exibida se compressão falhar | Phase 5 | Complete (05-01) |

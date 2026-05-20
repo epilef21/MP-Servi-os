@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-05-05)
 
 **Core value:** Produto confiável e completo — fluxos críticos cobertos por testes e features core entregues.
-**Current focus:** v1.0 Test Coverage — Phase 4 pendente (Fluxos Críticos — discuss completo, pronto para planejar)
+**Current focus:** v1.0 Test Coverage — Phase 4 completa (Fluxos Críticos — OS-01..06 + ORC-01..06 verificados, 75 testes passando)
 
 ## Current Position
 
-Milestone: v1.0 Test Coverage — em progresso
-Phase: 4 of 4 (v1.0 scope) — Ready to execute
+Milestone: v1.0 Test Coverage — COMPLETO
+Phase: 4 of 4 (v1.0 scope) — Complete
 Plan: 2 of 2 (Phase 4 plans) — Complete
-Status: Phase 4 planejamento completo (2026-05-19) — 04-01-PLAN.md (OS-01..06) e 04-02-PLAN.md (ORC-01..06) verificados e aprovados.
-Last activity: 2026-05-19 — Phase 4 planned — 2 planos Wave 1 independentes: osFluxo.test.jsx (stub components) + orcamentoFluxo.test.jsx (componentes reais + SignatureCanvas mock async)
+Status: Phase 4 execution completa (2026-05-20) — osFluxo.test.jsx (6/6) + orcamentoFluxo.test.jsx (6/6) — 75 testes totais passando.
+Last activity: 2026-05-20 — Phase 4 executada — OS-01..06 via stubs, ORC-01..06 via componentes reais
 
-Progress (v1.0): [██████░░░░] 75% (Phases 1-3 complete, Phase 4 ready to execute)
+Progress (v1.0): [██████████] 100% (Phases 1-4 complete — milestone v1.0 Test Coverage DONE)
 Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 
 ## Performance Metrics
@@ -32,7 +32,7 @@ Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 | 1. Infraestrutura | 2 | 2 | 8 min |
 | 2. Camada Base | 2 | 2 | ~12 min |
 | 3. Auth e Roteamento | 2 | 2 | ~6 min |
-| 4. Fluxos Críticos | 2 | 0 | — |
+| 4. Fluxos Críticos | 2 | 2 | ~4 min |
 | 5. Compressão de Imagens | 1 | 1 | ~4 min |
 | 6. Relatório Mensal em PDF | 2 | 2 | ~8 min |
 
@@ -72,8 +72,7 @@ Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 
 ### Pending Todos
 
-- Planejar Phase 4 via /gsd-plan-phase 4 (discuss completo — 04-CONTEXT.md disponível)
-- Executar Phase 4 do milestone v1.0 (Fluxos Críticos — OS e Orçamento)
+- Verificar Phase 4 com /gsd-verify-work 4 (todos os testes passando — verificação formal pendente)
 
 ### Blockers/Concerns
 
@@ -84,6 +83,6 @@ Progress (v1.1): [██████████] 100% (Phases 5+6 complete)
 
 ## Session Continuity
 
-Last session: 2026-05-19
-Stopped at: Phase 4 discuss completo — 04-CONTEXT.md criado. Próximo: /gsd-plan-phase 4
+Last session: 2026-05-20
+Stopped at: Phase 4 executada e 75 testes passando. Próximo: verificação formal da fase
 Resume file: None
