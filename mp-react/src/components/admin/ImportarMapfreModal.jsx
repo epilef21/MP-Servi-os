@@ -198,40 +198,88 @@ function parsearJuvo(raw) {
 }
 
 // ── Parser Maxpar (prestador.maxpar.com) ────────────────────────────────────
-// Ctrl+A na OS do Maxpar novo.
-// Labels: "Nome do Beneficiário", "Telefone 01", "Endereço de Origem",
-//         "Tipo de Serviço", "Observações", "Protocolo".
-// Endereço: "RUA - NUM - BAIRRO - CIDADE" split por " - ".
+// Formato real do Ctrl+A (descoberto em 21/05/2026):
+// - Nº OS: "Ordem de Serviço" → próxima linha
+// - Segurado: "Beneficiário" → próxima linha
+// - Serviço: linha ANTES de "Item de Cobertura" (exibido como título na UI)
+// - Data: DD/MM/YYYY que aparece antes de "Agendamento"
+// - Endereço: "Endereço" → "Origem" (sub-cabeçalho) → "Rua X, NUM, BAIRRO, Cidade"
+// - Descrição: "Observação: X" inline (evita a linha vazia "Observação\n-")
+// - Telefone: não fornecido pelo portal
 function parsearMaxpar(raw) {
   const ls = linhasOf(raw)
 
-  const num_assist    = buscar(ls, ['Protocolo', 'Número do Protocolo', 'N° Protocolo'])
-  const nome_segurado = buscar(ls, ['Nome do Beneficiário', 'Nome do Beneficiario', 'Beneficiário'])
-  const tel_segurado  = buscar(ls, ['Telefone 01', 'Telefone', 'Celular']).replace(/\D/g, '')
-  const servico       = buscar(ls, ['Tipo de Serviço', 'Tipo de Servico', 'Serviço'])
-  const desc_problema = buscar(ls, ['Observações', 'Observacoes', 'Observação', 'Descrição'])
-  const dataRaw       = buscar(ls, ['Data de Agendamento', 'Data Agendamento', 'Agendamento', 'Data Prevista'])
-  const data_agendada = normData(dataRaw) || primeiraData(raw)
+  // Nº OS: "Ordem de Serviço" → próxima linha (ex: "A26051959063/2")
+  const num_assist = buscar(ls, ['Ordem de Serviço', 'Ordem de Servico'])
 
-  // Endereço: "RUA MARCO ANTONIO RIBEIRO - 595 - VILA NOVA FLORINEA - ASSIS"
-  let endereco = '', numero = '', cidade = ''
-  const endRaw = buscar(ls, ['Endereço de Origem', 'Endereco de Origem', 'Endereço', 'Endereco'])
-  if (endRaw) {
-    const parts = endRaw.split(/\s*-\s*/)
-    if (parts.length >= 4) {
-      const rua     = parts[0].trim()
-      const numCand = parts[1].trim()
-      numero   = (numCand !== '0' && /^\d/.test(numCand)) ? numCand.replace(/\D.*$/, '') : ''
-      const bairro  = parts[2].trim()
-      cidade   = parts[3].trim()
-      endereco = bairro ? `${rua} - ${bairro}` : rua
-    } else {
-      endereco = endRaw
+  // Segurado: "Beneficiário" → próxima linha
+  const nome_segurado = buscar(ls, ['Beneficiário', 'Beneficiario', 'Nome do Beneficiário', 'Nome do Beneficiario'])
+
+  // Serviço: linha imediatamente ANTES de "Item de Cobertura"
+  // (a UI exibe o tipo de serviço como título, e "Item de Cobertura" como legenda abaixo)
+  let servico = ''
+  for (let i = 1; i < ls.length; i++) {
+    if (/^Item de Cobertura$/i.test(ls[i])) { servico = ls[i - 1]; break }
+  }
+  if (!servico) servico = buscar(ls, ['Tipo de Serviço', 'Tipo de Servico'])
+
+  // Data: DD/MM/YYYY que aparece imediatamente antes de "Agendamento"
+  let data_agendada = ''
+  for (let i = 0; i < ls.length; i++) {
+    if (/^Agendamento$/i.test(ls[i])) {
+      for (let j = i - 1; j >= Math.max(0, i - 4); j--) {
+        const v = normData(ls[j]); if (v) { data_agendada = v; break }
+      }
+      break
     }
+  }
+  if (!data_agendada) data_agendada = primeiraData(raw)
+
+  // Endereço: "Endereço" → pula sub-cabeçalho "Origem" → "Rua X, NUM, BAIRRO, Cidade"
+  let endereco = '', numero = '', cidade = ''
+  for (let i = 0; i < ls.length - 1; i++) {
+    if (!/^Endere[çc]o$/i.test(ls[i])) continue
+    let j = i + 1
+    if (j < ls.length && /^Origem$/i.test(ls[j])) j++ // pula sub-cabeçalho
+    for (; j < ls.length; j++) {
+      if (!ls[j] || /^(Ponto de refer[êe]ncia|Observa[çc][ãa]o:|Destino)/i.test(ls[j])) break
+      // Parseia "Rua X, 301, VILA CENTRAL, Assis"
+      const parts = ls[j].split(', ')
+      const temNum = parts.length >= 2 && /^\d/.test(parts[1])
+      if (parts.length >= 4 && temNum) {
+        numero   = parts[1].replace(/\D.*$/, '')
+        const bairro = parts.slice(2, -1).join(', ').trim()
+        cidade   = parts[parts.length - 1].trim()
+        endereco = bairro ? `${parts[0].trim()} - ${bairro}` : parts[0].trim()
+      } else if (parts.length === 3 && temNum) {
+        numero   = parts[1].replace(/\D.*$/, '')
+        cidade   = parts[2].trim()
+        endereco = parts[0].trim()
+      } else if (parts.length >= 2) {
+        cidade   = parts[parts.length - 1].trim()
+        endereco = parts.slice(0, -1).join(', ').trim()
+      } else {
+        endereco = ls[j]
+      }
+      break
+    }
+    break
+  }
+
+  // Descrição: "Observação: X" inline (ignora linhas com apenas "-")
+  let desc_problema = ''
+  for (const l of ls) {
+    const m = l.match(/^Observa[çc][ãa]o[:\s]+(.+)$/i)
+    if (m && m[1].trim() !== '-') { desc_problema = m[1].trim(); break }
+  }
+  if (!desc_problema) {
+    const qq = buscar(ls, 'O que aconteceu?')
+    if (qq && qq !== '-') desc_problema = qq
   }
 
   return {
-    seguradora: 'Maxpar', num_assist, nome_segurado, tel_segurado,
+    seguradora: 'Maxpar', num_assist, nome_segurado,
+    tel_segurado: '', // portal não fornece telefone no acionamento
     cep: extrairCep(raw), endereco, numero, cidade,
     servico, desc_problema, data_agendada,
   }
@@ -346,18 +394,21 @@ const PLACEHOLDER = {
     'JOÃO DA SILVA',
   ].join('\n'),
   maxpar: [
-    'Exemplo do texto esperado do Maxpar:',
+    'Exemplo do formato real do Maxpar (Ctrl+A na OS):',
     '',
-    'Protocolo',
-    '126233080',
-    'Nome do Beneficiário',
-    'MARIA SILVA',
-    'Telefone 01',
-    '(18) 99634-1999',
-    'Endereço de Origem',
-    'RUA MARCO ANTONIO RIBEIRO - 595 - VILA NOVA FLORINEA - ASSIS',
-    'Tipo de Serviço',
-    'Encanador',
+    'ELETRICISTA',
+    'Item de Cobertura',
+    '22/05/2026',
+    '13h00 - 18h00',
+    'Agendamento',
+    'Ordem de Serviço',
+    'A26051959063/2',
+    'Beneficiário',
+    'Lucas de Lima Gomes Da Silva',
+    'Endereço',
+    'Origem',
+    'Rua João Pessoa, 301, VILA CENTRAL, Assis',
+    'Observação: Problemas nas tomadas',
   ].join('\n'),
   mondial: [
     'Exemplo do texto esperado do Mondial:',
