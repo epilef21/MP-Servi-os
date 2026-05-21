@@ -318,7 +318,8 @@ function parsearMondial(raw) {
   const seguradora = prodParts.length >= 2 ? prodParts[1].trim() : 'Mondial'
 
   // Endereço: "Local" → "Rua das Flores, 123" — última vírgula separa número
-  const localRaw   = val(['Local'])
+  // Portal Mondial grava "R RUA X" (prefixo redundante) — remove o "R " inicial
+  const localRaw   = val(['Local']).replace(/^R\s+(?=RUA|AV\.|AVENIDA|AL\.|ALAMEDA|EST\.|ESTRADA|PÇ\.|PRAÇA|TV\.|TRAVESSA)/i, '')
   const lastComma  = localRaw.lastIndexOf(', ')
   const enderecoBruto = lastComma > 0 ? localRaw.slice(0, lastComma).trim() : localRaw
   const numeroBruto   = lastComma > 0 ? localRaw.slice(lastComma + 2).trim()  : ''
