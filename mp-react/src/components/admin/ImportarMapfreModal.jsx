@@ -348,7 +348,19 @@ function parsearMondial(raw) {
     tel_segurado,
     cep: (val(['CEP']) || '').replace(/\D/g, '') || extrairCep(raw),
     endereco, numero: numeroBruto, cidade,
-    servico:       val(['Serviço', 'Servico']),
+    servico:       (() => {
+      // Mondial tem duas linhas: "CONSERTO RESIDENCIAL" (genérico) + "ELETRODOMÉSTICO" (específico)
+      // Pega a segunda linha não-vazia após o label "Serviço"
+      for (let i = 0; i < ls.length - 1; i++) {
+        if (ls[i].toLowerCase().replace(/:$/, '').trim() === 'serviço') {
+          let count = 0
+          for (let j = i + 1; j < ls.length; j++) {
+            if (ls[j]) { count++; if (count === 2) return ls[j] }
+          }
+        }
+      }
+      return val(['Serviço', 'Servico'])
+    })(),
     desc_problema: val(['Problema', 'Referências', 'Referencia']),
     data_agendada,
   }
