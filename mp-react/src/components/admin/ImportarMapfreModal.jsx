@@ -20,9 +20,10 @@ function buscar(linhas, labels, exato = true) {
       if (m) return m[1].trim()
     }
     for (let i = 0; i < linhas.length - 1; i++) {
+      const lineNorm = linhas[i].toLowerCase().replace(/:$/, '').trim()
       const ok = exato
-        ? linhas[i].toLowerCase() === lb.toLowerCase()
-        : linhas[i].toLowerCase().includes(lb.toLowerCase())
+        ? lineNorm === lb.toLowerCase()
+        : lineNorm.includes(lb.toLowerCase())
       if (ok) {
         for (let j = i + 1; j < linhas.length; j++) {
           if (linhas[j]) return linhas[j]
@@ -189,11 +190,13 @@ function parsearJuvo(raw) {
     break
   }
 
+  const desc_problema = buscar(ls, ['Descrição', 'Descricao', 'Descrição do problema'])
+
   return {
     seguradora: 'Tempo', num_assist, nome_segurado,
     tel_segurado: '', // portal não fornece telefone
     cep, endereco, numero, cidade,
-    servico, desc_problema: '', data_agendada,
+    servico, desc_problema, data_agendada,
   }
 }
 
