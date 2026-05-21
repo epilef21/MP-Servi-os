@@ -988,10 +988,10 @@ export default function AdminPage() {
                     className="btn-sm btn-view"
                     onClick={() => setShowImportarMapfre(true)}
                     disabled={limite.bloqueado}
-                    title="Importar OS da Mapfre via texto OCR"
+                    title="Importar OS via texto — Mapfre, Juvo/Tempo, Maxpar, Mondial"
                     style={{ fontSize: '.82rem' }}
                   >
-                    📱 Importar Mapfre
+                    📋 Importar por Texto
                   </button>
                   <button
                     className="btn-new-os"
