@@ -3,12 +3,13 @@ import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { getLucro, fmtBRL, fmtDate } from '../../utils/formatters.js'
 
 const STATUS_META = {
-  aguardando_tecnico: { label: '🔔 Aguardando',     cls: 'aguardando-t'    },
-  pendente:           { label: '⏳ Pendente',         cls: 'pendente-y'      },
-  processado:         { label: '✅ Processado',       cls: 'processado-g'    },
-  enviado:            { label: '📤 Enviado',          cls: 'enviado-b'       },
-  ficou_visita:       { label: '🔄 Ficou na Visita', cls: 'ficou-visita'    },
-  cliente_ausente:    { label: '🚪 Cliente Ausente', cls: 'cliente-ausente' },
+  aguardando_tecnico: { label: '🔔 Aguardando',       cls: 'aguardando-t'    },
+  pendente:           { label: '⏳ Pendente',           cls: 'pendente-y'      },
+  concluido:          { label: '✅ Concluído',          cls: 'processado-g'    },
+  processado:         { label: '📋 Processado',        cls: 'processado-g'    },
+  enviado:            { label: '📤 Enviado',            cls: 'enviado-b'       },
+  ficou_visita:       { label: '🔄 Ficou na Visita',   cls: 'ficou-visita'    },
+  cliente_ausente:    { label: '🚪 Cliente Ausente',   cls: 'cliente-ausente' },
 }
 const badgeLabel = s => STATUS_META[s]?.label ?? STATUS_META.pendente.label
 const badgeCls   = s => STATUS_META[s]?.cls   ?? 'pendente-y'
@@ -43,7 +44,10 @@ export default function OrdensServicoTab() {
           <option value="">Todos os status</option>
           <option value="aguardando_tecnico">🔔 Aguardando Técnico</option>
           <option value="pendente">⏳ Pendentes</option>
-          <option value="processado">✅ Processados</option>
+          <option value="concluido">✅ Concluídos pelo técnico</option>
+          <option value="ficou_visita">🔄 Ficou na Visita</option>
+          <option value="cliente_ausente">🚪 Cliente Ausente</option>
+          <option value="processado">📋 Processados</option>
           <option value="enviado">📤 Enviados</option>
         </select>
         <input type="date" className="filter-input" value={filtData} onChange={e => setFiltData(e.target.value)} />
@@ -104,8 +108,8 @@ export default function OrdensServicoTab() {
                       🔗 Link
                     </button>
                   )}
-                  {(r.status || 'pendente') === 'pendente' && (
-                    <button className="btn-sm btn-ok" disabled={updating} onClick={() => changeStatus(r.id, 'processado')}>✓</button>
+                  {(r.status === 'concluido' || r.status === 'pendente' || !r.status) && (
+                    <button className="btn-sm btn-ok" disabled={updating} onClick={() => changeStatus(r.id, 'processado')} title="Marcar como processado">✓</button>
                   )}
                 </div>
               </div>

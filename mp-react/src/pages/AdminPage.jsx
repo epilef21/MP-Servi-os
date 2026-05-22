@@ -3,7 +3,7 @@
 // Fase 2: Técnicos, Perfil do Usuário, Minha Empresa
 // ============================================================
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   db,
   storage,
@@ -21,6 +21,7 @@ import {
   getDocs,
   deleteDoc,
   serverTimestamp,
+  arrayUnion,
   PLANOS,
   storageRef,
   uploadBytes,
@@ -60,12 +61,13 @@ function fmtSN(v) {
 }
 
 const STATUS_META = {
-  aguardando_tecnico: { label: '🔔 Aguardando',       cls: 'aguardando-t'    },
-  pendente:           { label: '⏳ Pendente',           cls: 'pendente-y'      },
-  processado:         { label: '✅ Processado',         cls: 'processado-g'    },
-  enviado:            { label: '📤 Enviado',            cls: 'enviado-b'       },
-  ficou_visita:       { label: '🔄 Ficou na Visita',   cls: 'ficou-visita'    },
-  cliente_ausente:    { label: '🚪 Cliente Ausente',   cls: 'cliente-ausente' },
+  aguardando_tecnico: { label: '🔔 Aguardando',       cls: 'aguardando-t',    dot: '#f05a1a' },
+  pendente:           { label: '⏳ Pendente',           cls: 'pendente-y',      dot: '#f59e0b' },
+  concluido:          { label: '✅ Concluído',          cls: 'processado-g',    dot: '#2d8a4e' },
+  processado:         { label: '📋 Processado',        cls: 'processado-g',    dot: '#1a3fa8' },
+  enviado:            { label: '📤 Enviado',            cls: 'enviado-b',       dot: '#7c3aed' },
+  ficou_visita:       { label: '🔄 Ficou na Visita',   cls: 'ficou-visita',    dot: '#3b82f6' },
+  cliente_ausente:    { label: '🚪 Cliente Ausente',   cls: 'cliente-ausente', dot: '#9ca3af' },
 }
 const badgeLabel = s => STATUS_META[s]?.label ?? STATUS_META.pendente.label
 const badgeCls   = s => STATUS_META[s]?.cls   ?? 'pendente-y'
@@ -112,6 +114,7 @@ function Toast({ toast }) {
 // ── Componente principal ─────────────────────────────────────
 export default function AdminPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { logout, empresaId: empresaIdAuth, emailUsuario } = useAuth()
 
   const { empresa, config, slug, verificarLimite, loading: loadingEmpresa } = useEmpresa()
@@ -242,6 +245,17 @@ export default function AdminPage() {
     if (empresaId) loadReports()
   }, [empresaId])
 
+  // Abre OS diretamente quando navegado da Agenda com state.openOsId
+  useEffect(() => {
+    const openId = location.state?.openOsId
+    if (!openId || loading || reports.length === 0) return
+    const os = reports.find(r => r.id === openId)
+    if (os) {
+      setSelected(os)
+      window.history.replaceState({}, '') // limpa o state para não reabrir na volta
+    }
+  }, [reports, loading])
+
   // ── Carrega técnicos da empresa ──────────────────────────
   async function loadTecnicos() {
     if (!empresaId) return
@@ -290,9 +304,25 @@ export default function AdminPage() {
   async function changeStatus(id, newStatus) {
     setUpdating(true)
     try {
-      await atualizarOS(empresaId, id, { status: newStatus })
-      setReports(p => p.map(r => r.id === id ? { ...r, status: newStatus } : r))
-      if (selected?.id === id) setSelected(p => ({ ...p, status: newStatus }))
+      const osAtual = reports.find(r => r.id === id)
+      const entrada = {
+        de: osAtual?.status || 'pendente',
+        para: newStatus,
+        quando: new Date().toISOString(),
+        por: emailUsuario || 'admin',
+      }
+      await atualizarOS(empresaId, id, {
+        status: newStatus,
+        status_historico: arrayUnion(entrada),
+      })
+      setReports(p => p.map(r => r.id === id
+        ? { ...r, status: newStatus, status_historico: [...(r.status_historico || []), entrada] }
+        : r
+      ))
+      if (selected?.id === id) setSelected(p => ({
+        ...p, status: newStatus,
+        status_historico: [...(p.status_historico || []), entrada],
+      }))
     } catch (e) { alert('Erro: ' + e.message) }
     finally { setUpdating(false) }
   }
@@ -1648,6 +1678,32 @@ export default function AdminPage() {
                 </div>
               )}
 
+              {selected.status_historico?.length > 0 && (
+                <div className="md-section" style={{ background: '#f8f9fb', border: '1px solid var(--border)', borderRadius: 8, padding: '14px 16px' }}>
+                  <h3 style={{ color: 'var(--text)', marginBottom: 10 }}>🕐 Histórico de Status</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {[...selected.status_historico].reverse().map((h, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                        <span style={{
+                          display: 'inline-block', width: 10, height: 10, borderRadius: '50%', marginTop: 4, flexShrink: 0,
+                          background: STATUS_META[h.para]?.dot || '#999',
+                        }} />
+                        <div style={{ lineHeight: 1.4 }}>
+                          <span style={{ fontWeight: 700, fontSize: '.85rem' }}>
+                            {STATUS_META[h.para]?.label || h.para}
+                          </span>
+                          {h.de && <span style={{ fontSize: '.78rem', color: 'var(--muted)' }}> ← {STATUS_META[h.de]?.label || h.de}</span>}
+                          <br />
+                          <span style={{ fontSize: '.75rem', color: 'var(--muted)' }}>
+                            {h.por} · {new Date(h.quando).toLocaleString('pt-BR')}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="meta-row">
                 <div className="meta-item"><label>ID</label><p>{selected.id}</p></div>
                 <div className="meta-item"><label>Criado em</label><p>{fmtDatetime(selected.criado_em)}</p></div>
@@ -1657,7 +1713,7 @@ export default function AdminPage() {
 
             <div className="modal-footer">
               <span className={`badge ${badgeCls(selected.status)}`} style={{ marginRight: 'auto' }}>{badgeLabel(selected.status)}</span>
-              {(selected.status || 'pendente') === 'pendente' && (
+              {(selected.status === 'concluido' || selected.status === 'pendente' || !selected.status) && (
                 <button className="btn-sm btn-ok" disabled={updating} onClick={() => changeStatus(selected.id, 'processado')}>✓ Processado</button>
               )}
               {selected.status === 'processado' && (

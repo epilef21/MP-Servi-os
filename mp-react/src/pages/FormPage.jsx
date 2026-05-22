@@ -6,7 +6,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import SignatureCanvas from 'react-signature-canvas'
 import {
-  db, criarOS, atualizarOS,
+  db, criarOS, atualizarOS, arrayUnion,
   doc, getDoc, serverTimestamp, uploadFoto,
 } from '../firebase.js'
 import { useEmpresa } from '../hooks/useEmpresa.js'
@@ -359,7 +359,7 @@ export default function FormPage() {
       .map(i => ({ item: i.label, quant: checkup[i.id]?.quant || '' }))
 
     // Status final baseado no resultado da visita
-    let statusFinal = 'pendente'
+    let statusFinal = 'concluido'
     if (form.resultado_visita === 'ficou_visita')    statusFinal = 'ficou_visita'
     if (form.resultado_visita === 'cliente_ausente') statusFinal = 'cliente_ausente'
 
@@ -372,6 +372,12 @@ export default function FormPage() {
       assinatura_prestador: sigPrestData,
       assinatura_segurado:  sigSegData,
       status:               statusFinal,
+    })
+    // Histórico de status — registra a mudança feita pelo técnico
+    base.status_historico = arrayUnion({
+      para: statusFinal,
+      quando: new Date().toISOString(),
+      por: 'tecnico',
     })
 
     try {

@@ -20,6 +20,7 @@ import {
   where,
   limit,
   getCountFromServer,
+  arrayUnion,
 } from 'firebase/firestore'
 
 // Storage
@@ -66,7 +67,7 @@ export const auth    = getAuth(app)
 // ── Re-exportações do Firestore ──────────────────────────────
 export {
   collection, addDoc, getDocs, getDoc, updateDoc, setDoc, deleteDoc,
-  doc, serverTimestamp, query, orderBy, where, limit, getCountFromServer,
+  doc, serverTimestamp, query, orderBy, where, limit, getCountFromServer, arrayUnion,
   storageRef, uploadBytes, getDownloadURL,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signOut, onAuthStateChanged,
