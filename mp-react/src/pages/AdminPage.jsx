@@ -43,6 +43,7 @@ import SeguradosTab     from '../components/admin/SeguradosTab.jsx'
 import RelatorioTab     from '../components/admin/RelatorioTab.jsx'
 import ConfigTab             from '../components/admin/ConfigTab.jsx'
 import ImportarMapfreModal   from '../components/admin/ImportarMapfreModal.jsx'
+import PreencherOSModal      from '../components/admin/PreencherOSModal.jsx'
 import { generatePDF } from '../utils/pdfGenerator.js'
 import { generatePNG } from '../utils/pngGenerator.js'
 import { generatePDFCliente, generatePDFSeguradora } from '../utils/orcamentoPdfGenerator.js'
@@ -61,13 +62,14 @@ function fmtSN(v) {
 }
 
 const STATUS_META = {
-  aguardando_tecnico: { label: '🔔 Aguardando',       cls: 'aguardando-t',    dot: '#f05a1a' },
-  pendente:           { label: '⏳ Pendente',           cls: 'pendente-y',      dot: '#f59e0b' },
-  concluido:          { label: '✅ Concluído',          cls: 'processado-g',    dot: '#2d8a4e' },
-  processado:         { label: '📋 Processado',        cls: 'processado-g',    dot: '#1a3fa8' },
-  enviado:            { label: '📤 Enviado',            cls: 'enviado-b',       dot: '#7c3aed' },
-  ficou_visita:       { label: '🔄 Ficou na Visita',   cls: 'ficou-visita',    dot: '#3b82f6' },
-  cliente_ausente:    { label: '🚪 Cliente Ausente',   cls: 'cliente-ausente', dot: '#9ca3af' },
+  aguardando_tecnico:          { label: '🔔 Aguardando',          cls: 'aguardando-t',    dot: '#f05a1a' },
+  pendente:                    { label: '⏳ Pendente',             cls: 'pendente-y',      dot: '#f59e0b' },
+  concluido:                   { label: '✅ Concluído',            cls: 'processado-g',    dot: '#2d8a4e' },
+  processado:                  { label: '📋 Processado',          cls: 'processado-g',    dot: '#1a3fa8' },
+  enviado:                     { label: '📤 Enviado',              cls: 'enviado-b',       dot: '#7c3aed' },
+  ficou_visita:                { label: '🔄 Ficou na Visita',     cls: 'ficou-visita',    dot: '#3b82f6' },
+  cliente_ausente:             { label: '🚪 Cliente Ausente',     cls: 'cliente-ausente', dot: '#9ca3af' },
+  aguardando_assinatura_cliente: { label: '📝 Aguard. Assinatura', cls: 'pendente-y',      dot: '#f59e0b' },
 }
 const badgeLabel = s => STATUS_META[s]?.label ?? STATUS_META.pendente.label
 const badgeCls   = s => STATUS_META[s]?.cls   ?? 'pendente-y'
@@ -137,6 +139,7 @@ export default function AdminPage() {
   const [selected,           setSelected]           = useState(null)
   const [showOsForm,         setShowOsForm]         = useState(false)
   const [showImportarMapfre, setShowImportarMapfre] = useState(false)
+  const [showPreencherOS,    setShowPreencherOS]    = useState(false)
   const [osForm,        setOsForm]        = useState(OS_INITIAL)
   const [osErrors,      setOsErrors]      = useState({})
   const [osCepLoading,  setOsCepLoading]  = useState(false)
@@ -372,6 +375,21 @@ export default function AdminPage() {
   function buildLinkRelatorio(osId, token) {
     const t = token ? `?t=${token}` : ''
     return `${window.location.origin}/relatorio/${slug}/${osId}${t}`
+  }
+
+  function buildLinkAssinar(osId, token) {
+    const t = token ? `?t=${token}` : ''
+    return `${window.location.origin}/assinar/${slug}/${osId}${t}`
+  }
+
+  function reenviarLinkAssinatura(os) {
+    const link = buildLinkAssinar(os.id, os.publicToken)
+    const tel  = (os.tel_segurado || '').replace(/\D/g, '')
+    const msg  = `Olá ${os.nome_segurado || ''}! 😊\nPrecisamos da sua assinatura para finalizar o documento do atendimento.\n\n🔧 Serviço: ${os.servico || '—'}\n\nClique no link para assinar:\n🔗 ${link}`
+    const waUrl = tel
+      ? `https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`
+      : `https://wa.me/?text=${encodeURIComponent(msg)}`
+    window.open(waUrl, '_blank')
   }
 
   function openLinkRelModal(r) {
@@ -1719,6 +1737,20 @@ export default function AdminPage() {
               {selected.status === 'processado' && (
                 <button className="btn-sm" style={{ background: '#1a3a8c', color: '#fff' }} disabled={updating} onClick={() => changeStatus(selected.id, 'enviado')}>📤 Enviado</button>
               )}
+              {!selected.assinatura_segurado && selected.status !== 'concluido' && selected.status !== 'processado' && selected.status !== 'enviado' && (
+                <button
+                  className="btn-sm"
+                  style={{ background: '#7c3aed', color: '#fff' }}
+                  onClick={() => setShowPreencherOS(true)}
+                >✍️ Preencher e Enviar</button>
+              )}
+              {selected.status === 'aguardando_assinatura_cliente' && (
+                <button
+                  className="btn-sm"
+                  style={{ background: '#25d366', color: '#fff' }}
+                  onClick={() => reenviarLinkAssinatura(selected)}
+                >📱 Reenviar Link</button>
+              )}
               <button className="btn-sm btn-png" disabled={genPng} onClick={() => handlePNG(selected)}>
                 {genPng ? '⏳ Gerando...' : '📱 PNG WhatsApp'}
               </button>
@@ -1726,6 +1758,21 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ══ MODAL: PREENCHER OS PARA ASSINATURA REMOTA ══ */}
+      {showPreencherOS && selected && (
+        <PreencherOSModal
+          os={selected}
+          empresaId={empresaId}
+          slug={slug}
+          onClose={() => setShowPreencherOS(false)}
+          onSaved={updated => {
+            setReports(p => p.map(r => r.id === updated.id ? { ...r, ...updated } : r))
+            setSelected(p => ({ ...p, ...updated }))
+            setShowPreencherOS(false)
+          }}
+        />
       )}
 
       {/* ══ MODAL: NOVO ORÇAMENTO (3 etapas) ══ */}

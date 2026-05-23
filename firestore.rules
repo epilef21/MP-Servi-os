@@ -126,13 +126,14 @@ service cloud.firestore {
           !('lucroReal'          in request.resource.data) &&
           (
             !('status' in request.resource.data) ||
-            request.resource.data.status in ['pendente', 'aguardando_tecnico', 'ficou_visita', 'cliente_ausente']
+            request.resource.data.status in ['pendente', 'aguardando_tecnico', 'concluido', 'ficou_visita', 'cliente_ausente']
           );
 
         // Atualização:
         // - Admin/superadmin: irrestrita dentro da empresa
         // - Técnico autenticado da empresa: campos do formulário, sem financeiro
         // - Técnico sem auth: campos do formulário, sem financeiro
+        // - Cliente sem auth: apenas assinatura remota (AssinarClientePage)
         // - Segurado sem auth: apenas avaliação, apenas uma vez
         allow update: if
           isUserOfEmpresa(empresaId) || isSuperAdmin()
@@ -144,7 +145,17 @@ service cloud.firestore {
               'mo_seguradora', 'valor_prestador', 'valor_deslocamento',
               'maoDeObraSeguradora', 'valorPagoTecnico', 'kmDeslocamento', 'lucroReal'
             ]) &&
-            request.resource.data.status in ['pendente', 'aguardando_tecnico', 'ficou_visita', 'cliente_ausente']
+            request.resource.data.status in ['pendente', 'aguardando_tecnico', 'concluido', 'ficou_visita', 'cliente_ausente']
+          )
+          ||
+          (
+            // Cliente assina remotamente: OS deve estar aguardando e só campos de assinatura mudam
+            resource.data.status == 'aguardando_assinatura_cliente' &&
+            request.resource.data.status == 'concluido' &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'assinatura_segurado', 'nome_assinatura_segurado',
+              'status', 'finalizado_em', 'status_historico'
+            ])
           )
           ||
           (

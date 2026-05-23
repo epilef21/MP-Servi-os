@@ -18,6 +18,7 @@ import OrcamentoTecnicoPage   from './pages/OrcamentoTecnicoPage.jsx'
 import AprovarOrcamentoPage   from './pages/AprovarOrcamentoPage.jsx'
 import AgendaPage             from './pages/AgendaPage.jsx'
 import RelatorioPage          from './pages/RelatorioPage.jsx'
+import AssinarClientePage     from './pages/AssinarClientePage.jsx'
 import NotFoundPage           from './pages/NotFoundPage.jsx'
 
 // ── Guarda de rota para admin da empresa ─────────────────────
@@ -55,6 +56,9 @@ export default function App() {
 
       {/* Relatório técnico público — enviado à seguradora via link */}
       <Route path="/relatorio/:slug/:osId" element={<RelatorioPage />} />
+
+      {/* Assinatura remota do cliente — admin preenche, cliente só assina */}
+      <Route path="/assinar/:slug/:osId" element={<AssinarClientePage />} />
 
       {/* ── Superadmin ─────────────────────────────────────── */}
       <Route
