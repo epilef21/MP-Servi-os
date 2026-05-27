@@ -8,10 +8,9 @@ import {
   db,
   storage,
   auth,
-  getOSdaEmpresa,
+  escutarOSdaEmpresa,
   criarOS,
   atualizarOS,
-  contarOSdoMes,
   refConfig,
   refEmpresa,
   updateDoc,
@@ -125,11 +124,12 @@ export default function AdminPage() {
   const seguradoras = config?.seguradoras ?? ['Tempo', 'Mapfre', 'Maxpar', 'Allianz']
 
   // ── Estado de dados ──────────────────────────────────────
-  const [reports,   setReports]   = useState([])
-  const [loading,   setLoading]   = useState(true)
-  const [error,     setError]     = useState(null)
-  const [updating,  setUpdating]  = useState(false)
-  const [totalMes,  setTotalMes]  = useState(0)
+  const [reports,    setReports]    = useState([])
+  const [loading,    setLoading]    = useState(true)
+  const [error,      setError]      = useState(null)
+  const [updating,   setUpdating]   = useState(false)
+  const [totalMes,   setTotalMes]   = useState(0)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   // ── Navegação ────────────────────────────────────────────
   const [abaAtiva,    setAbaAtiva]    = useState('dashboard')
@@ -227,26 +227,25 @@ export default function AdminPage() {
     }
   }, [loadingEmpresa, empresaId, empresaIdAuth, navigate])
 
-  // ── Carrega OS da empresa ────────────────────────────────
-  async function loadReports() {
+  // ── Escuta OS em tempo real ──────────────────────────────
+  useEffect(() => {
     if (!empresaId) return
     setLoading(true)
     setError(null)
-    try {
-      const lista = await getOSdaEmpresa(empresaId)
-      setReports(lista)
-      const count = await contarOSdoMes(empresaId)
-      setTotalMes(count)
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    if (empresaId) loadReports()
-  }, [empresaId])
+    const unsub = escutarOSdaEmpresa(
+      empresaId,
+      lista => {
+        setReports(lista)
+        const inicio = new Date(); inicio.setDate(1); inicio.setHours(0, 0, 0, 0)
+        setTotalMes(lista.filter(r => {
+          try { return r.criado_em?.toDate?.() >= inicio } catch { return false }
+        }).length)
+        setLoading(false)
+      },
+      e => { setError(e.message); setLoading(false) }
+    )
+    return unsub
+  }, [empresaId, refreshKey])
 
   // Abre OS diretamente quando navegado da Agenda com state.openOsId
   useEffect(() => {
@@ -1021,7 +1020,7 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="page-header-actions">
-            <button className="btn-secondary" style={{ fontSize: '.82rem', padding: '7px 14px' }} onClick={loadReports} disabled={loading}>
+            <button className="btn-secondary" style={{ fontSize: '.82rem', padding: '7px 14px' }} onClick={() => setRefreshKey(k => k + 1)} disabled={loading}>
               🔄 Atualizar
             </button>
             {abaAtiva === 'orcamentos'

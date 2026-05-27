@@ -17,16 +17,16 @@ import { comprimirImagem } from '../utils/comprimirImagem.js'
 const getDraftKey = (slug) => `mp_form_draft_${slug}`
 
 const CHECKUP_ITEMS = [
-  { id: 'rev_eletrica',   label: '⚡ Rev. Elétrica',       quant: false },
-  { id: 'rev_hidraulica', label: '💧 Rev. Hidráulica',      quant: false },
-  { id: 'lub_fechaduras', label: '🔐 Lub. de Fechaduras',   quant: true  },
-  { id: 'limp_caixas',    label: '📦 Limp. de Caixas',      quant: true  },
-  { id: 'fix_objetos',    label: '🔧 Fix. de Objetos',      quant: true  },
-  { id: 'limp_calhas',    label: '🏗️ Limp. de Calhas',      quant: true  },
-  { id: 'troca_vidros',   label: '🪟 Troca de Vidros',      quant: true  },
-  { id: 'troca_lampadas', label: '💡 Troca de Lâmpadas',    quant: true  },
-  { id: 'olho_magico',    label: '👁️ Inst. Olho Mágico',    quant: false },
-  { id: 'cacamba',        label: '🗑️ Caçamba',              quant: false },
+  { id: 'rev_eletrica',      label: '⚡ Rev. Elétrica',              quant: false },
+  { id: 'rev_hidraulica',    label: '💧 Rev. Hidráulica',             quant: false },
+  { id: 'lub_fechaduras',    label: '🔐 Lub. de Fechaduras',          quant: true  },
+  { id: 'limp_caixas',       label: '🪣 Limp. de Caixas d\'Água',     quant: true  },
+  { id: 'fix_objetos',       label: '🔧 Fix. de Objetos',             quant: true  },
+  { id: 'limp_calhas',       label: '🏗️ Limp. de Calhas',             quant: true  },
+  { id: 'troca_lampadas',    label: '💡 Troca de Lâmpadas',           quant: true  },
+  { id: 'manut_maq_lavar',   label: '🫧 Manutenção Máq. de Lavar',   quant: false },
+  { id: 'manut_geladeira',   label: '🧊 Manutenção de Geladeira',     quant: false },
+  { id: 'desentupimento',    label: '🚿 Desentupimento',              quant: false },
 ]
 
 const REQUIRED_FIELDS = [
@@ -104,13 +104,21 @@ export default function FormPage() {
     if (!osId) {
       try {
         const saved = localStorage.getItem(DRAFT_KEY)
-        if (saved) return { ...INITIAL, ...JSON.parse(saved) }
+        if (saved) return { ...INITIAL, ...JSON.parse(saved).form }
       } catch {}
     }
     return INITIAL
   })
 
-  const [checkup,      setCheckup]      = useState({})
+  const [checkup, setCheckup] = useState(() => {
+    if (!osId) {
+      try {
+        const saved = localStorage.getItem(DRAFT_KEY)
+        if (saved) return JSON.parse(saved).checkup || {}
+      } catch {}
+    }
+    return {}
+  })
   const [errors,       setErrors]       = useState({})
   const [submitting,   setSubmitting]   = useState(false)
   const [submitted,    setSubmitted]    = useState(false)
@@ -199,11 +207,11 @@ export default function FormPage() {
     try {
       const isEmpty = REQUIRED_FIELDS.every(f => !form[f]?.trim())
       if (!isEmpty) {
-        localStorage.setItem(DRAFT_KEY, JSON.stringify(form))
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, checkup }))
         setHasDraft(true)
       }
     } catch {}
-  }, [form, osId, slug])
+  }, [form, checkup, osId, slug])
 
   // ── Verifica rascunho existente ──────────────────────────
   useEffect(() => {
@@ -423,6 +431,7 @@ export default function FormPage() {
   function clearDraft() {
     try { localStorage.removeItem(DRAFT_KEY) } catch { /* browser pode bloquear storage */ }
     setForm(INITIAL)
+    setCheckup({})
     setHasDraft(false)
   }
 

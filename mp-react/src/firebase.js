@@ -21,6 +21,7 @@ import {
   limit,
   getCountFromServer,
   arrayUnion,
+  onSnapshot,
 } from 'firebase/firestore'
 
 // Storage
@@ -131,6 +132,12 @@ export async function getOSdaEmpresa(empresaId) {
   const q = query(refChecklist(empresaId), orderBy('criado_em', 'desc'))
   const snap = await getDocs(q)
   return snap.docs.map(d => ({ id: d.id, ...d.data() }))
+}
+
+// Escuta OS em tempo real — retorna unsubscribe
+export function escutarOSdaEmpresa(empresaId, onData, onError) {
+  const q = query(refChecklist(empresaId), orderBy('criado_em', 'desc'))
+  return onSnapshot(q, snap => onData(snap.docs.map(d => ({ id: d.id, ...d.data() }))), onError)
 }
 
 // Cria uma nova OS na subcoleção da empresa
