@@ -170,6 +170,31 @@ service cloud.firestore {
         allow delete: if isUserOfEmpresa(empresaId) || isSuperAdmin();
       }
 
+      // ── /empresas/{empresaId}/despesasRecorrentes/{id} ──
+      match /despesasRecorrentes/{id} {
+        allow read, write: if isUserOfEmpresa(empresaId) || isSuperAdmin();
+      }
+
+      // ── /empresas/{empresaId}/despesasMensais/{id} ───────
+      match /despesasMensais/{id} {
+        allow read, write: if isUserOfEmpresa(empresaId) || isSuperAdmin();
+      }
+
+      // ── /empresas/{empresaId}/servicosParticulares/{id} ──
+      match /servicosParticulares/{id} {
+        allow read, write: if isUserOfEmpresa(empresaId) || isSuperAdmin();
+      }
+
+      // ── /empresas/{empresaId}/deducoesMensais/{id} ───────
+      match /deducoesMensais/{id} {
+        allow read, write: if isUserOfEmpresa(empresaId) || isSuperAdmin();
+      }
+
+      // ── /empresas/{empresaId}/resultadoFinanceiroMensal/{id}
+      match /resultadoFinanceiroMensal/{id} {
+        allow read, write: if isUserOfEmpresa(empresaId) || isSuperAdmin();
+      }
+
       // ── /empresas/{empresaId}/orcamentos/{orcamentoId} ───
       // Orçamentos gerados pelo admin, preenchidos pelo técnico,
       // aprovados/reprovados pelo cliente via link público.

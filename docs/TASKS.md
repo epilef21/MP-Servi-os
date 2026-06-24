@@ -1,21 +1,22 @@
 # TASKS - AssistHub
 # Backlog completo em ordem de prioridade
-# Atualizado: Maio 2026
+# Atualizado: 2026-05-24
 
 ---
 
 ## Estado Geral do Projeto
 
 O AssistHub funciona de ponta a ponta: multi-tenant, cadastro/login, painel admin,
-criacao de OS, formulario publico para tecnico, fotos, assinaturas, PDF/PNG,
-dashboard financeiro, tecnicos, segurados, avaliacoes, orcamentos, agenda,
+criacao de OS, formulario publico para tecnico, fotos, assinaturas remotas, PDF/PNG,
+dashboard financeiro, tecnicos, segurados, avaliacoes, orcamentos, agenda operacional,
 relatorio mensal, extensao Chrome e Cloud Function para criar OS via extensao.
 
-Ultima verificacao:
-- Build: `npm run build` passou limpo em 1.53s
-- Testes: 50 testes passando com Vitest
-- AdminPage.jsx: 2293 linhas (era 3572 — reducao de 36% com extracao de abas)
+Ultima verificacao (2026-05-24):
+- Build: `npm run build` passou limpo
+- Testes: 75 testes passando com Vitest (7 arquivos)
+- AdminPage.jsx: 2182 linhas (era 3572 — reducao de 39% com extracao de abas)
 - Lint: `npm run lint` falha — falta `eslint.config.js` para ESLint 9
+- HMR: vite.config.js renomeado + polling ativo para funcionar no OneDrive
 
 ---
 
@@ -61,12 +62,14 @@ Ultima verificacao:
 
 ## P1 — Produto Core Para Uso Diario
 
-- [ ] CORE-001: Importar OS Mapfre por texto (OCR manual)
-      Motivo: Mapfre usa app mobile, entao extensao Chrome nao resolve.
-      MVP: modal "Importar Mapfre" com textarea para colar texto do Google Lens/iPhone Live Text.
-      Resultado: preencher seguradora, assistencia, data, servico, endereco, cidade, CEP,
-      segurado e descricao automaticamente.
-      Arquivos: AdminPage.jsx ou novo modal em components/admin/
+- [x] CORE-001: Importar OS por texto (OCR manual — multi-portal)
+      Implementado modal "Importar OS por Texto" com parser por portal:
+      - Mapfre: Google Lens / Live Text (labels em ingles, endereco sem label)
+      - Maxpar: Ctrl+A (Ordem de Servico, Beneficiario, Item de Cobertura, endereco "Rua, NUM, BAIRRO, Cidade")
+      - Portal Juvo / Tempo Assist: Ctrl+A (endereco formato 8 digitos, desc_problema de "Descricao")
+      - Mondial: Ctrl+A (tabela com tab ou proxima linha; servico pega 2a linha ELETRODOMESTICO; remove prefixo "R RUA")
+      Correcoes aplicadas pos-uso real: parsers Mapfre, Maxpar, Juvo e Mondial ajustados com dados reais.
+      Arquivo: components/admin/ImportarMapfreModal.jsx
 
 - [ ] CORE-002: Importar OS Mapfre por imagem (OCR automatico)
       Motivo: depois de validar o parser por texto, automatizar upload do print.
@@ -85,9 +88,26 @@ Ultima verificacao:
 - [x] CORE-005: Relatorio mensal em PDF
       Implementado fluxo de relatorio mensal com download em PDF.
 
-- [ ] CORE-006: Melhorar agenda operacional
-      Proximo passo: visual semanal/mensal, cores por tecnico/seguradora, filtros e acoes rapidas.
+- [x] CORE-006: Melhorar agenda operacional
+      Reescrita completa da agenda (2026-05-22):
+      - 4 secoes visuais: A Fazer, Respondidas, Retorno, Finalizadas
+      - Filtros por seguradora e cidade (dinamicos por dia)
+      - Stats clicaveis para filtrar por secao
+      - Cor automatica por tecnico (faixa lateral no card)
+      - Badge "Atrasada" com animacao quando horario passou +15 min
+      - Badge "Conflito" quando dois tecnicos tem OS no mesmo horario
+      - Destaque para OS sem horario (borda tracejada + badge)
+      - Botao Reagendar com modal (data + hora + opcao de avisar WhatsApp)
+      - Botao "Ver OS" abre modal correto no AdminPage via navigate state
       Arquivos: AgendaPage.jsx, AgendaPage.css
+
+- [x] CORE-009: Assinatura remota do cliente
+      Admin preenche a OS (desc_servico, data/hora) e assina como responsavel tecnico.
+      Link gerado e enviado ao cliente para assinar pelo celular (sem login).
+      Novo status: aguardando_assinatura_cliente (entre concluido e processado).
+      Novos botoes no painel: "Preencher e Enviar" e "Reenviar Link".
+      Regras Firestore especificas e fechadas para permitir apenas o campo assinatura_cliente.
+      Arquivos: PreencherOSModal.jsx, AssinarClientePage.jsx, App.jsx, firestore.rules
 
 - [ ] CORE-007: Ranking de tecnicos no dashboard
       Metricas: OS concluidas, avaliacao media, lucro total, retorno/pendencia.
@@ -105,6 +125,20 @@ Ultima verificacao:
       Problema: ESLint 9 nao encontra arquivo de configuracao.
       Esperado: `npm run lint` funcionando sem erros.
       Arquivo: mp-react/eslint.config.js
+
+- [ ] TECH-008: Adicionar testes para Assinatura Remota (CORE-009)
+      Cobrir: PreencherOSModal gera link, AssinarClientePage valida token e salva assinatura.
+      Arquivos: src/__tests__/assinaturaRemota.test.jsx
+
+- [ ] TECH-009: Adicionar testes para Agenda
+      Cobrir: renderizacao das 4 secoes, filtros por seguradora/cidade, badge "Atrasada".
+      Arquivo: src/__tests__/agenda.test.jsx
+
+- [ ] TECH-010: Historico de status (timeline) visivel no modal da OS
+      O changeStatus ja grava {de, para, quando, por} via arrayUnion no Firestore.
+      Verificar se o modal de detalhe exibe essa linha do tempo corretamente para todos os status novos
+      (concluido, aguardando_assinatura_cliente).
+      Arquivo: AdminPage.jsx (modal DetalheOS)
 
 - [x] TECH-002: Criar AdminContext
       Concluido: AdminContext.jsx criado com todos os dados e funcoes compartilhados.
@@ -163,6 +197,16 @@ Ultima verificacao:
       Proximo passo: pre-visualizacao editavel, logs de erro, deteccao de portal
       e campos obrigatorios por seguradora.
       Arquivos: assisthub-extension/*
+
+- [ ] DIFF-007: Notificacao de assinatura remota pendente
+      Quando OS entra em aguardando_assinatura_cliente, exibir badge/alerta no painel
+      para o admin lembrar de cobrar o cliente ou reenviar o link.
+      Arquivo: AdminPage.jsx, OrdensServicoTab.jsx
+
+- [ ] DIFF-008: Copiar link de assinatura com 1 clique no card da OS
+      Hoje o link so aparece no modal PreencherOSModal.
+      Proximo passo: botao rapido "Copiar link" no card da OS quando status = aguardando_assinatura_cliente.
+      Arquivo: OrdensServicoTab.jsx
 
 - [ ] DIFF-003: WhatsApp automatico
       Fluxo: OS criada → tecnico recebe link automaticamente.
@@ -309,8 +353,33 @@ Ultima verificacao:
 - [x] TecnicosTab.jsx extraido (cadastro de tecnicos)
 - [x] ConfigTab.jsx extraido (configuracoes da empresa)
 - [x] RelatorioTab.jsx extraido (relatorio mensal)
-- [x] AdminPage.jsx: 3572 → 2293 linhas (-36%)
+- [x] AdminPage.jsx: 3572 → 2182 linhas (-39%)
+
+### Status de OS
+- [x] Novo status: `concluido` — tecnico conclui visita via FormPage (era "pendente")
+- [x] Novo status: `aguardando_assinatura_cliente` — admin aguarda assinatura remota
+- [x] changeStatus grava historico {de, para, quando, por} via arrayUnion
+- [x] Modal da OS exibe linha do tempo de mudancas de status
+- [x] Filtro de status inclui todos os estados (OrdensServicoTab)
+
+### Importar por texto (CORE-001)
+- [x] Parser Mapfre (Google Lens / Live Text)
+- [x] Parser Maxpar — formato real Ctrl+A corrigido
+- [x] Parser Juvo/Tempo — desc_problema de campo "Descricao", ignora ":" no final
+- [x] Parser Mondial — servico da 2a linha, remove prefixo "R RUA" duplicado
+
+### Agenda operacional (CORE-006)
+- [x] Reescrita completa com 4 secoes: A Fazer, Respondidas, Retorno, Finalizadas
+- [x] Filtros por seguradora e cidade dinamicos
+- [x] Badge "Atrasada" (horario passou +15min) e badge "Conflito" (mesmo horario)
+- [x] Cor automatica por tecnico, botao Reagendar com modal
+
+### Assinatura remota (CORE-009)
+- [x] PreencherOSModal.jsx — admin preenche desc_servico, data/hora, assina como responsavel
+- [x] AssinarClientePage.jsx — pagina publica /assinar/:slug/:osId
+- [x] Regras Firestore fechadas para escrita apenas de assinatura_cliente
 
 ### Qualidade
 - [x] Testes unitarios configurados com Vitest 4.1.5
-- [x] 50 testes passando
+- [x] 75 testes passando (7 arquivos: smoke, utils, firebase, authContext, rotasEmpresa, osFluxo, orcamentoFluxo)
+- [x] HMR corrigido para funcionar no OneDrive (polling + vite.config.js renomeado)

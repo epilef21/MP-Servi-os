@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AssistHub — Trabalho de Análise de Sistemas</title>
+<style>
+  @page {
+    margin: 3cm 2.5cm 3cm 3cm;
+  }
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 50px;
+  }
+  h1 {
+    font-size: 16pt;
+    text-align: center;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  h2 {
+    font-size: 14pt;
+    margin-top: 36px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 4px;
+    text-transform: uppercase;
+  }
+  h3 {
+    font-size: 12pt;
+    margin-top: 24px;
+    margin-bottom: 8px;
+  }
+  h4 {
+    font-size: 12pt;
+    margin-top: 18px;
+    margin-bottom: 6px;
+    font-style: italic;
+  }
+  p {
+    text-align: justify;
+    margin: 0 0 10px 0;
+    text-indent: 1.25cm;
+  }
+  p.no-indent {
+    text-indent: 0;
+  }
+  .capa {
+    text-align: center;
+    margin-bottom: 60px;
+    page-break-after: always;
+  }
+  .capa p {
+    text-indent: 0;
+    text-align: center;
+  }
+  .sumario {
+    page-break-after: always;
+  }
+  .sumario ul {
+    list-style: none;
+    padding: 0;
+  }
+  .sumario li {
+    margin: 6px 0;
+    display: flex;
+    justify-content: space-between;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 11pt;
+  }
+  table caption {
+    font-weight: bold;
+    margin-bottom: 6px;
+    text-align: left;
+    font-size: 11pt;
+  }
+  th {
+    background-color: #1a3fa8;
+    color: #fff;
+    padding: 7px 10px;
+    text-align: left;
+    border: 1px solid #333;
+    font-size: 11pt;
+  }
+  td {
+    border: 1px solid #999;
+    padding: 6px 10px;
+    vertical-align: top;
+    font-size: 11pt;
+  }
+  tr:nth-child(even) td {
+    background-color: #f5f7ff;
+  }
+  .nota {
+    font-size: 10pt;
+    font-style: italic;
+    margin-top: 6px;
+    color: #444;
+    text-indent: 0;
+  }
+  .diagrama-aviso {
+    border: 1px dashed #999;
+    background: #f9f9f9;
+    padding: 16px 20px;
+    margin: 20px 0;
+    font-size: 11pt;
+  }
+  .diagrama-aviso strong {
+    display: block;
+    margin-bottom: 4px;
+  }
+  ul.lista {
+    margin: 8px 0 12px 20px;
+  }
+  ul.lista li {
+    margin-bottom: 4px;
+  }
+  .secao-num {
+    margin-right: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     CAPA
+     ============================================================ -->
+<div class="capa">
+  <br><br>
+  <p><strong>UNIVERSIDADE</strong></p>
+  <p>Curso de Análise e Desenvolvimento de Sistemas / Ciência da Computação</p>
+  <br><br><br>
+  <p><strong>FELIPE VIEIRA</strong></p>
+  <br><br><br>
+  <h1>ASSISTHUB</h1>
+  <p><strong>Plataforma SaaS de Gestão de Ordens de Serviço<br>para Assistência Técnica Residencial</strong></p>
+  <br><br><br>
+  <p>Trabalho apresentado à disciplina de Análise e Projeto de Sistemas<br>
+  como requisito parcial de avaliação.</p>
+  <br><br><br><br>
+  <p>2026</p>
+</div>
+
+<!-- ============================================================
+     SUMÁRIO
+     ============================================================ -->
+<div class="sumario">
+  <h2 style="text-align:center; border:none;">SUMÁRIO</h2>
+  <table style="border:none;">
+    <tr>
+      <td style="border:none; padding:4px 0;">1. DESCRIÇÃO DO SISTEMA</td>
+      <td style="border:none; text-align:right; padding:4px 0;">3</td>
+    </tr>
+    <tr>
+      <td style="border:none; padding:4px 0 4px 20px;">1.1 Definição da Empresa</td>
+      <td style="border:none; text-align:right; padding:4px 0;">3</td>
+    </tr>
+    <tr>
+      <td style="border:none; padding:4px 0 4px 20px;">1.2 Descrição do Problema</td>
+      <td style="border:none; text-align:right; padding:4px 0;">3</td>
+    </tr>
+    <tr>
+      <td style="border:none; padding:4px 0;">2. ANÁLISE DE REQUISITOS</td>
+      <td style="border:none; text-align:right; padding:4px 0;">5</td>
+    </tr>
+    <tr>
+      <td style="border:none; padding:4px 0 4px 20px;">2.1 Requisitos Funcionais</td>
+      <td style="border:none; text-align:right; padding:4px 0;">5</td>
+    </tr>
+    <tr>
+      <td style="border:none; padding:4px 0 4px 20px;">2.2 Requisitos Não Funcionais</td>
+      <td style="border:none; text-align:right; padding:4px 0;">7</td>
+    </tr>
+    <tr>
+      <td style="border:none; padding:4px 0 4px 20px;">2.3 Regras de Negócio</td>
+      <td style="border:none; text-align:right; padding:4px 0;">8</td>
+    </tr>
+    <tr>
+      <td style="border:none; padding:4px 0;">3. DIAGRAMA DE CASO DE USO</td>
+      <td style="border:none; text-align:right; padding:4px 0;">10</td>
+    </tr>
+    <tr>
+      <td style="border:none; padding:4px 0;">4. DIAGRAMA DE CLASSES</td>
+      <td style="border:none; text-align:right; padding:4px 0;">11</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ============================================================
+     1. DESCRIÇÃO DO SISTEMA
+     ============================================================ -->
+<h2>1. Descrição do Sistema</h2>
+
+<h3>1.1 Definição da Empresa</h3>
+
+<p>
+  A <strong>AssistHub</strong> é uma startup brasileira de tecnologia que desenvolve e opera uma
+  plataforma SaaS (<em>Software as a Service</em>) B2B multi-tenant voltada ao mercado de
+  assistência técnica residencial. A empresa comercializa seu produto principal — um sistema de
+  gestão de ordens de serviço (OS) — para prestadores de serviços que atendem contratos com
+  seguradoras de residência, tais como <strong>Mapfre</strong>, <strong>Tempo Assist</strong>,
+  <strong>Maxpar</strong> e <strong>Allianz</strong>.
+</p>
+
+<p>
+  O produto é acessível via navegador web (aplicação React hospedada na Vercel) e por uma extensão
+  do navegador Microsoft Edge, que automatiza a captura de dados dos portais das seguradoras,
+  reduzindo o trabalho manual de digitação. A infraestrutura de back-end é inteiramente baseada nos
+  serviços gerenciados do Firebase (Firestore, Authentication, Storage e Cloud Functions),
+  permitindo que o custo operacional se mantenha em R$ 0,00 por mês dentro da camada gratuita
+  da plataforma.
+</p>
+
+<p>
+  O modelo de negócio é <em>multi-tenant</em>: cada empresa cliente possui um identificador único
+  (chamado de <em>slug</em>) e acessa seus dados de forma completamente isolada das demais. Um único
+  administrador por empresa gerencia todo o fluxo operacional — criação de OS, despacho de técnicos,
+  controle financeiro e comunicação com as seguradoras.
+</p>
+
+<h3>1.2 Descrição do Problema</h3>
+
+<p>
+  Antes do AssistHub, as empresas de assistência técnica residencial operavam por meio de processos
+  fragmentados e predominantemente manuais. O ciclo de uma ordem de serviço envolvia ao menos quatro
+  ferramentas distintas e não integradas: papel (para o formulário de campo), WhatsApp (para
+  comunicação com o técnico e com a seguradora), planilha Excel (para controle financeiro) e o portal
+  individual de cada seguradora (para envio do relatório finalizado).
+</p>
+
+<p>
+  Esse cenário gerava os seguintes problemas concretos:
+</p>
+
+<ul class="lista">
+  <li>
+    <strong>Perda de rastreabilidade:</strong> sem um repositório centralizado, era impossível saber
+    o status de uma OS em andamento sem ligar para o técnico.
+  </li>
+  <li>
+    <strong>Risco de extravio de documentos:</strong> checklists em papel se perdiam ou chegavam
+    ilegíveis ao escritório após o atendimento de campo.
+  </li>
+  <li>
+    <strong>Ausência de comprovação de presença:</strong> não havia mecanismo para confirmar que o
+    técnico esteve fisicamente no endereço do segurado.
+  </li>
+  <li>
+    <strong>Controle financeiro deficiente:</strong> calcular o lucro real por OS (descontando o
+    valor pago ao técnico e o quilômetro de deslocamento) era feito manualmente em planilha,
+    sujeito a erros.
+  </li>
+  <li>
+    <strong>Processo de aprovação de orçamentos ineficiente:</strong> orçamentos eram redigidos no
+    WhatsApp ou em papel, sem assinatura digital do cliente e sem versão formal para a seguradora.
+  </li>
+  <li>
+    <strong>Dificuldade de comunicação com seguradoras:</strong> cada seguradora exige um formato
+    diferente de envio (PDF, portal próprio ou WhatsApp), tornando o processo demorado e propenso
+    a retrabalho.
+  </li>
+</ul>
+
+<p>
+  O problema central identificado é a <strong>ausência de um sistema digital integrado</strong>
+  que acompanhe o ciclo completo de uma OS — do acionamento pela seguradora, passando pelo
+  trabalho do técnico no campo, até a assinatura do segurado, o controle financeiro e o
+  arquivamento do documento. Isso resulta em perda de tempo, aumento de custos operacionais e
+  redução da qualidade do serviço entregue ao segurado.
+</p>
+
+<p>
+  O AssistHub foi concebido para resolver esse problema ao digitalizar e centralizar todo o
+  fluxo em uma única plataforma, acessível tanto pelo administrador no computador quanto pelo
+  técnico no celular — sem necessidade de instalação de aplicativo.
+</p>
+
+<p>
+  O fluxo operacional coberto pelo sistema segue as seguintes etapas:
+</p>
+
+<ol class="lista">
+  <li>A seguradora aciona o prestador via app/portal próprio;</li>
+  <li>O administrador cria a OS no painel e seleciona o técnico;</li>
+  <li>Um link público é gerado e enviado ao técnico via WhatsApp;</li>
+  <li>O técnico abre o link no celular, encontra os dados pré-preenchidos e complementa com
+      serviço realizado, fotos, observações e coleta a assinatura digital do segurado;</li>
+  <li>O administrador revisa a OS, calcula os valores financeiros e gera o PDF/PNG;</li>
+  <li>O documento é enviado à seguradora pelo canal adequado;</li>
+  <li>A OS é arquivada com status "processado".</li>
+</ol>
+
+<!-- ============================================================
+     2. ANÁLISE DE REQUISITOS
+     ============================================================ -->
+<h2>2. Análise de Requisitos</h2>
+
+<h3>2.1 Requisitos Funcionais</h3>
+
+<p class="no-indent">
+  Os requisitos funcionais descrevem as funcionalidades que o sistema deve oferecer aos seus
+  usuários. A tabela a seguir apresenta os requisitos levantados para o AssistHub.
+</p>
+
+<table>
+  <caption>Tabela 1 — Requisitos Funcionais</caption>
+  <thead>
+    <tr>
+      <th style="width:8%">ID</th>
+      <th style="width:22%">Nome</th>
+      <th style="width:55%">Descrição</th>
+      <th style="width:15%">Ator</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>RF01</td>
+      <td>Autenticação de usuário</td>
+      <td>O sistema deve permitir login e logout do administrador por e-mail e senha via Firebase Authentication, com proteção de rota para as páginas privadas.</td>
+      <td>Administrador</td>
+    </tr>
+    <tr>
+      <td>RF02</td>
+      <td>Cadastro de empresa</td>
+      <td>O sistema deve permitir o cadastro de uma nova empresa (tenant), gerando um slug único que identifica o tenant em todas as rotas do sistema.</td>
+      <td>Administrador</td>
+    </tr>
+    <tr>
+      <td>RF03</td>
+      <td>Criação de OS</td>
+      <td>O administrador deve poder criar uma nova ordem de serviço informando seguradora, número do atendimento, dados do segurado, endereço, tipo de serviço e técnico responsável.</td>
+      <td>Administrador</td>
+    </tr>
+    <tr>
+      <td>RF04</td>
+      <td>Geração de link para técnico</td>
+      <td>Ao criar ou editar uma OS, o sistema deve gerar automaticamente um link público pré-preenchido que o técnico acessa pelo celular sem necessidade de login.</td>
+      <td>Administrador</td>
+    </tr>
+    <tr>
+      <td>RF05</td>
+      <td>Preenchimento de formulário pelo técnico</td>
+      <td>O técnico deve poder preencher o formulário da OS pelo celular, informando: serviço realizado, descrição do problema, peças utilizadas, horário de chegada/saída, fotos de evidência, problema solucionado, garantia e assinatura digital do segurado.</td>
+      <td>Técnico</td>
+    </tr>
+    <tr>
+      <td>RF06</td>
+      <td>Coleta de senha do segurado</td>
+      <td>O sistema deve exigir o registro da senha de atendimento (4 últimos dígitos do celular ou token de 4 dígitos fornecido pelo segurado), como comprovação de presença física do técnico.</td>
+      <td>Técnico</td>
+    </tr>
+    <tr>
+      <td>RF07</td>
+      <td>Upload de fotos com compressão</td>
+      <td>O técnico deve poder anexar fotos à OS. O sistema deve comprimir automaticamente cada imagem para no máximo 400 KB antes do upload para o Firebase Storage.</td>
+      <td>Técnico</td>
+    </tr>
+    <tr>
+      <td>RF08</td>
+      <td>Assinatura digital do segurado</td>
+      <td>O formulário deve incluir um componente de assinatura digital onde o segurado assina com o dedo na tela do celular do técnico. A assinatura é salva como imagem PNG no Firestore.</td>
+      <td>Técnico / Segurado</td>
+    </tr>
+    <tr>
+      <td>RF09</td>
+      <td>Visualização e gestão de OS</td>
+      <td>O administrador deve visualizar todas as OS em formato de cards, com filtros por texto, status, seguradora e data, e paginação de 25 itens por página.</td>
+      <td>Administrador</td>
+    </tr>
+    <tr>
+      <td>RF10</td>
+      <td>Geração de PDF e PNG da OS</td>
+      <td>O sistema deve permitir ao administrador gerar um PDF completo da OS e um PNG otimizado para envio via WhatsApp, contendo todos os dados do atendimento, fotos e assinatura.</td>
+      <td>Administrador</td>
+    </tr>
+    <tr>
+      <td>RF11</td>
+      <td>Controle financeiro da OS</td>
+      <td>O administrador deve poder registrar os valores financeiros de cada OS: mão de obra cobrada da seguradora, valor pago ao técnico e quilômetros de deslocamento. O sistema calcula e persiste automaticamente o lucro real.</td>
+      <td>Administrador</td>
+    </tr>
+    <tr>
+      <td>RF12</td>
+      <td>Gestão de técnicos</td>
+      <td>O administrador deve poder cadastrar, editar e desativar técnicos, informando nome, telefone, e-mail e especialidade. Técnicos desativados não aparecem na seleção de novas OS.</td>
+      <td>Administrador</td>
+    </tr>
+    <tr>
+      <td>RF13</td>
+      <td>Dashboard com métricas</td>
+      <td>O painel deve exibir indicadores de desempenho: total de OS, OS por status, faturamento total, lucro total e gráficos de barras (6 meses) e pizza (status), com filtros por período (hoje/semana/mês/ano).</td>
+      <td>Administrador</td>
+    </tr>
+    <tr>
+      <td>RF14</td>
+      <td>Criação e gestão de orçamentos</td>
+      <td>O administrador deve poder criar orçamentos com dados do cliente, equipamento (marca, modelo, voltagem) e lista de itens com valores individuais, divididos entre responsabilidade da seguradora e do cliente.</td>
+      <td>Administrador</td>
+    </tr>
+    <tr>
+      <td>RF15</td>
+      <td>Preenchimento de orçamento pelo técnico</td>
+      <td>O técnico deve poder preencher o orçamento no campo via link público, incluindo diagnóstico, itens, valores, prazo de execução e forma de pagamento.</td>
+      <td>Técnico</td>
+    </tr>
+    <tr>
+      <td>RF16</td>
+      <td>Aprovação de orçamento pelo segurado</td>
+      <td>O sistema deve enviar ao segurado um link onde ele visualiza o orçamento detalhado e assina digitalmente para aprovação, sem necessidade de login.</td>
+      <td>Segurado</td>
+    </tr>
+    <tr>
+      <td>RF17</td>
+      <td>Conversão de orçamento em OS</td>
+      <td>Com um clique, o administrador deve poder converter um orçamento aprovado em ordem de serviço, aproveitando os dados já cadastrados.</td>
+      <td>Administrador</td>
+    </tr>
+    <tr>
+      <td>RF18</td>
+      <td>Avaliação do serviço pelo segurado</td>
+      <td>Após a conclusão do atendimento, o sistema deve permitir ao segurado acessar uma página pública para avaliar o serviço com nota (1 a 5 estrelas) e comentário.</td>
+      <td>Segurado</td>
+    </tr>
+    <tr>
+      <td>RF19</td>
+      <td>Exportação de relatório em Excel</td>
+      <td>O administrador deve poder exportar todas as OS filtradas em formato .xlsx, com todos os campos relevantes para análise e prestação de contas.</td>
+      <td>Administrador</td>
+    </tr>
+    <tr>
+      <td>RF20</td>
+      <td>Painel SuperAdmin</td>
+      <td>Um usuário com perfil de SuperAdmin deve poder visualizar e gerenciar todas as empresas cadastradas, ativar/desativar contas e monitorar o uso da plataforma.</td>
+      <td>SuperAdmin</td>
+    </tr>
+    <tr>
+      <td>RF21</td>
+      <td>Extensão do navegador</td>
+      <td>Uma extensão para Microsoft Edge deve capturar automaticamente os dados de uma OS nos portais das seguradoras (Tempo, Maxpar, Allianz, Mondial) e importá-los para o AssistHub com um clique.</td>
+      <td>Administrador</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>2.2 Requisitos Não Funcionais</h3>
+
+<p class="no-indent">
+  Os requisitos não funcionais definem as qualidades e restrições do sistema que impactam a
+  experiência do usuário e a operação do software, sem descrever comportamentos funcionais diretos.
+</p>
+
+<table>
+  <caption>Tabela 2 — Requisitos Não Funcionais</caption>
+  <thead>
+    <tr>
+      <th style="width:8%">ID</th>
+      <th style="width:20%">Categoria</th>
+      <th style="width:72%">Descrição</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>RNF01</td>
+      <td>Desempenho</td>
+      <td>O painel administrativo deve carregar a listagem de OS em menos de 3 segundos em conexão de 10 Mbps, utilizando paginação de 25 itens e escuta em tempo real via Firestore.</td>
+    </tr>
+    <tr>
+      <td>RNF02</td>
+      <td>Disponibilidade</td>
+      <td>O sistema deve apresentar disponibilidade mínima de 99,5%, sustentada pelos SLAs da Vercel (frontend) e Firebase (back-end), sem necessidade de infraestrutura própria.</td>
+    </tr>
+    <tr>
+      <td>RNF03</td>
+      <td>Segurança — Isolamento</td>
+      <td>Os dados de um tenant (empresa) não devem ser acessíveis por outro. O isolamento é garantido pelas regras de segurança do Firestore (<em>security rules</em>), que exigem que o <code>uid</code> autenticado pertença à mesma empresa dos documentos solicitados.</td>
+    </tr>
+    <tr>
+      <td>RNF04</td>
+      <td>Segurança — Autenticação</td>
+      <td>O acesso ao painel administrativo deve ser protegido por autenticação via Firebase Authentication (e-mail/senha). Rotas privadas redirecionam usuários não autenticados para a página de login.</td>
+    </tr>
+    <tr>
+      <td>RNF05</td>
+      <td>Usabilidade</td>
+      <td>O formulário do técnico (rota pública <code>/:slug</code>) deve ser projetado com princípio <em>mobile-first</em>, garantindo funcionamento correto em dispositivos Android com tela mínima de 4,7 polegadas sem rolagem horizontal.</td>
+    </tr>
+    <tr>
+      <td>RNF06</td>
+      <td>Escalabilidade</td>
+      <td>A arquitetura <em>serverless</em> (Firebase + Vercel) deve escalar automaticamente em resposta ao aumento de carga, sem necessidade de provisionamento manual de servidores.</td>
+    </tr>
+    <tr>
+      <td>RNF07</td>
+      <td>Portabilidade</td>
+      <td>O sistema deve funcionar corretamente nos navegadores Google Chrome, Microsoft Edge e Mozilla Firefox nas versões lançadas nos últimos dois anos, tanto em desktop quanto em dispositivos móveis.</td>
+    </tr>
+    <tr>
+      <td>RNF08</td>
+      <td>Confiabilidade</td>
+      <td>Os dados devem ser persistidos em tempo real no Firestore com replicação automática gerenciada pelo Google. Nenhum dado deve ser perdido em caso de falha de rede durante o preenchimento — o formulário salva rascunho local (localStorage).</td>
+    </tr>
+    <tr>
+      <td>RNF09</td>
+      <td>Custo</td>
+      <td>A infraestrutura deve operar dentro da camada gratuita dos serviços Firebase e Vercel, mantendo custo operacional de R$ 0,00 por mês.</td>
+    </tr>
+    <tr>
+      <td>RNF10</td>
+      <td>Manutenibilidade</td>
+      <td>O front-end deve utilizar componentes React reutilizáveis, variáveis CSS centralizadas (paleta de cores, espaçamentos) e arquitetura multi-tenant baseada em slug, facilitando a adição de novos tenants sem alteração de código.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>2.3 Regras de Negócio</h3>
+
+<p class="no-indent">
+  As regras de negócio definem as políticas, restrições e procedimentos operacionais do domínio
+  que o sistema deve respeitar, independentemente da tecnologia adotada.
+</p>
+
+<table>
+  <caption>Tabela 3 — Regras de Negócio</caption>
+  <thead>
+    <tr>
+      <th style="width:8%">ID</th>
+      <th style="width:25%">Regra</th>
+      <th style="width:67%">Descrição</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>RN01</td>
+      <td>Obrigatoriedade da senha</td>
+      <td>A senha do segurado é obrigatória para concluir o formulário de campo. Deve ser os 4 últimos dígitos do celular do segurado ou um token de 4 dígitos fornecido por ele, comprovando que o técnico esteve fisicamente no local de atendimento.</td>
+    </tr>
+    <tr>
+      <td>RN02</td>
+      <td>Escopo do serviço</td>
+      <td>O técnico deve executar apenas os serviços descritos na OS, conforme solicitado pela seguradora. É vedada a execução de serviços extras pedidos pelo cliente, mesmo que solicitados no momento do atendimento, sem prévia autorização da seguradora.</td>
+    </tr>
+    <tr>
+      <td>RN03</td>
+      <td>Consulta de limite de material</td>
+      <td>O limite de cobertura para materiais varia conforme a seguradora e o contrato individual do segurado. Esse limite nunca deve ser assumido pelo técnico ou pelo administrador — deve ser sempre consultado junto à seguradora antes de utilizar qualquer material não previsto.</td>
+    </tr>
+    <tr>
+      <td>RN04</td>
+      <td>Ocultação de dados financeiros</td>
+      <td>Os valores financeiros da OS (mão de obra cobrada da seguradora, valor pago ao técnico, quilômetro de deslocamento e lucro real) não devem aparecer no formulário público do técnico, no PDF de cliente nem em qualquer documento enviado ao segurado.</td>
+    </tr>
+    <tr>
+      <td>RN05</td>
+      <td>Ocultação de anotação interna</td>
+      <td>O campo de anotação interna da OS é exclusivo para uso do administrador e jamais deve ser exibido em PDFs, PNGs, formulários públicos ou qualquer outro documento externo.</td>
+    </tr>
+    <tr>
+      <td>RN06</td>
+      <td>Cálculo e persistência do lucro real</td>
+      <td>O lucro real de cada OS deve ser calculado pela fórmula: <em>lucroReal = maoDeObraSeguradora − valorPagoTecnico − kmDeslocamento</em>. O resultado deve ser salvo no Firestore sempre que os dados financeiros forem atualizados, nunca calculado apenas na memória do front-end.</td>
+    </tr>
+    <tr>
+      <td>RN07</td>
+      <td>Compressão de imagens</td>
+      <td>Toda imagem enviada pelo técnico deve ser comprimida para no máximo 400 KB antes do upload. O sistema não deve aceitar o upload de imagens sem compressão prévia, para preservar o desempenho e a cota de armazenamento do plano gratuito.</td>
+    </tr>
+    <tr>
+      <td>RN08</td>
+      <td>Integridade dos dados no Firebase</td>
+      <td>Nenhum campo com valor <code>undefined</code> deve ser enviado ao Firestore, pois isso causa erro de persistência. Campos não preenchidos devem ser enviados como string vazia (<code>''</code>).</td>
+    </tr>
+    <tr>
+      <td>RN09</td>
+      <td>Acesso do técnico</td>
+      <td>O técnico não possui conta no sistema e não acessa o painel administrativo. Seu único ponto de interação é o link público gerado pelo administrador, que expira após o preenchimento ou pode ser utilizado apenas uma vez.</td>
+    </tr>
+    <tr>
+      <td>RN10</td>
+      <td>Páginas públicas sem autenticação</td>
+      <td>As rotas de formulário do técnico (<code>/:slug</code>), avaliação do segurado (<code>/avaliacao/:id</code>), preenchimento de orçamento (<code>/orcamento/:slug/:id</code>) e aprovação de orçamento (<code>/aprovar/:slug/:id</code>) não exigem autenticação.</td>
+    </tr>
+    <tr>
+      <td>RN11</td>
+      <td>Isolamento multi-tenant</td>
+      <td>Todos os dados de uma empresa (OS, técnicos, orçamentos, configurações) são armazenados em uma subcoleção identificada pelo <code>empresaId</code> no Firestore. Um usuário autenticado só pode ler e escrever documentos da sua própria empresa.</td>
+    </tr>
+    <tr>
+      <td>RN12</td>
+      <td>Status das OS</td>
+      <td>Uma OS deve sempre possuir um status que reflita sua etapa no fluxo operacional. Os status válidos são: <em>pendente</em> (técnico ainda não preencheu), <em>preenchida</em> (técnico concluiu), <em>revisando</em> (admin em revisão), <em>enviada</em> (enviada à seguradora) e <em>processada</em> (concluída).</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ============================================================
+     3. DIAGRAMA DE CASO DE USO
+     ============================================================ -->
+<h2>3. Diagrama de Caso de Uso</h2>
+
+<p>
+  O diagrama de caso de uso representa as interações entre os atores do sistema AssistHub e
+  as funcionalidades disponíveis. O sistema possui quatro atores principais:
+</p>
+
+<ul class="lista">
+  <li><strong>Administrador:</strong> gestor da empresa prestadora, responsável por gerenciar OS,
+  orçamentos, técnicos e configurações;</li>
+  <li><strong>Técnico:</strong> prestador autônomo que acessa o sistema apenas pelo formulário
+  público, via link;</li>
+  <li><strong>Segurado:</strong> cliente da seguradora que interage com o sistema para aprovar
+  orçamentos e avaliar atendimentos;</li>
+  <li><strong>SuperAdmin:</strong> administrador da plataforma, com acesso global a todas as
+  empresas cadastradas.</li>
+</ul>
+
+<div class="diagrama-aviso">
+  <strong>Diagrama de Caso de Uso — AssistHub</strong>
+  O diagrama foi gerado em formato draw.io e se encontra no arquivo
+  <strong>diagrama_caso_de_uso.drawio</strong>, incluso neste trabalho.
+  Para visualizar, abra o arquivo em <em>app.diagrams.net</em> (draw.io) ou importe-o
+  diretamente pelo menu <em>Arquivo &gt; Abrir</em> na versão desktop.
+</div>
+
+<p>
+  As principais relações de inclusão e extensão identificadas são:
+</p>
+<ul class="lista">
+  <li>
+    <strong>&lt;&lt;include&gt;&gt;</strong> — "Preencher Formulário OS" inclui obrigatoriamente
+    "Coletar Assinatura do Segurado", pois toda OS finalizada deve ter a assinatura do cliente.
+  </li>
+  <li>
+    <strong>&lt;&lt;extend&gt;&gt;</strong> — "Converter Orçamento em OS" estende "Gerenciar
+    Orçamentos", sendo um comportamento opcional ativado somente quando o orçamento está aprovado.
+  </li>
+</ul>
+
+<!-- ============================================================
+     4. DIAGRAMA DE CLASSES
+     ============================================================ -->
+<h2>4. Diagrama de Classes</h2>
+
+<p>
+  O diagrama de classes representa a estrutura estática do sistema, evidenciando as entidades
+  principais, seus atributos, operações e os relacionamentos entre elas. As classes foram
+  mapeadas a partir da estrutura de documentos do Firestore e da lógica de negócio implementada
+  no código-fonte.
+</p>
+
+<div class="diagrama-aviso">
+  <strong>Diagrama de Classes — AssistHub</strong>
+  O diagrama foi gerado em formato draw.io e se encontra no arquivo
+  <strong>diagrama_classes.drawio</strong>, incluso neste trabalho.
+  Para visualizar, abra o arquivo em <em>app.diagrams.net</em> (draw.io) ou importe-o
+  diretamente pelo menu <em>Arquivo &gt; Abrir</em> na versão desktop.
+</div>
+
+<p>
+  As classes principais do sistema e seus relacionamentos são descritos a seguir:
+</p>
+
+<ul class="lista">
+  <li>
+    <strong>Empresa</strong> — entidade raiz do modelo multi-tenant. Contém os dados cadastrais
+    do prestador e é o ponto de agregação de todas as demais entidades.
+  </li>
+  <li>
+    <strong>OrdemDeServico</strong> — entidade central do negócio. Registra todos os dados de um
+    atendimento, desde a identificação do segurado até os valores financeiros e o lucro calculado.
+  </li>
+  <li>
+    <strong>Tecnico</strong> — cadastro dos prestadores autônomos vinculados à empresa.
+    Um técnico pode ser responsável por múltiplas OS.
+  </li>
+  <li>
+    <strong>Orcamento</strong> — entidade que representa uma proposta de serviço antes da
+    execução. Contém uma lista de itens (<em>ItemOrcamento</em>) e pode ser convertida em OS.
+  </li>
+  <li>
+    <strong>ItemOrcamento</strong> — representa cada linha do orçamento, com descrição, quantidade,
+    valor unitário e divisão de responsabilidade (seguradora ou cliente).
+  </li>
+  <li>
+    <strong>Usuario</strong> — representa a conta de acesso do administrador, vinculada a uma
+    empresa pelo <code>empresaId</code>.
+  </li>
+</ul>
+
+<p>
+  Os principais relacionamentos são: <em>Empresa</em> possui composição com
+  <em>OrdemDeServico</em>, <em>Tecnico</em> e <em>Orcamento</em> (1 para muitos, composição pois
+  a exclusão da empresa elimina todas as suas OS); <em>Orcamento</em> possui composição com
+  <em>ItemOrcamento</em> (1 para muitos); <em>Tecnico</em> se relaciona com
+  <em>OrdemDeServico</em> por associação (1 para muitos); <em>Usuario</em> se associa a
+  <em>Empresa</em> por referência ao <code>empresaId</code>.
+</p>
+
+<br><br>
+<hr>
+<p class="nota" style="text-indent:0;">
+  Trabalho desenvolvido com base no projeto real AssistHub — plataforma SaaS de gestão de
+  ordens de serviço para assistência técnica residencial.<br>
+  Stack: React 19 + Vite 8 + Firebase (Firestore, Auth, Storage, Cloud Functions) + Vercel.<br>
+  Repositório: github.com/epilef21/MP-Servi-os | Produção: mp-servi-os.vercel.app
+</p>
+
+</body>
+</html>

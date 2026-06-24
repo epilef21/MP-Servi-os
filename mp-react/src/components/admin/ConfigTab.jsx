@@ -10,6 +10,7 @@ import {
 import { useAuth }        from '../../contexts/AuthContext.jsx'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { maskPhone, maskCNPJ } from '../../utils/formatters.js'
+import { TABELAS, DESL_FAIXAS_PADRAO } from '../../utils/tarifas.js'
 
 export default function ConfigTab() {
   const { emailUsuario } = useAuth()
@@ -42,9 +43,14 @@ export default function ConfigTab() {
   const [logoUploading,     setLogoUploading]     = useState(false)
   const logoInputRef = useRef(null)
 
+  // ── Tarifas por seguradora ───────────────────────────────
+  const [tarifaForm,    setTarifaForm]    = useState({})
+  const [savingTarifa,  setSavingTarifa]  = useState(false)
+
   // Inicializa form quando config/empresa carrega
   useEffect(() => {
     if (config || empresa) {
+      const segs = config?.seguradoras || empresa?.seguradoras || ['Tempo', 'Mapfre', 'Maxpar', 'Allianz']
       setConfigForm({
         nome:          config?.nome          || empresa?.nome          || '',
         telefone:      config?.telefone      || empresa?.telefone      || '',
@@ -53,8 +59,18 @@ export default function ConfigTab() {
         cidade_estado: config?.cidade_estado || empresa?.cidade_estado || '',
         cnpj:          config?.cnpj          || empresa?.cnpj          || '',
         site:          config?.site          || empresa?.site          || '',
-        seguradoras:   config?.seguradoras   || ['Tempo','Mapfre','Maxpar','Allianz'],
+        seguradoras:   segs,
       })
+      const tf = {}
+      segs.forEach(seg => {
+        const saved  = config?.tarifas?.[seg]?.deslocamento
+        const def    = DESL_FAIXAS_PADRAO
+        tf[seg] = {
+          ate200km:   String(saved?.ate200km   ?? def.ate200km),
+          acima200km: String(saved?.acima200km ?? def.acima200km),
+        }
+      })
+      setTarifaForm(tf)
     }
   }, [config, empresa])
 
@@ -134,6 +150,31 @@ export default function ConfigTab() {
     }
   }
 
+  async function saveTarifas() {
+    if (!empresaId) return
+    setSavingTarifa(true)
+    try {
+      // Mescla com o que já existe em config.tarifas para não sobrescrever outros campos
+      const tarifasAtuais = config?.tarifas || {}
+      const tarifas = { ...tarifasAtuais }
+      Object.entries(tarifaForm).forEach(([seg, vals]) => {
+        tarifas[seg] = {
+          ...(tarifasAtuais[seg] || {}),
+          deslocamento: {
+            ate200km:   parseFloat(vals.ate200km)   || DESL_FAIXAS_PADRAO.ate200km,
+            acima200km: parseFloat(vals.acima200km) || DESL_FAIXAS_PADRAO.acima200km,
+          },
+        }
+      })
+      await updateDoc(refConfig(empresaId), { tarifas })
+      showToast('✅ Tarifas de deslocamento salvas!')
+    } catch (e) {
+      showToast('Erro ao salvar: ' + e.message, 'error')
+    } finally {
+      setSavingTarifa(false)
+    }
+  }
+
   async function sendResetEmail() {
     if (!emailUsuario) return
     try {
@@ -150,6 +191,7 @@ export default function ConfigTab() {
       <div className="config-tabs-bar">
         {[
           { id: 'empresa', label: '🏢 Minha Empresa' },
+          { id: 'tarifas', label: '🧾 Tarifas'        },
           { id: 'conta',   label: '👤 Minha Conta'   },
         ].map(t => (
           <button key={t.id} className={`config-tab-btn${configAba === t.id ? ' active' : ''}`}
@@ -262,6 +304,87 @@ export default function ConfigTab() {
           <button className="btn-primary" onClick={saveConfig} disabled={savingConfig} style={{ padding: '10px 28px', fontSize: '.9rem' }}>
             {savingConfig ? '⏳ Salvando...' : '💾 Salvar dados'}
           </button>
+        </div>
+      )}
+
+      {/* ── Sub-aba: Tarifas ── */}
+      {configAba === 'tarifas' && (
+        <div style={{ maxWidth: 720 }}>
+
+          {/* Tabelas de serviço (leitura) */}
+          <h3 style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.6px', paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 12 }}>
+            Tabelas de Serviço por Seguradora
+          </h3>
+          <p style={{ fontSize: '.83rem', color: 'var(--muted)', marginBottom: 16 }}>
+            As tabelas abaixo são carregadas automaticamente no painel de Tarifação de cada OS. A Mapfre já está carregada com 65 serviços (Versão 7 / 2024). Para as demais seguradoras, envie a tabela para cadastrar.
+          </p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 28 }}>
+            {['Mapfre', 'Allianz', 'Tempo', 'Maxpar', 'Mondial'].map(seg => {
+              const temTabela = (TABELAS[seg] || []).length > 0
+              return (
+                <div key={seg} style={{
+                  background: temTabela ? '#e8f5e9' : '#f5f5f5',
+                  border: `1px solid ${temTabela ? '#81c784' : '#ccc'}`,
+                  borderRadius: 8, padding: '10px 16px', minWidth: 130, textAlign: 'center',
+                }}>
+                  <div style={{ fontFamily: 'Barlow Condensed,sans-serif', fontWeight: 800, fontSize: '1rem', color: temTabela ? '#1e6e3e' : '#888' }}>{seg}</div>
+                  <div style={{ fontSize: '.78rem', color: temTabela ? '#2d8a4e' : '#aaa', marginTop: 2 }}>
+                    {temTabela ? `✅ ${TABELAS[seg].length} serviços` : '⏳ Pendente'}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Deslocamento por faixa */}
+          <h3 style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.6px', paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 12 }}>
+            Taxas de Deslocamento (R$/km)
+          </h3>
+          <p style={{ fontSize: '.83rem', color: 'var(--muted)', marginBottom: 16 }}>
+            Defina a taxa por km que você cobra em cada faixa de distância. Acima de 200km o sistema aplica automaticamente a taxa maior.
+          </p>
+
+          {Object.keys(tarifaForm).length === 0 && (
+            <p style={{ color: 'var(--muted)', fontSize: '.88rem' }}>Nenhuma seguradora configurada. Vá em <strong>Minha Empresa</strong> e marque as seguradoras que atende.</p>
+          )}
+
+          {Object.keys(tarifaForm).map(seg => {
+            const vals = tarifaForm[seg]
+            const set  = (field, val) => setTarifaForm(p => ({ ...p, [seg]: { ...p[seg], [field]: val } }))
+            const ex200  = (200  * (parseFloat(vals.ate200km)   || 0)).toFixed(2).replace('.', ',')
+            const ex300  = (300  * (parseFloat(vals.acima200km) || 0)).toFixed(2).replace('.', ',')
+            return (
+              <div key={seg} style={{ background: '#f8faff', border: '1px solid #c8d8ec', borderRadius: 8, padding: '14px 16px', marginBottom: 14 }}>
+                <h4 style={{ color: '#1a3fa8', marginBottom: 12, fontFamily: 'Barlow Condensed,sans-serif', fontSize: '1.05rem', fontWeight: 800 }}>{seg}</h4>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  <div className="field">
+                    <label className="form-label">Até 200km — R$ por km</label>
+                    <input type="number" step="0.01" min="0" value={vals.ate200km}
+                      onChange={e => set('ate200km', e.target.value)}
+                      placeholder="1,20"
+                      style={{ width: '100%', padding: '7px 10px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.9rem' }} />
+                    <span style={{ fontSize: '.76rem', color: 'var(--muted)' }}>Ex: 200km → R$ {ex200}</span>
+                  </div>
+                  <div className="field">
+                    <label className="form-label">Acima de 200km — R$ por km</label>
+                    <input type="number" step="0.01" min="0" value={vals.acima200km}
+                      onChange={e => set('acima200km', e.target.value)}
+                      placeholder="1,80"
+                      style={{ width: '100%', padding: '7px 10px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.9rem' }} />
+                    <span style={{ fontSize: '.76rem', color: 'var(--muted)' }}>Ex: 300km → R$ {ex300}</span>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+
+          {Object.keys(tarifaForm).length > 0 && (
+            <div style={{ marginTop: 10, textAlign: 'right' }}>
+              <button className="btn-primary" onClick={saveTarifas} disabled={savingTarifa} style={{ padding: '10px 28px', fontSize: '.9rem' }}>
+                {savingTarifa ? '⏳ Salvando...' : '💾 Salvar deslocamento'}
+              </button>
+            </div>
+          )}
         </div>
       )}
 

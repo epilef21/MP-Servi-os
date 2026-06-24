@@ -621,13 +621,13 @@ export default function AgendaPage() {
             <div className="ag-modal-footer">
               <button className="ag-btn" onClick={() => setReagendarModal(null)}>Cancelar</button>
               <button className="ag-btn ag-btn-wa"
-                disabled={reagendarSaving || !reagendarForm.data}
+                disabled={reagendarSaving || !reagendarForm.data || !reagendarForm.hora}
                 onClick={() => salvarReagendar(true)}
               >
                 {reagendarSaving ? '⏳' : '💬 Salvar + WA'}
               </button>
               <button className="ag-btn ag-btn-ok"
-                disabled={reagendarSaving || !reagendarForm.data}
+                disabled={reagendarSaving || !reagendarForm.data || !reagendarForm.hora}
                 onClick={() => salvarReagendar(false)}
               >
                 {reagendarSaving ? '⏳' : '💾 Salvar'}

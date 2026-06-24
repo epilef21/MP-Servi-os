@@ -28,6 +28,7 @@ import {
   getDoc,
   query,
   orderBy,
+  where,
   limit,
 } from '../firebase.js'
 import { sendPasswordResetEmail, updateProfile } from 'firebase/auth'
@@ -40,13 +41,18 @@ import OrcamentosTab, { STATUS_ORC_META } from '../components/admin/OrcamentosTa
 import TecnicosTab      from '../components/admin/TecnicosTab.jsx'
 import SeguradosTab     from '../components/admin/SeguradosTab.jsx'
 import RelatorioTab     from '../components/admin/RelatorioTab.jsx'
-import ConfigTab             from '../components/admin/ConfigTab.jsx'
+import ConfigTab                from '../components/admin/ConfigTab.jsx'
+import FinanceiroEmpresaTab    from '../components/admin/FinanceiroEmpresaTab.jsx'
 import ImportarMapfreModal   from '../components/admin/ImportarMapfreModal.jsx'
 import PreencherOSModal      from '../components/admin/PreencherOSModal.jsx'
 import { generatePDF } from '../utils/pdfGenerator.js'
 import { generatePNG } from '../utils/pngGenerator.js'
 import { generatePDFCliente, generatePDFSeguradora } from '../utils/orcamentoPdfGenerator.js'
 import { fmtDate, fmtBRL, getLucro, maskPhone } from '../utils/formatters.js'
+import {
+  TABELAS,
+  calcServico, calcDeslocamento, getDeslocFaixas, gerarMsgWhatsApp,
+} from '../utils/tarifas.js'
 
 // ── Helpers de formatação ────────────────────────────────────
 function fmtDatetime(ts) {
@@ -156,7 +162,7 @@ export default function AdminPage() {
   const [osTecnicoMode, setOsTecnicoMode] = useState('select')
 
   // ── Financeiro e Técnico (modal detalhe OS) ──────────────
-  const [finForm,       setFinForm]       = useState({ mo_seguradora: '', valor_prestador: '', valor_deslocamento: '' })
+  const [finForm,       setFinForm]       = useState({ mo_seguradora: '', valor_prestador: '', valor_deslocamento: '', material_cobrado_seguradora: '', material_custo_real: '' })
   const [savingFin,     setSavingFin]     = useState(false)
   const [tecnicoForm,   setTecnicoForm]   = useState({ nome: '', tel: '' })
   const [savingTecnico, setSavingTecnico] = useState(false)
@@ -169,6 +175,14 @@ export default function AdminPage() {
   // ── Anotações internas (visível só pelo admin, nunca vai ao PDF/PNG) ──
   const [anotacaoInterna, setAnotacaoInterna] = useState('')
   const [savingAnotacao,  setSavingAnotacao]  = useState(false)
+
+  // ── Tarifação ─────────────────────────────────────────────
+  const [tarifForm,     setTarifForm]     = useState({ pontos: '1', km: '', moManual: '' })
+  const [servicoTarif,  setServicoTarif]  = useState(null)
+  const [codigoForm,    setCodigoForm]    = useState({ codigo: '', valor_aprovado: '' })
+  const [savingCodigo,  setSavingCodigo]  = useState(false)
+  const [savingLancado, setSavingLancado] = useState(false)
+  const [copiedTarif,   setCopiedTarif]   = useState(false)
 
   // ── Técnicos ─────────────────────────────────────────────
   const [tecnicos,        setTecnicos]        = useState([])
@@ -280,9 +294,11 @@ export default function AdminPage() {
   useEffect(() => {
     if (!selected) return
     setFinForm({
-      mo_seguradora:      String(selected.mo_seguradora      ?? ''),
-      valor_prestador:    String(selected.valor_prestador    ?? ''),
-      valor_deslocamento: String(selected.valor_deslocamento ?? ''),
+      mo_seguradora:               String(selected.mo_seguradora               ?? ''),
+      valor_prestador:             String(selected.valor_prestador             ?? ''),
+      valor_deslocamento:          String(selected.valor_deslocamento          ?? ''),
+      material_cobrado_seguradora: String(selected.material_cobrado_seguradora ?? ''),
+      material_custo_real:         String(selected.material_custo_real         ?? ''),
     })
     setTecnicoForm({
       nome: selected.tecnico_nome || '',
@@ -292,6 +308,18 @@ export default function AdminPage() {
     setDetTecnicoMode(selected.tecnico_id ? 'select' : 'manual')
     // carrega anotação interna (campo exclusivo do admin)
     setAnotacaoInterna(selected.anotacao_interna || '')
+    // carrega dados de tarifação salvos
+    setTarifForm({
+      pontos:   selected.fat_pontos != null ? String(selected.fat_pontos) : '1',
+      km:       selected.fat_km     != null ? String(selected.fat_km)     : '',
+      moManual: selected.fat_mo_manual != null ? String(selected.fat_mo_manual) : '',
+    })
+    const tabela = TABELAS[selected.seguradora] || []
+    setServicoTarif(tabela.find(x => x.id === selected.fat_item_id) || null)
+    setCodigoForm({
+      codigo:         selected.fat_codigo        || '',
+      valor_aprovado: selected.fat_valor_aprovado != null ? String(selected.fat_valor_aprovado) : '',
+    })
   }, [selected?.id])
 
   const limite = verificarLimite(totalMes)
@@ -486,10 +514,15 @@ export default function AdminPage() {
   async function saveFin() {
     setSavingFin(true)
     try {
+      const matCobrado = parseFloat(finForm.material_cobrado_seguradora) || 0
+      const matCusto   = parseFloat(finForm.material_custo_real)         || 0
       const payload = {
-        mo_seguradora:      parseFloat(finForm.mo_seguradora)      || 0,
-        valor_prestador:    parseFloat(finForm.valor_prestador)    || 0,
-        valor_deslocamento: parseFloat(finForm.valor_deslocamento) || 0,
+        mo_seguradora:               parseFloat(finForm.mo_seguradora)      || 0,
+        valor_prestador:             parseFloat(finForm.valor_prestador)    || 0,
+        valor_deslocamento:          parseFloat(finForm.valor_deslocamento) || 0,
+        material_cobrado_seguradora: matCobrado,
+        material_custo_real:         matCusto,
+        margem_material:             matCobrado - matCusto,
       }
       await atualizarOS(empresaId, selected.id, payload)
       const updated = { ...selected, ...payload }
@@ -593,6 +626,55 @@ export default function AdminPage() {
       showToast('✅ Anotação salva!')
     } catch (e) { showToast('Erro ao salvar: ' + e.message, 'error') }
     finally { setSavingAnotacao(false) }
+  }
+
+  // ── Tarifação: salvar código recebido da seguradora ─────
+  async function saveCodigo() {
+    if (!codigoForm.codigo.trim()) { showToast('Informe o código recebido.', 'error'); return }
+    setSavingCodigo(true)
+    try {
+      const valorAprov = parseFloat(codigoForm.valor_aprovado) || 0
+      const km         = parseFloat(tarifForm.km) || 0
+      const faixas     = getDeslocFaixas(config, selected.seguradora)
+      const desl       = calcDeslocamento(km, faixas)
+      const payload    = {
+        fat_codigo:         codigoForm.codigo.trim(),
+        fat_valor_aprovado: valorAprov,
+        fat_codigo_em:      serverTimestamp(),
+        fat_item_id:        servicoTarif?.id    || null,
+        fat_pontos:         parseInt(tarifForm.pontos) || null,
+        fat_km:             km || null,
+        fat_mo_manual:      parseFloat(tarifForm.moManual) || null,
+        // Alimenta automaticamente o fechamento financeiro
+        mo_seguradora:      valorAprov,
+        ...(km > 0 ? { valor_deslocamento: desl } : {}),
+      }
+      await atualizarOS(empresaId, selected.id, payload)
+      const updated = { ...selected, ...payload }
+      setReports(p => p.map(r => r.id === selected.id ? updated : r))
+      setSelected(updated)
+      setFinForm(p => ({
+        ...p,
+        mo_seguradora:      String(valorAprov),
+        ...(km > 0 ? { valor_deslocamento: String(desl) } : {}),
+      }))
+      showToast('🔑 Código salvo! Financeiro atualizado.')
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
+    finally { setSavingCodigo(false) }
+  }
+
+  // ── Tarifação: marcar como lançado no portal da seguradora ─
+  async function marcarLancado() {
+    setSavingLancado(true)
+    try {
+      const payload = { fat_lancado_em: serverTimestamp() }
+      await atualizarOS(empresaId, selected.id, payload)
+      const updated = { ...selected, ...payload }
+      setReports(p => p.map(r => r.id === selected.id ? updated : r))
+      setSelected(updated)
+      showToast(`✅ Lançado no portal ${selected.seguradora || ''}!`)
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
+    finally { setSavingLancado(false) }
   }
 
   // ── Orçamentos: load ─────────────────────────────────────
@@ -946,8 +1028,9 @@ export default function AdminPage() {
             { id: 'orcamentos', icon: '📄', label: 'Orçamentos'        },
             { id: 'segurados',  icon: '👥', label: 'Segurados'         },
             { id: 'tecnicos',   icon: '👷', label: 'Técnicos'          },
-            { id: 'config',     icon: '⚙️', label: 'Configurações'     },
-            { id: 'relatorio',  icon: '📊', label: 'Relatório Mensal'  },
+            { id: 'config',      icon: '⚙️', label: 'Configurações'        },
+            { id: 'relatorio',   icon: '📊', label: 'Relatório Mensal'     },
+            { id: 'financeiro',  icon: '💰', label: 'Financeiro da Empresa' },
           ].map(item => (
             <button
               key={item.id}
@@ -1014,7 +1097,7 @@ export default function AdminPage() {
             <button className="hamburger-btn" onClick={() => setSidebarOpen(o => !o)}>☰</button>
             <div>
               <div className="page-header-title">
-                {{ dashboard: '📊 Dashboard', os: '📋 Ordens de Serviço', orcamentos: '📄 Orçamentos', segurados: '👥 Segurados', tecnicos: '👷 Técnicos', config: '⚙️ Configurações' }[abaAtiva]}
+                {{ dashboard: '📊 Dashboard', os: '📋 Ordens de Serviço', orcamentos: '📄 Orçamentos', segurados: '👥 Segurados', tecnicos: '👷 Técnicos', config: '⚙️ Configurações', relatorio: '📊 Relatório Mensal', financeiro: '💰 Financeiro da Empresa' }[abaAtiva]}
               </div>
               <div className="page-header-sub">{nomeEmpresa}</div>
             </div>
@@ -1086,6 +1169,9 @@ export default function AdminPage() {
 
         {/* ══ RELATÓRIO MENSAL ══════════════════════════════════════ */}
         {abaAtiva === 'relatorio' && <RelatorioTab />}
+
+        {/* ══ FINANCEIRO DA EMPRESA ═════════════════════════════════ */}
+        {abaAtiva === 'financeiro' && <FinanceiroEmpresaTab />}
 
       </div>{/* fim admin-content */}
 
@@ -1632,6 +1718,198 @@ export default function AdminPage() {
                 )
               }
 
+              {/* ── Tarifação & Faturamento ── */}
+              {(() => {
+                const seg      = selected.seguradora || ''
+                const tabela   = TABELAS[seg] || []
+                const temTabela = tabela.length > 0
+                const faixas   = getDeslocFaixas(config, seg)
+                const pontos   = parseInt(tarifForm.pontos) || 1
+                const km       = parseFloat(tarifForm.km)   || 0
+                const { visita, mo, pontosExtras, totalServico } = calcServico(servicoTarif, pontos)
+                const moManual = parseFloat(tarifForm.moManual) || 0
+                const moUsado  = temTabela ? totalServico : moManual
+                const desl     = calcDeslocamento(km, faixas)
+                const total    = moUsado + desl
+                const r        = n => Number(n).toFixed(2).replace('.', ',')
+                const codigoDigitos = seg === 'Allianz' || seg === 'Tempo' ? 2 : 8
+                return (
+                  <div className="md-section" style={{ background: '#eef3ff', border: '1.5px solid #adc5f5', borderRadius: 8, padding: '14px 16px' }}>
+                    <h3 style={{ color: '#1a3fa8', marginBottom: 14 }}>🧾 Tarifação</h3>
+
+                    {/* ── Passo 1: Calcular ── */}
+                    <p style={{ fontSize: '.73rem', fontWeight: 700, color: '#1a3fa8', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 10 }}>
+                      1 · Calcular e enviar para a seguradora
+                    </p>
+
+                    {/* Seletor de serviço (Mapfre tem tabela completa) */}
+                    {temTabela ? (
+                      <div className="md-field" style={{ marginBottom: 10 }}>
+                        <label>Serviço — tabela {seg}</label>
+                        <select
+                          value={servicoTarif?.id || ''}
+                          onChange={e => setServicoTarif(tabela.find(x => x.id === e.target.value) || null)}
+                          style={{ width: '100%', padding: '7px 10px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.88rem' }}
+                        >
+                          <option value="">Selecione o serviço...</option>
+                          {tabela.map(x => (
+                            <option key={x.id} value={x.id}>{x.id} — {x.servico}</option>
+                          ))}
+                        </select>
+                        {servicoTarif && (
+                          <div style={{ marginTop: 6, background: '#fff', border: '1px solid #c8d8ec', borderRadius: 5, padding: '7px 10px', fontSize: '.82rem', color: '#444', lineHeight: 1.6 }}>
+                            <div style={{ color: 'var(--muted)', marginBottom: 2, fontSize: '.77rem' }}>{servicoTarif.descricao}</div>
+                            <span style={{ marginRight: 14 }}>Visita: <strong>R$ {r(servicoTarif.visita)}</strong></span>
+                            <span style={{ marginRight: 14 }}>MO: <strong>R$ {r(servicoTarif.mo)}</strong></span>
+                            <span>Ponto: <strong>{servicoTarif.pontoAdicional != null ? `R$ ${r(servicoTarif.pontoAdicional)}` : 'Não se aplica'}</strong></span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="md-field" style={{ marginBottom: 10 }}>
+                        <label>Valor MO proposto (R$)</label>
+                        <input type="number" step="0.01" min="0" value={tarifForm.moManual}
+                          onChange={e => setTarifForm(p => ({ ...p, moManual: e.target.value }))}
+                          placeholder="Ex: 170,00"
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.9rem' }} />
+                      </div>
+                    )}
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                      {/* Pontos (só mostra se o serviço aceita ponto adicional ou se não tem tabela) */}
+                      {(!temTabela || servicoTarif?.pontoAdicional != null) && (
+                        <div className="md-field">
+                          <label>Nº de pontos</label>
+                          <input type="number" min="1" step="1" value={tarifForm.pontos}
+                            onChange={e => setTarifForm(p => ({ ...p, pontos: e.target.value }))}
+                            placeholder="1"
+                            style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.9rem' }} />
+                        </div>
+                      )}
+                      <div className="md-field">
+                        <label>KM de deslocamento</label>
+                        <input type="number" min="0" step="1" value={tarifForm.km}
+                          onChange={e => setTarifForm(p => ({ ...p, km: e.target.value }))}
+                          placeholder="Ex: 160"
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.9rem' }} />
+                        {km > 200 && (
+                          <span style={{ fontSize: '.75rem', color: '#e07000', fontWeight: 600 }}>⚠️ Acima de 200km — taxa {r(faixas.acima200km)}/km</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Preview do cálculo */}
+                    {(servicoTarif || moManual > 0 || km > 0) && (
+                      <div style={{ background: '#fff', border: '1px solid #adc5f5', borderRadius: 6, padding: '10px 14px', marginBottom: 12, fontSize: '.88rem', lineHeight: 1.85 }}>
+                        {temTabela && servicoTarif ? (
+                          <>
+                            {visita > 0    && <div>Visita/Saída: <strong>R$ {r(visita)}</strong></div>}
+                            {mo > 0        && <div>MO ({servicoTarif.id} — {servicoTarif.servico}): <strong>R$ {r(mo)}</strong></div>}
+                            {pontosExtras > 0 && <div>Pontos extras ({pontos - 1} × R$ {r(servicoTarif.pontoAdicional)}): <strong>R$ {r(pontosExtras)}</strong></div>}
+                          </>
+                        ) : (
+                          moManual > 0 && <div>MO proposta: <strong>R$ {r(moManual)}</strong></div>
+                        )}
+                        {km > 0 && (
+                          <div>
+                            Deslocamento: {km}km × R$ {r(km <= 200 ? faixas.ate200km : faixas.acima200km)}
+                            {km > 200 && <span style={{ fontSize: '.78rem', color: '#e07000' }}> (faixa &gt;200km)</span>}
+                            {' '}= <strong>R$ {r(desl)}</strong>
+                          </div>
+                        )}
+                        <div style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid #e0e8f8', fontWeight: 900, fontSize: '1.05rem', color: '#1a3fa8' }}>
+                          Total proposto: R$ {r(total)}
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      style={{ background: '#25d366', color: '#fff', border: 'none', borderRadius: 7, padding: '8px 18px', fontFamily: 'Barlow Condensed,sans-serif', fontWeight: 700, fontSize: '.92rem', cursor: 'pointer' }}
+                      onClick={() => {
+                        const msg = gerarMsgWhatsApp(selected, servicoTarif, pontos, km, faixas)
+                        navigator.clipboard.writeText(msg).catch(() => {
+                          const el = document.createElement('textarea')
+                          el.value = msg; document.body.appendChild(el); el.select()
+                          document.execCommand('copy'); document.body.removeChild(el)
+                        })
+                        setCopiedTarif(true); setTimeout(() => setCopiedTarif(false), 2500)
+                      }}
+                    >
+                      {copiedTarif ? '✅ Copiado!' : '📋 Copiar mensagem para WhatsApp'}
+                    </button>
+
+                    <div style={{ borderTop: '1px solid #adc5f5', margin: '16px 0' }} />
+
+                    {/* ── Passo 2: Código recebido ── */}
+                    <p style={{ fontSize: '.73rem', fontWeight: 700, color: '#1a3fa8', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 10 }}>
+                      2 · Código recebido da seguradora
+                    </p>
+                    {selected.fat_codigo && (
+                      <div style={{ background: '#e8f5e9', border: '1px solid #81c784', borderRadius: 6, padding: '8px 12px', marginBottom: 10, fontSize: '.88rem', display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+                        <span>🔑 Código: <strong style={{ letterSpacing: 3, fontFamily: 'monospace' }}>{selected.fat_codigo}</strong></span>
+                        <span>Valor aprovado: <strong>{fmtBRL(selected.fat_valor_aprovado)}</strong></span>
+                      </div>
+                    )}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                      <div className="md-field">
+                        <label>Código ({codigoDigitos} dígitos)</label>
+                        <input
+                          value={codigoForm.codigo}
+                          onChange={e => setCodigoForm(p => ({ ...p, codigo: e.target.value }))}
+                          placeholder={'X'.repeat(codigoDigitos)}
+                          maxLength={codigoDigitos}
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'monospace', fontSize: '1.05rem', fontWeight: 700, letterSpacing: 3 }}
+                        />
+                      </div>
+                      <div className="md-field">
+                        <label>Valor aprovado (R$)</label>
+                        <input type="number" step="0.01" min="0"
+                          value={codigoForm.valor_aprovado}
+                          onChange={e => setCodigoForm(p => ({ ...p, valor_aprovado: e.target.value }))}
+                          placeholder="0,00"
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.9rem' }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                      <button
+                        disabled={savingCodigo}
+                        onClick={saveCodigo}
+                        style={{ background: '#1a3fa8', color: '#fff', border: 'none', borderRadius: 7, padding: '8px 18px', fontFamily: 'Barlow Condensed,sans-serif', fontWeight: 700, fontSize: '.92rem', cursor: 'pointer', opacity: savingCodigo ? .6 : 1 }}
+                      >
+                        {savingCodigo ? '⏳ Salvando...' : '💾 Salvar código'}
+                      </button>
+                      <span style={{ fontSize: '.78rem', color: 'var(--muted)' }}>Preenche o financeiro automaticamente</span>
+                    </div>
+
+                    <div style={{ borderTop: '1px solid #adc5f5', margin: '16px 0' }} />
+
+                    {/* ── Passo 3: Lançado no portal ── */}
+                    <p style={{ fontSize: '.73rem', fontWeight: 700, color: '#1a3fa8', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 10 }}>
+                      3 · Lançamento no portal {seg}
+                    </p>
+                    {selected.fat_lancado_em ? (
+                      <div style={{ background: '#e8f5e9', border: '1px solid #81c784', borderRadius: 7, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: '1.4rem' }}>✅</span>
+                        <div>
+                          <strong>Lançado no portal {seg}</strong>
+                          <div style={{ color: 'var(--muted)', fontSize: '.8rem' }}>em {fmtDatetime(selected.fat_lancado_em)}</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        disabled={savingLancado || !selected.fat_codigo}
+                        onClick={marcarLancado}
+                        title={!selected.fat_codigo ? 'Salve o código primeiro (passo 2)' : ''}
+                        style={{ background: !selected.fat_codigo ? '#aaa' : '#2d8a4e', color: '#fff', border: 'none', borderRadius: 7, padding: '10px 22px', fontFamily: 'Barlow Condensed,sans-serif', fontWeight: 700, fontSize: '1rem', cursor: !selected.fat_codigo ? 'not-allowed' : 'pointer', opacity: savingLancado ? .6 : 1 }}
+                      >
+                        {savingLancado ? '⏳ Salvando...' : `✅ Marcar como lançado no portal ${seg}`}
+                      </button>
+                    )}
+                  </div>
+                )
+              })()}
+
               <div className="md-section" style={{ background: '#f0f7f0', border: '1px solid #b8ddb8', borderRadius: 8, padding: '14px 16px' }}>
                 <h3 style={{ color: '#1e6e3e', marginBottom: 4 }}>🔒 Fechamento Financeiro Interno</h3>
                 <p style={{ fontSize: '.78rem', color: 'var(--muted)', marginBottom: 12 }}>
@@ -1666,6 +1944,44 @@ export default function AdminPage() {
                     })()}
                   </div>
                 </div>
+
+                {/* Campos de material */}
+                <div style={{ marginTop: 14, borderTop: '1px solid #b8ddb8', paddingTop: 14 }}>
+                  <p style={{ fontSize: '.78rem', color: 'var(--muted)', marginBottom: 10 }}>
+                    📦 Material (para o DRE da empresa)
+                  </p>
+                  <div className="md-grid">
+                    <div className="md-field">
+                      <label>Material Cobrado da Seguradora (R$)</label>
+                      <input type="number" step="0.01" min="0"
+                        value={finForm.material_cobrado_seguradora}
+                        onChange={e => setFinForm(p => ({ ...p, material_cobrado_seguradora: e.target.value }))}
+                        placeholder="0,00"
+                        style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.9rem' }} />
+                    </div>
+                    <div className="md-field">
+                      <label>Custo Real do Material (R$)</label>
+                      <input type="number" step="0.01" min="0"
+                        value={finForm.material_custo_real}
+                        onChange={e => setFinForm(p => ({ ...p, material_custo_real: e.target.value }))}
+                        placeholder="0,00"
+                        style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.9rem' }} />
+                    </div>
+                  </div>
+                  {(() => {
+                    const cobrado = parseFloat(finForm.material_cobrado_seguradora) || 0
+                    const custo   = parseFloat(finForm.material_custo_real)         || 0
+                    if (!cobrado && !custo) return null
+                    const margem = cobrado - custo
+                    return (
+                      <div className={`margem-material-box${margem < 0 ? ' negativa' : ''}`}>
+                        <span>Margem em Material</span>
+                        <span>{fmtBRL(margem)}</span>
+                      </div>
+                    )
+                  })()}
+                </div>
+
                 <div style={{ marginTop: 12, textAlign: 'right' }}>
                   <button className="btn-sm btn-ok" disabled={savingFin} onClick={saveFin}>
                     {savingFin ? '⏳ Salvando...' : '💾 Salvar Financeiro'}

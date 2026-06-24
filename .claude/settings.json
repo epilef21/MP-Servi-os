@@ -19,7 +19,12 @@
       "WebFetch(domain:vite.dev)",
       "Read(//c/Users/felip/.claude/get-shit-done/templates/research-project/**)",
       "Read(//c/Users/felip/.claude/get-shit-done/templates/**)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "Read(//c/Users/felip/.claude/get-shit-done/workflows/**)",
+      "Bash(npx tsc *)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\felip\\\\OneDrive\\\\Área de Trabalho\\\\projeto Check List\\\\mp-react-v3-completo\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Read(//c/Users/felip/OneDrive/�rea de Trabalho/projeto Check List/**)"
     ],
     "additionalDirectories": [
       "c:\\Users\\felip\\OneDrive\\Área de Trabalho\\projeto Check List\\mp-react-v3-completo\\.planning"

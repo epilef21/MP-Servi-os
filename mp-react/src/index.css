@@ -1442,3 +1442,307 @@ body {
 /* Badges novos de status */
 .badge.ficou-visita    { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
 .badge.cliente-ausente { background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6; }
+
+/* ── FINANCEIRO DA EMPRESA — DRE ── */
+.dre-container {
+  background: #fff;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.dre-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: .92rem;
+  gap: 12px;
+}
+.dre-linha:last-child { border-bottom: none; }
+.dre-linha.subtotal {
+  background: var(--light);
+  font-weight: 700;
+}
+.dre-linha.resultado {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.08rem;
+  padding: 16px 20px;
+}
+.dre-linha.resultado.negativo { background: var(--danger); }
+.dre-secao-titulo {
+  background: #e8f0fb;
+  padding: 8px 20px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: .82rem;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+}
+.dre-valor-positivo { color: var(--success); font-weight: 700; }
+.dre-valor-negativo { color: var(--danger);  font-weight: 700; }
+
+/* ── FINANCEIRO DA EMPRESA — Tabs ── */
+.fin-tabs {
+  display: flex;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 1.5px solid var(--border);
+}
+.fin-tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 6px;
+  font-size: .83rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--light);
+  color: var(--muted);
+  border: none;
+  font-family: 'Barlow', sans-serif;
+  transition: all .2s;
+}
+.fin-tab:not(:last-child) { border-right: 1.5px solid var(--border); }
+.fin-tab.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ── FINANCEIRO — Seletor de período ── */
+.fin-periodo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.fin-periodo-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary);
+  min-width: 140px;
+  text-align: center;
+}
+.fin-periodo-btn {
+  background: var(--light);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 6px 14px;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--primary);
+  font-weight: 700;
+  transition: all .15s;
+}
+.fin-periodo-btn:hover { background: #e8f0fb; border-color: var(--primary); }
+
+/* ── FINANCEIRO — Alerta de despesas pendentes ── */
+.despesa-alerta {
+  background: #fff8e6;
+  border: 1.5px solid #f0a500;
+  border-radius: var(--r-sm);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.despesa-alerta-text {
+  font-size: .85rem;
+  color: #856404;
+  flex: 1;
+}
+.despesa-alerta-text strong { color: #6d4800; }
+
+/* ── FINANCEIRO — Lista de despesas ── */
+.despesa-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  margin-bottom: 8px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.despesa-item.pendente {
+  border-left: 4px solid #f0a500;
+  background: #fffdf5;
+}
+.despesa-item.lancado {
+  border-left: 4px solid var(--success);
+}
+.despesa-item-info { flex: 1; min-width: 0; }
+.despesa-item-desc { font-weight: 600; font-size: .9rem; }
+.despesa-item-sub  { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+.despesa-item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.despesa-badge-tipo {
+  font-size: .67rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.despesa-badge-tipo.fixa     { background: var(--success-bg); color: var(--success); }
+.despesa-badge-tipo.variavel { background: #fff3cd; color: #856404; }
+.despesa-status-ok  { font-size: .78rem; color: var(--success); font-weight: 700; }
+.despesa-status-pend{ font-size: .78rem; color: #f0a500;         font-weight: 700; }
+
+/* ── FINANCEIRO — Serviços particulares ── */
+.particular-item {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.particular-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.particular-item-desc { font-weight: 700; font-size: .92rem; }
+.particular-item-data { font-size: .78rem; color: var(--muted); white-space: nowrap; }
+.particular-valores {
+  display: flex;
+  gap: 16px;
+  font-size: .82rem;
+  flex-wrap: wrap;
+}
+.particular-valores span { color: var(--muted); }
+.particular-valores strong { color: var(--text); }
+.particular-lucro { color: var(--success); font-weight: 700; }
+
+/* ── FINANCEIRO — Margem material no modal OS ── */
+.margem-material-box {
+  background: var(--success-bg);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  margin-top: 8px;
+  font-weight: 700;
+  color: var(--success);
+  font-size: .9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.margem-material-box.negativa {
+  background: #fdecea;
+  color: var(--danger);
+}
+
+/* ── FINANCEIRO — Banner auto-lançamento ── */
+.fin-auto-lancamento {
+  background: #f0f7f0;
+  border: 1.5px solid #b8ddb8;
+  border-radius: var(--r-sm);
+  padding: 16px 18px;
+  margin-bottom: 20px;
+}
+.fin-auto-lancamento h4 { color: #1e6e3e; margin-bottom: 6px; font-size: .92rem; }
+.fin-auto-lancamento p  { font-size: .82rem; color: var(--muted); margin-bottom: 12px; }
+.fin-auto-lancamento-acoes { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ── FINANCEIRO — Aviso vazio no DRE ── */
+.dre-aviso-vazio {
+  background: #fff8e6;
+  border: 1.5px dashed #f0a500;
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  font-size: .82rem;
+  color: #856404;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 8px 0;
+  flex-wrap: wrap;
+}
+
+/* ── FINANCEIRO — Grupos de despesas ── */
+.despesa-grupo-titulo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  padding: 10px 0 4px;
+  color: var(--muted);
+}
+.despesa-badge-categoria {
+  font-size: .65rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+.despesa-badge-categoria.pessoal        { background: #e8f0fb; color: var(--primary); }
+.despesa-badge-categoria.estrutura      { background: #fff0ea; color: var(--accent);  }
+.despesa-badge-categoria.administrativo { background: #f0f0f0; color: #555;           }
+
+/* ── FINANCEIRO — Sub-seção dentro de aba ── */
+.subsecao-financeiro {
+  margin-top: 28px;
+  border-top: 2px solid var(--border);
+  padding-top: 18px;
+}
+.subsecao-titulo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── FINANCEIRO — Item de dedução / resultado financeiro ── */
+.deducao-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  margin-bottom: 8px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.deducao-item-info { flex: 1; min-width: 0; }
+.deducao-item-desc { font-weight: 600; font-size: .88rem; }
+.deducao-item-sub  { font-size: .73rem; color: var(--muted); margin-top: 2px; }
+.deducao-item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.deducao-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--light);
+  border-radius: var(--r-sm);
+  font-weight: 700;
+  font-size: .9rem;
+  margin-top: 4px;
+  border: 1px solid var(--border);
+}
+
+@media (max-width: 640px) {
+  .fin-tabs .fin-tab { font-size: .72rem; padding: 9px 3px; }
+  .dre-linha { font-size: .85rem; padding: 9px 14px; }
+  .dre-secao-titulo { padding: 7px 14px; }
+  .particular-valores { gap: 10px; }
+  .deducao-item { gap: 8px; }
+}

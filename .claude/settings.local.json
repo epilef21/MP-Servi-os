@@ -17,7 +17,23 @@
       "Bash(node *)",
       "Bash(git worktree *)",
       "Bash(git branch *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(Get-Item \"c:\\\\Users\\\\felip\\\\OneDrive\\\\Área de Trabalho\\\\projeto Check List\\\\mp-react-v3-completo\\\\mp-react\\\\src\\\\pages\\\\AdminPage.jsx\")",
+      "Bash(Select-Object Length, Name)",
+      "Read(//c/Users/felip/OneDrive/�rea de Trabalho/projeto Check List/mp-react-v3-completo/mp-react/src/pages/**)",
+      "PowerShell(\\(Get-Item \"c:\\\\Users\\\\felip\\\\OneDrive\\\\Área de Trabalho\\\\projeto Check List\\\\mp-react-v3-completo\\\\mp-react\\\\src\\\\pages\\\\AdminPage.jsx\"\\).Length; \\(Get-Content \"c:\\\\Users\\\\felip\\\\OneDrive\\\\Área de Trabalho\\\\projeto Check List\\\\mp-react-v3-completo\\\\mp-react\\\\src\\\\pages\\\\AdminPage.jsx\" | Measure-Object -Line\\).Lines)",
+      "Bash(Get-Content \"C:\\\\Users\\\\felip\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-felip-OneDrive--rea-de-Trabalho-projeto-Check-List-mp-react-v3-completo\\\\2bd20ffd-7be0-4ff6-a555-f4219f50bef4\\\\tasks\\\\bwckhipaj.output\" -Wait)",
+      "Bash(Select-String -Pattern \"Deploy complete|Error|error|functions\\\\[|rules\")",
+      "Bash(Get-Content \"C:\\\\Users\\\\felip\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-felip-OneDrive--rea-de-Trabalho-projeto-Check-List-mp-react-v3-completo\\\\2bd20ffd-7be0-4ff6-a555-f4219f50bef4\\\\tasks\\\\bwckhipaj.output\")",
+      "Bash(Select-String -Pattern \"Deploy|functions|rules|Error|error\")",
+      "Bash(Select-Object -Last 20)",
+      "Read(//c/Users/felip/.claude/projects/c--Users-felip-OneDrive--rea-de-Trabalho-projeto-Check-List-mp-react-v3-completo/memory/**)",
+      "Bash(wc -l \"/mnt/c/Users/felip/OneDrive/Área de Trabalho/projeto Check List/mp-react-v3-completo/mp-react/src/pages/AdminPage.jsx\")",
+      "Read(//mnt/c/Users/felip/OneDrive/Área de Trabalho/projeto Check List/mp-react-v3-completo/mp-react/src/pages/**)",
+      "Bash(npm audit *)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\felip\\.claude\\projects\\c--Users-felip-OneDrive--rea-de-Trabalho-projeto-Check-List-mp-react-v3-completo\\memory"
     ]
   }
 }
