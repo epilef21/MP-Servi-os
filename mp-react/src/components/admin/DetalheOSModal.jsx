@@ -17,6 +17,7 @@ import {
   TABELAS,
   calcServico, calcDeslocamento, getDeslocFaixas, gerarMsgWhatsApp,
 } from '../../utils/tarifas.js'
+import { SEGS_COM_CODIGO, digitosCodigo } from '../../utils/faturamento.js'
 import { buildGoogleCalendarLink } from '../../utils/googleCalendarLink.js'
 import { excluirEventoOS } from '../../utils/googleCalendarApi.js'
 import { copyToClipboard } from '../../utils/clipboard.js'
@@ -46,9 +47,9 @@ export default function DetalheOSModal({ os: selected, onClose }) {
   // ── Tarifação ─────────────────────────────────────────────
   const [tarifForm,     setTarifForm]     = useState({ pontos: '1', km: '', moManual: '' })
   const [servicoTarif,  setServicoTarif]  = useState(null)
-  const [codigoForm,    setCodigoForm]    = useState({ codigo: '', valor_aprovado: '' })
-  const [savingCodigo,  setSavingCodigo]  = useState(false)
-  const [savingLancado, setSavingLancado] = useState(false)
+  const [codigoMoForm,     setCodigoMoForm]     = useState({ codigo: '', valor: '' })
+  const [codigoDeslocForm, setCodigoDeslocForm] = useState({ codigo: '', valor: '' })
+  const [savingCodigo,     setSavingCodigo]     = useState(false)
   const [copiedTarif,   setCopiedTarif]   = useState(false)
 
   const [genPng,          setGenPng]          = useState(false)
@@ -82,9 +83,13 @@ export default function DetalheOSModal({ os: selected, onClose }) {
     })
     const tabela = TABELAS[selected.seguradora] || []
     setServicoTarif(tabela.find(x => x.id === selected.fat_item_id) || null)
-    setCodigoForm({
-      codigo:         selected.fat_codigo        || '',
-      valor_aprovado: selected.fat_valor_aprovado != null ? String(selected.fat_valor_aprovado) : '',
+    setCodigoMoForm({
+      codigo: selected.fat_codigo_mo ?? selected.fat_codigo ?? '',        // legado fat_codigo = código de MO
+      valor:  String(selected.fat_valor_mo ?? selected.fat_valor_aprovado ?? ''),
+    })
+    setCodigoDeslocForm({
+      codigo: selected.fat_codigo_desloc ?? '',
+      valor:  String(selected.fat_valor_desloc ?? ''),
     })
   }, [selected?.id])
 
@@ -244,53 +249,29 @@ export default function DetalheOSModal({ os: selected, onClose }) {
     finally { setSavingAnotacao(false) }
   }
 
-  // ── Tarifação: salvar código recebido da seguradora ─────
-  async function saveCodigo() {
-    if (!codigoForm.codigo.trim()) { showToast('Informe o código recebido.', 'error'); return }
+  // ── Tarifação: salvar códigos recebidos da seguradora (MO + Deslocamento) ─
+  async function saveCodigos() {
+    if (!codigoMoForm.codigo.trim()) { showToast('Informe ao menos o código de mão de obra.', 'error'); return }
     setSavingCodigo(true)
     try {
-      const valorAprov = parseFloat(codigoForm.valor_aprovado) || 0
-      const km         = parseFloat(tarifForm.km) || 0
-      const faixas     = getDeslocFaixas(config, selected.seguradora)
-      const desl       = calcDeslocamento(km, faixas)
-      const payload    = {
-        fat_codigo:         codigoForm.codigo.trim(),
-        fat_valor_aprovado: valorAprov,
+      const valorMo     = parseFloat(codigoMoForm.valor) || 0
+      const temDesloc   = !!codigoDeslocForm.codigo.trim()
+      const valorDesloc = parseFloat(codigoDeslocForm.valor) || 0
+      const payload = {
+        fat_codigo_mo:      codigoMoForm.codigo.trim(),
+        fat_valor_mo:       valorMo,
+        fat_codigo_desloc:  temDesloc ? codigoDeslocForm.codigo.trim() : '',
+        fat_valor_desloc:   temDesloc ? valorDesloc : 0,
         fat_codigo_em:      serverTimestamp(),
-        fat_item_id:        servicoTarif?.id    || null,
-        fat_pontos:         parseInt(tarifForm.pontos) || null,
-        fat_km:             km || null,
-        fat_mo_manual:      parseFloat(tarifForm.moManual) || null,
-        // Alimenta automaticamente o fechamento financeiro
-        mo_seguradora:      valorAprov,
-        ...(km > 0 ? { valor_deslocamento: desl } : {}),
+        // NÃO alimentar mo_seguradora/valor_deslocamento aqui: preservar o valor da OS para a divergência (FAT-05)
       }
       await atualizarOS(empresaId, selected.id, payload)
       const updated = { ...selected, ...payload }
       setReports(p => p.map(r => r.id === selected.id ? updated : r))
       setSelected(updated)
-      setFinForm(p => ({
-        ...p,
-        mo_seguradora:      String(valorAprov),
-        ...(km > 0 ? { valor_deslocamento: String(desl) } : {}),
-      }))
-      showToast('🔑 Código salvo! Financeiro atualizado.')
+      showToast('🔑 Códigos salvos!')
     } catch (e) { showToast('Erro: ' + e.message, 'error') }
     finally { setSavingCodigo(false) }
-  }
-
-  // ── Tarifação: marcar como lançado no portal da seguradora ─
-  async function marcarLancado() {
-    setSavingLancado(true)
-    try {
-      const payload = { fat_lancado_em: serverTimestamp() }
-      await atualizarOS(empresaId, selected.id, payload)
-      const updated = { ...selected, ...payload }
-      setReports(p => p.map(r => r.id === selected.id ? updated : r))
-      setSelected(updated)
-      showToast(`✅ Lançado no portal ${selected.seguradora || ''}!`)
-    } catch (e) { showToast('Erro: ' + e.message, 'error') }
-    finally { setSavingLancado(false) }
   }
 
   return (
