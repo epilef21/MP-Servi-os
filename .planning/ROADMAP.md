@@ -1,234 +1,170 @@
-# Roadmap: AssistHub — Cobertura de Testes + Produto Core
+# Roadmap: AssistHub
 
-**Milestones:** Test Coverage v1 (Phases 1-4) · Produto Core v1.1 (Phases 5-6)
-**Created:** 2026-05-03
-**Updated:** 2026-05-15
-**Phases:** 6
-**Requirements:** 45 (37 v1.0 + 8 v1.1)
+## Milestones
 
-## Overview
-
-Quatro fases encadeadas levam a plataforma de zero testes para uma suite confiável dos fluxos críticos. A ordem respeita o grafo de dependências: infra primeiro (nada roda sem ela), utilitários puros e camada de dados em seguida (sem dependências de contexto React), autenticação e roteamento depois (depende dos mocks de firebase.js estabelecidos na fase anterior), e os fluxos de negócio por último (dependem de auth, roteamento e helpers de dados funcionando nos testes).
-
-As Phases 5 e 6 pertencem ao milestone v1.1 Produto Core e são independentes da suite de testes — entregam as duas features de produto pendentes da PRIORIDADE 2 do backlog.
+- ✅ **v1.0 Test Coverage** - Phases 1-4 (concluído 2026-05-20)
+- ✅ **v1.1 Produto Core** - Phases 5-6 (concluído 2026-05-05)
+- 🚧 **v1.2 Financeiro Completo** - Phases 7-11 (em planejamento)
 
 ## Phases
 
-- [x] **Phase 1: Infraestrutura de Testes** - Configurar Vitest, RTL, mocks globais e smoke test passando
-- [x] **Phase 2: Camada Base** - Testar utilitários puros e funções de acesso ao Firestore em isolamento
-- [x] **Phase 3: Auth e Roteamento** - Testar AuthContext, guards de rota e hook useEmpresa
-- [x] **Phase 4: Fluxos Críticos** - Testar CRUD de OS e fluxo completo de orçamento
-- [x] **Phase 5: Compressão de Imagens** - Técnico pode enviar fotos comprimidas no orçamento com feedback visual
-- [x] **Phase 6: Relatório Mensal em PDF** - Admin pode gerar e baixar relatório mensal com OS, lucro e breakdown
-
-## Phase Details
+<details>
+<summary>✅ v1.0 Test Coverage (Phases 1-4) - CONCLUÍDO 2026-05-20</summary>
 
 ### Phase 1: Infraestrutura de Testes
 **Goal**: O ambiente de testes está completamente configurado e um smoke test confirma que a suite funciona de ponta a ponta.
-**Depends on**: Nothing (first phase)
-**Requirements**: INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-05, INFRA-06, INFRA-07, INFRA-08
-**Success Criteria** (what must be TRUE):
-  1. `npm test` em `mp-react/` executa sem erros de configuração e exibe output do Vitest
-  2. O smoke test `it('works')` passa e aparece verde no output
-  3. Um teste que importa qualquer módulo que depende de `firebase.js` não explode com "Variáveis de ambiente do Firebase não encontradas"
-  4. `renderWithProviders` e `mockFirebase` estão disponíveis para importação pelos testes das fases seguintes
-**Plans**: 2 plans
-
-Plans:
-- [x] 01-01: Instalar dependências e criar vitest.config.js, .env.test e package.json scripts
-- [x] 01-02: Criar src/test-utils/ (setupTests.js, renderWithProviders.jsx, mockFirebase.js) e smoke test
-
-**UI hint**: no
-**Complexity**: low
-
----
+**Requirements**: INFRA-01..08
+**Plans**: 2/2 completos
 
 ### Phase 2: Camada Base
-**Goal**: Desenvolvedores podem confiar nos utilitários de formatação e nas funções de acesso ao Firestore porque cada um tem testes que verificam seu comportamento observável.
-**Depends on**: Phase 1
-**Requirements**: UTIL-01, UTIL-02, UTIL-03, UTIL-04, DATA-01, DATA-02, DATA-03, DATA-04, DATA-05, DATA-06
-**Success Criteria** (what must be TRUE):
-  1. `fmtDate`, `fmtBRL`, `getLucro`, `maskPhone` e `maskCNPJ` têm testes que falham se a lógica for alterada incorretamente
-  2. `criarOS` e `atualizarOS` têm testes que verificam que as funções Firestore corretas são chamadas com os argumentos corretos
-  3. `getOSdaEmpresa` e `getEmpresaBySlug` têm testes para o caminho feliz e para o caso "não encontrado"
-  4. `verificarLimite` tem testes para os casos true e false baseados em plano e contagem de OS
-  5. Todos os testes desta fase passam sem nenhuma chamada real à rede Firebase
-**Plans**: 2 plans
-
-Plans:
-- [x] 02-01: Testes das funções utilitárias puras (UTIL-01..04)
-- [x] 02-02: Testes das funções de acesso ao Firestore em firebase.js (DATA-01..06)
-
-**UI hint**: no
-**Complexity**: medium
-
----
+**Goal**: Utilitários de formatação e funções de acesso ao Firestore têm testes que verificam seu comportamento observável.
+**Requirements**: UTIL-01..04, DATA-01..06
+**Plans**: 2/2 completos
 
 ### Phase 3: Auth e Roteamento
-**Goal**: Os fluxos de autenticação, proteção de rotas e resolução de empresa por slug têm testes que cobrem todos os estados observáveis pelo usuário.
-**Depends on**: Phase 2
-**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, AUTH-08, AUTH-09, AUTH-10, AUTH-11, AUTH-12, AUTH-13
-**Success Criteria** (what must be TRUE):
-  1. Um teste demonstra que a tela de loading aparece enquanto `onAuthStateChanged` não responde e desaparece depois
-  2. Testes cobrem todos os caminhos de resolução do `AuthContext`: usuário normal via claims, fallback via Firestore, superadmin por email e logout
-  3. `RotaAdmin` tem testes que verificam redirecionamento para login (sem auth, sem empresaId) e renderização para admin válido
-  4. `RotaSuperAdmin` tem testes que bloqueiam usuário normal e permitem superadmin
-  5. `useEmpresa` tem testes para slug válido, slug inexistente e acerto de cache na segunda consulta
-**Plans**: 2 plans
-
-Plans:
-
-**Wave 1**
-- [x] 03-01-PLAN.md — Testes do AuthContext (AUTH-01..05): loading, empresaId via Firestore, superadmin, logout
-
-**Wave 2** *(bloqueado pelo Wave 1)*
-- [x] 03-02-PLAN.md — Testes de RotaAdmin, RotaSuperAdmin e useEmpresa (AUTH-06..13): fix RotaAdmin + _clearCacheForTest + 8 testes
-
-**UI hint**: yes
-**Complexity**: high
-
----
+**Goal**: Fluxos de autenticação, proteção de rotas e resolução de empresa por slug têm testes que cobrem todos os estados observáveis pelo usuário.
+**Requirements**: AUTH-01..13
+**Plans**: 2/2 completos
 
 ### Phase 4: Fluxos Críticos
-**Goal**: Os fluxos de negócio de Ordens de Serviço e Orçamento têm testes de comportamento que falhariam se qualquer etapa crítica fosse removida ou quebrada.
-**Depends on**: Phase 3
-**Requirements**: OS-01, OS-02, OS-03, OS-04, OS-05, OS-06, ORC-01, ORC-02, ORC-03, ORC-04, ORC-05, ORC-06
-**Success Criteria** (what must be TRUE):
-  1. Um teste demonstra que um admin pode criar uma OS via formulário e que `criarOS` é chamada com os dados corretos
-  2. Um teste demonstra que edição e mudança de status de OS invocam `atualizarOS` com os campos esperados
-  3. A lista de OS exibe "nenhuma OS" quando o mock retorna vazio e exibe itens quando o mock retorna dados
-  4. Um teste demonstra o fluxo técnico-para-cliente: técnico preenche e assina → dados são salvos no Firestore
-  5. Um teste demonstra que cliente visualiza orçamento e aprova com assinatura → status atualizado no Firestore
-**Plans**: 2 plans
+**Goal**: Fluxos de negócio de Ordens de Serviço e Orçamento têm testes de comportamento que falhariam se qualquer etapa crítica fosse removida ou quebrada.
+**Requirements**: OS-01..06, ORC-01..06
+**Plans**: 2/2 completos
 
-Plans:
+**Milestone v1.0 completo:** 75 testes passando em 7 arquivos de teste. Detalhes completos (success criteria, plans, cross-cutting constraints) preservados no histórico do git.
 
-**Wave 1** *(ambos independentes — podem rodar em paralelo)*
-- [x] 04-01-PLAN.md — Testes de CRUD de OS via stub components (OS-01..06)
-- [x] 04-02-PLAN.md — Testes do fluxo de Orçamento técnico→cliente, componentes reais (ORC-01..06)
+</details>
 
-**Cross-cutting constraints:**
-- vi.mock('../firebase') com Padrão C obrigatório em ambos os arquivos de teste
-- _clearCacheForTest() no beforeEach em orcamentoFluxo.test.jsx (cache de useEmpresa)
-- AdminPage.jsx nunca importado em nenhum arquivo de teste desta fase
-
-**UI hint**: yes
-**Complexity**: high
-
----
+<details>
+<summary>✅ v1.1 Produto Core (Phases 5-6) - CONCLUÍDO 2026-05-05</summary>
 
 ### Phase 5: Compressão de Imagens
-**Goal**: Técnico pode enviar fotos no orçamento com garantia de que cada arquivo respeita o limite de 400KB, com feedback visual durante o processo e mensagem clara se algo der errado.
-**Depends on**: Nothing (feature independente — não depende das fases de teste)
+**Goal**: Técnico pode enviar fotos no orçamento com garantia de que cada arquivo respeita o limite de 400KB, com feedback visual durante o processo.
 **Requirements**: IMG-01, IMG-02, IMG-03
+**Plans**: 1/1 completo
+
+### Phase 6: Relatório Mensal em PDF
+**Goal**: Admin pode selecionar qualquer mês/ano, visualizar os dados consolidados de OS e lucro, e baixar o relatório como PDF.
+**Requirements**: REL-01..05
+**Plans**: 2/2 completos
+
+**Milestone v1.1 completo.** Detalhes completos preservados no histórico do git.
+
+</details>
+
+### 🚧 v1.2 Financeiro Completo (Em planejamento)
+
+**Milestone Goal:** Transformar o módulo Financeiro em controle completo: da OS finalizada até o dinheiro na conta — faturamento por seguradora, pagamento de técnicos, contas a pagar, fluxo de caixa e exportação/fechamento do mês.
+
+#### Phase 7: Faturamento e Contas a Receber
+**Goal**: Admin controla o ciclo completo de faturamento por seguradora — do código lançado na OS até a nota marcada como paga — sem nunca perder "onde parou" no lançamento no portal.
+**Depends on**: Nothing (usa dados de OS finalizadas já existentes)
+**Requirements**: FAT-01, FAT-02, FAT-03, FAT-04, FAT-05, FAT-06, FAT-07, FAT-08, FAT-09, FAT-10
 **Success Criteria** (what must be TRUE):
-  1. Técnico seleciona uma foto grande (ex: 3MB) no formulário de orçamento e o upload enviado ao Storage nunca ultrapassa 400KB
-  2. Enquanto a compressão está em andamento, o técnico vê um indicador visual (spinner, texto ou barra) que desaparece quando a compressão termina
-  3. Se a compressão falhar (arquivo corrompido, formato inesperado), o técnico vê uma mensagem de erro em português — sem crash da página
-**Plans**: 1 plan
-
-Plans:
-- [x] 05-01: Integrar browser-image-compression em OrcamentoTecnicoPage (compressão, feedback, tratamento de erro)
-
+  1. Admin registra na OS finalizada os dois códigos de faturamento (mão de obra e deslocamento, este último opcional) com valor
+  2. Admin abre a fila de faturamento de uma seguradora e vê todas as OS/códigos finalizados ainda não lançados em nenhuma nota — na Tempo e na Maxpar a OS já aparece sozinha na fila pelo nº da assistência, sem digitar nada
+  3. Admin marca cada item da fila como "lançado no portal" e, ao sair e voltar depois, encontra o checklist exatamente como deixou
+  4. Admin edita o valor na hora de faturar na fila da Tempo/Maxpar (valor da OS aparece só como sugestão), e vê destaque de divergência entre valor do código e valor da OS na Mapfre/Allianz
+  5. Admin fecha uma nota informando número e data de emissão vinculando os itens marcados; o sistema calcula sozinho a data prevista de pagamento pelo calendário da seguradora (avisando quando a data cai em período sem faturamento), mostra status aguardando/paga/atrasada por seguradora, e marcar como paga quita de uma vez todas as OS vinculadas
+**Plans**: TBD
 **UI hint**: yes
-**Complexity**: low
 
 ---
 
-### Phase 6: Relatório Mensal em PDF
-**Goal**: Admin pode selecionar qualquer mês/ano, visualizar os dados consolidados de OS e lucro por status, seguradora e técnico, e baixar o relatório como arquivo PDF.
-**Depends on**: Nothing (feature independente — lê campo lucroReal já existente em cada OS)
-**Requirements**: REL-01, REL-02, REL-03, REL-04, REL-05
+#### Phase 8: Fechamento de Técnicos
+**Goal**: Admin fecha o pagamento mensal de cada técnico com poucos cliques, sempre com a chave PIX à mão e histórico consultável.
+**Depends on**: Nothing (usa dados de OS e cadastro de técnicos já existentes)
+**Requirements**: TEC-01, TEC-02, TEC-03
 **Success Criteria** (what must be TRUE):
-  1. Admin vê no painel um seletor de mês e ano e pode escolher qualquer período dos últimos 12 meses
-  2. Após selecionar o período, os dados de OS do mês aparecem na tela: total de OS, breakdown por status, lucro total, média por OS, breakdown por seguradora e breakdown por técnico
-  3. Todos os valores monetários exibidos na tela batem com o campo `lucroReal` salvo nos documentos de OS do período
-  4. Admin clica em "Baixar PDF" e recebe um arquivo PDF gerado no browser via jsPDF, sem chamada a servidor externo
-  5. O PDF contém as mesmas seções da tela: total OS, status, lucro, seguradora e técnico — legível e sem dados trocados
-**Plans**: 2 plans
-
-Plans:
-
-**Wave 1**
-- [x] 06-01: Criar utils/relatorioMensalPdf.js (agregarRelatorio + gerarRelatorioMensalPdf via jsPDF)
-
-**Wave 2** *(bloqueado pelo Wave 1)*
-- [x] 06-02: Criar UI na AdminPage — seletor de mês/ano, tabelas de resultado e botão de download
-
-**Cross-cutting constraints:**
-- getLucroLocal deve replicar exatamente getLucro() do AdminPage: (mo_seguradora - valor_prestador) + valor_deslocamento
-- Filtro de OS por período usa criado_em.toDate() — consistente com padrão já usado em stats/chartData do AdminPage
-
+  1. Admin cadastra chave PIX e forma de pagamento no cadastro do técnico
+  2. Admin vê o fechamento mensal por técnico: lista das OS do mês com valor do prestador e total a pagar
+  3. Admin marca o fechamento do técnico como pago (com data) e consulta depois o histórico de pagamentos daquele técnico
+**Plans**: TBD
 **UI hint**: yes
-**Complexity**: medium
+
+---
+
+#### Phase 9: Contas a Pagar
+**Goal**: Admin nunca é pego de surpresa por uma despesa vencida — o sistema avisa antes e organiza tudo por status.
+**Depends on**: Nothing (usa despesas já cadastradas no módulo Financeiro)
+**Requirements**: PAG-01, PAG-02, PAG-03
+**Success Criteria** (what must be TRUE):
+  1. Toda despesa mensal tem data de vencimento e status pendente / pago / atrasado visível
+  2. Admin vê alerta de contas a vencer nos próximos 7 dias e das contas já atrasadas
+  3. Despesas recorrentes fixas entram automaticamente no mês novo já com o dia de vencimento preenchido
+**Plans**: TBD
+**UI hint**: yes
+
+---
+
+#### Phase 10: Fluxo de Caixa e Evolução
+**Goal**: Admin enxerga o dinheiro que de fato entrou e saiu no mês, e como o negócio evoluiu nos últimos 12 meses.
+**Depends on**: Phase 7, Phase 8, Phase 9 (fluxo de caixa soma notas pagas, técnicos pagos e despesas pagas dessas fases)
+**Requirements**: CAIXA-01, CAIXA-02
+**Success Criteria** (what must be TRUE):
+  1. Admin vê o fluxo de caixa do mês com entradas reais (notas pagas + particulares) e saídas reais (despesas pagas + técnicos pagos)
+  2. Admin vê um gráfico de evolução dos últimos 12 meses com receita, lucro líquido e margem
+**Plans**: TBD
+**UI hint**: yes
+
+---
+
+#### Phase 11: Exportação e Fechamento do Mês
+**Goal**: Admin encerra o mês com um clique — PDF do DRE em mãos e lançamentos financeiros travados contra edição acidental.
+**Depends on**: Phase 7, Phase 8, Phase 9, Phase 10 (fechamento do mês trava lançamentos de todas as áreas financeiras)
+**Requirements**: EXP-01, EXP-02
+**Success Criteria** (what must be TRUE):
+  1. Admin baixa o DRE do mês em PDF gerado direto no navegador (jsPDF, mesmo padrão já usado no relatório mensal)
+  2. Admin fecha o mês e, a partir daí, qualquer tentativa de editar um lançamento financeiro daquele período é bloqueada
+**Plans**: TBD
+**UI hint**: yes
 
 ---
 
 ## Progress
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Infraestrutura de Testes | 2/2 | Complete | 2026-05-03 |
-| 2. Camada Base | 2/2 | Complete | 2026-05-05 |
-| 3. Auth e Roteamento | 2/2 | Complete | 2026-05-19 |
-| 4. Fluxos Críticos | 2/2 | Complete | 2026-05-20 |
-| 5. Compressão de Imagens | 1/1 | Complete | 2026-05-04 |
-| 6. Relatório Mensal em PDF | 2/2 | Complete | 2026-05-05 |
+**Execution Order:**
+Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 
-## Requirement Traceability
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Infraestrutura de Testes | v1.0 | 2/2 | Complete | 2026-05-03 |
+| 2. Camada Base | v1.0 | 2/2 | Complete | 2026-05-05 |
+| 3. Auth e Roteamento | v1.0 | 2/2 | Complete | 2026-05-19 |
+| 4. Fluxos Críticos | v1.0 | 2/2 | Complete | 2026-05-20 |
+| 5. Compressão de Imagens | v1.1 | 1/1 | Complete | 2026-05-04 |
+| 6. Relatório Mensal em PDF | v1.1 | 2/2 | Complete | 2026-05-05 |
+| 7. Faturamento e Contas a Receber | v1.2 | 0/TBD | Not started | - |
+| 8. Fechamento de Técnicos | v1.2 | 0/TBD | Not started | - |
+| 9. Contas a Pagar | v1.2 | 0/TBD | Not started | - |
+| 10. Fluxo de Caixa e Evolução | v1.2 | 0/TBD | Not started | - |
+| 11. Exportação e Fechamento do Mês | v1.2 | 0/TBD | Not started | - |
 
-| Requirement | Description | Phase | Status |
-|-------------|-------------|-------|--------|
-| INFRA-01 | Vitest + jsdom + RTL + jest-dom instalados | Phase 1 | Complete (01-01) |
-| INFRA-02 | vitest.config.js com globals, jsdom e setupFiles | Phase 1 | Complete (01-01) |
-| INFRA-03 | .env.test com stubs VITE_FIREBASE_* | Phase 1 | Complete (01-01) |
-| INFRA-04 | setupTests.js com jest-dom e cleanup RTL | Phase 1 | Complete (01-02) |
-| INFRA-05 | renderWithProviders.jsx com MemoryRouter + FakeAuthProvider | Phase 1 | Complete (01-02) |
-| INFRA-06 | mockFirebase.js com vi.fn() factory | Phase 1 | Complete (01-02) |
-| INFRA-07 | Scripts test, test:watch, test:coverage no package.json | Phase 1 | Complete (01-01) |
-| INFRA-08 | Smoke test `it('works')` passa | Phase 1 | Complete (01-02) |
-| UTIL-01 | fmtDate formata Firestore Timestamp corretamente | Phase 2 | Complete (02-01) |
-| UTIL-02 | fmtBRL formata valores monetários em pt-BR | Phase 2 | Complete (02-01) |
-| UTIL-03 | getLucro calcula margem de lucro corretamente | Phase 2 | Complete (02-01) |
-| UTIL-04 | maskPhone e maskCNPJ mascaram entradas corretamente | Phase 2 | Complete (02-01) |
-| DATA-01 | criarOS chama addDoc com campos corretos | Phase 2 | Complete (02-02) |
-| DATA-02 | atualizarOS chama updateDoc no documento certo | Phase 2 | Complete (02-02) |
-| DATA-03 | getOSdaEmpresa consulta subcoleção por empresaId | Phase 2 | Complete (02-02) |
-| DATA-04 | getEmpresaBySlug busca por slug e retorna null quando não existe | Phase 2 | Complete (02-02) |
-| DATA-05 | cadastrarEmpresa cria documento e retorna dados | Phase 2 | Complete (02-02) |
-| DATA-06 | verificarLimite retorna true/false por plano e contagem | Phase 2 | Complete (02-02) |
-| AUTH-01 | AuthContext exibe loading enquanto onAuthStateChanged pende | Phase 3 | Complete (03-01) |
-| AUTH-02 | AuthContext resolve usuário com empresaId via Firestore | Phase 3 | Complete (03-01) |
-| AUTH-03 | AuthContext usa fallback Firestore quando empresas/{uid} não existe | Phase 3 | Complete (03-01) |
-| AUTH-04 | AuthContext identifica superadmin pelo email | Phase 3 | Complete (03-01) |
-| AUTH-05 | AuthContext limpa estado e redireciona no logout | Phase 3 | Complete (03-01) |
-| AUTH-06 | RotaAdmin redireciona para login sem autenticação | Phase 3 | Complete (03-02) |
-| AUTH-07 | RotaAdmin redireciona para login sem empresaId | Phase 3 | Complete (03-02) |
-| AUTH-08 | RotaAdmin renderiza conteúdo para admin válido | Phase 3 | Complete (03-02) |
-| AUTH-09 | RotaSuperAdmin redireciona usuário normal para / | Phase 3 | Complete (03-02) |
-| AUTH-10 | RotaSuperAdmin renderiza conteúdo para superadmin | Phase 3 | Complete (03-02) |
-| AUTH-11 | useEmpresa resolve slug e retorna dados do Firestore | Phase 3 | Complete (03-02) |
-| AUTH-12 | useEmpresa redireciona para /empresa-nao-encontrada | Phase 3 | Complete (03-02) |
-| AUTH-13 | useEmpresa retorna cache sem nova chamada Firestore | Phase 3 | Complete (03-02) |
-| OS-01 | Admin pode criar OS via formulário | Phase 4 | Complete (04-01) |
-| OS-02 | Admin pode editar dados de OS existente | Phase 4 | Complete (04-01) |
-| OS-03 | Admin pode alterar status de OS | Phase 4 | Complete (04-01) |
-| OS-04 | Admin pode excluir OS e ela desaparece da lista | Phase 4 | Complete (04-01) |
-| OS-05 | Lista de OS exibe estado vazio corretamente | Phase 4 | Complete (04-01) |
-| OS-06 | Lista de OS exibe conjunto retornado pelo Firebase | Phase 4 | Complete (04-01) |
-| ORC-01 | Técnico preenche formulário de orçamento com itens | Phase 4 | Complete (04-02) |
-| ORC-02 | Técnico assina orçamento digitalmente antes de enviar | Phase 4 | Complete (04-02) |
-| ORC-03 | Orçamento é salvo no Firestore com dados corretos | Phase 4 | Complete (04-02) |
-| ORC-04 | Cliente visualiza orçamento na página de aprovação | Phase 4 | Complete (04-02) |
-| ORC-05 | Cliente aprova orçamento e assinatura é registrada | Phase 4 | Complete (04-02) |
-| ORC-06 | Orçamento aprovado atualiza status no Firestore | Phase 4 | Complete (04-02) |
-| IMG-01 | Fotos comprimidas para máx 400KB antes do upload ao Storage | Phase 5 | Complete (05-01) |
-| IMG-02 | Interface exibe feedback visual durante compressão | Phase 5 | Complete (05-01) |
-| IMG-03 | Mensagem de erro amigável exibida se compressão falhar | Phase 5 | Complete (05-01) |
-| REL-01 | Admin seleciona mês e ano para gerar relatório mensal | Phase 6 | Complete (06-02) |
-| REL-02 | Relatório exibe total de OS e breakdown por status | Phase 6 | Complete (06-01, 06-02) |
-| REL-03 | Relatório exibe lucro total, média por OS e breakdown por seguradora | Phase 6 | Complete (06-01, 06-02) |
-| REL-04 | Relatório exibe OS e lucro por técnico no período | Phase 6 | Complete (06-01, 06-02) |
-| REL-05 | Admin baixa relatório como PDF gerado via jsPDF | Phase 6 | Complete (06-01, 06-02) |
+## Requirement Traceability (v1.2)
 
-**Coverage:** 45/45 requirements mapped. No orphans.
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| FAT-01 | Phase 7 | Pending |
+| FAT-02 | Phase 7 | Pending |
+| FAT-03 | Phase 7 | Pending |
+| FAT-04 | Phase 7 | Pending |
+| FAT-05 | Phase 7 | Pending |
+| FAT-06 | Phase 7 | Pending |
+| FAT-07 | Phase 7 | Pending |
+| FAT-08 | Phase 7 | Pending |
+| FAT-09 | Phase 7 | Pending |
+| FAT-10 | Phase 7 | Pending |
+| TEC-01 | Phase 8 | Pending |
+| TEC-02 | Phase 8 | Pending |
+| TEC-03 | Phase 8 | Pending |
+| PAG-01 | Phase 9 | Pending |
+| PAG-02 | Phase 9 | Pending |
+| PAG-03 | Phase 9 | Pending |
+| CAIXA-01 | Phase 10 | Pending |
+| CAIXA-02 | Phase 10 | Pending |
+| EXP-01 | Phase 11 | Pending |
+| EXP-02 | Phase 11 | Pending |
+
+**Coverage:** 20/20 v1.2 requirements mapped. No orphans.
+
+Para a tabela de traceability completa de v1.0/v1.1 (45 requisitos), ver histórico do git deste arquivo.

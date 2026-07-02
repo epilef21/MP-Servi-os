@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
 status: planning
-last_updated: "2026-07-02T19:06:46.346Z"
+last_updated: "2026-07-02T19:30:00.000Z"
 last_activity: 2026-07-02
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,25 +17,27 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-05)
+See: .planning/PROJECT.md (updated 2026-07-02)
 
-**Core value:** Produto confiável e completo — fluxos críticos cobertos por testes e features core entregues.
-**Current focus:** v1.0 Test Coverage — Phase 4 completa (Fluxos Críticos — OS-01..06 + ORC-01..06 verificados, 75 testes passando)
+**Core value:** Da OS finalizada até o dinheiro na conta — o admin controla faturamento, recebimento, pagamentos e caixa em um lugar só.
+**Current focus:** v1.2 Financeiro Completo — Roadmap criado (Phases 7-11), pronto para planejar Phase 7
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-07-02 — Milestone v1.2 started
+Phase: Not started (Phase 7 of 11 — Faturamento e Contas a Receber)
+Plan: — (TBD, definido em /gsd-plan-phase 7)
+Status: Ready to plan Phase 7
+Last activity: 2026-07-02 — ROADMAP.md criado para v1.2 (Phases 7-11), 20/20 requisitos mapeados
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 5 (2 v1.0 + 3 v1.1)
+- Total plans completed: 11 (2 v1.0 infra/base + 2 v1.0 auth/fluxos + 1 v1.1 imagens + 2 v1.1 relatório, arredondado — ver ROADMAP.md para detalhe por fase)
 - Average duration: ~6 min
-- Total execution time: ~0.5 hours
+- Total execution time: ~0.7 hours
 
 **By Phase:**
 
@@ -47,54 +49,31 @@ Last activity: 2026-07-02 — Milestone v1.2 started
 | 4. Fluxos Críticos | 2 | 2 | ~4 min |
 | 5. Compressão de Imagens | 1 | 1 | ~4 min |
 | 6. Relatório Mensal em PDF | 2 | 2 | ~8 min |
+| 7-11. Financeiro Completo | TBD | 0 | - |
 
-**Recent Trend:** Phase 6 complete (2026-05-05) — 2 planos executados, aprovados e verificados
+**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — requisitos definidos e roadmap criado, execução ainda não começou.
 
 ## Accumulated Context
 
 ### Decisions
 
-- Pre-start: Vitest 4.1.5 + RTL 16 + vi.mock() para Firebase (sem Emulator Suite, sem MSW)
-- Pre-start: JavaScript puro — sem TypeScript nos testes
-- Pre-start: clearMocks: true globalmente (nunca resetMocks: true)
-- 01-01: vitest.config.js standalone (vitest/config, não extendendo vite_config.js)
-- 01-01: .env.test commitado (não no .gitignore) — stubs seguros para todos os testes
-- 01-02: AuthContext exportado (export const) para permitir FakeAuthProvider sem trigger do Firebase
-- 01-02: Arquivos de teste com JSX devem usar extensão .jsx — OXC/Vite 8 não processa JSX em .js
-- v1.1: browser-image-compression já instalado — integrar diretamente em OrcamentoTecnicoPage.jsx
-- v1.1: jsPDF já instalado (usado em pdfGenerator.js e orcamentoPdfGenerator.js) — reaproveitar padrão existente em utils/relatorioMensalPdf.js
-- 06-01: getLucroLocal copiado internamente para evitar dependência circular utils->pages
-- 06-01: agregarRelatorio filtra client-side (in-memory) sem nova query Firestore
-- 06-01: tableRow helper para tabelas de breakdown (3 colunas) em vez de textBlock
-- 06-02: seletor de período com 12 opções geradas por loop — sem input livre para evitar valores inválidos
-- 06-02: tabelas inline com style props — sem adicionar novas classes CSS conforme CLAUDE.md
-- 06-02: mudar o select limpa relDados para forçar nova geração (evita dados desatualizados)
-- v1.1: campo lucroReal já salvo em cada documento de OS em empresas/{empresaId}/checklist/{osId} — sem migration necessária
-- 05-01: compressão ocorre no handleSubmit (não no handleFotoSelect) — evita bloqueio async na seleção
-- 05-01: estado `comprimindo` (não uploadingFoto) — reflete que o feedback corresponde à fase de compressão
-- 03-01: Padrão C de mock: vi.mock('../firebase') inline + .mockImplementation() por describe (clearMocks:true não limpa implementations)
-- 03-02: Guards locais no arquivo de teste (Opção B) — sem modificar exportações do App.jsx
-- 03-02: renderHook com wrapper MemoryRouter+Routes — obrigatório para hooks que usam useParams() e useNavigate()
-- 03-02: _clearCacheForTest exportado de useEmpresa.js (prefixo _ = uso só em testes)
-- 03-02: RotaAdmin agora verifica !empresaId além de !estaLogado (correção de segurança AUTH-07)
-- 04-discuss: OS-01..06 usa stub components mínimos no arquivo de teste (AdminPage não renderizado)
-- 04-discuss: ORC-01..06 renderiza OrcamentoTecnicoPage e AprovarOrcamentoPage diretamente
-- 04-discuss: vi.mock('react-signature-canvas') com toDataURL fake para ORC-02/ORC-05
-- 04-discuss: mocks adicionais — browser-image-compression, validarUpload, comprimirImagem, uploadFoto/serverTimestamp/deleteDoc em firebase
+- Pre-start (v1.2): Faturamento por seguradora modelado por dois caminhos — códigos por OS (Mapfre/Allianz) vs. fila automática por num_assist (Tempo/Maxpar)
+- Pre-start (v1.2): Valores da Tempo/Maxpar não são travados na OS — confirmados na hora de faturar, pois mudam com frequência
+- Pre-start (v1.2): Calendários de pagamento (Mapfre, Allianz) pré-cadastrados e editáveis via Config; demais seguradoras usam data manual até serem levantadas
+- Pre-start (v1.2): Fluxo de Caixa (Phase 10) depende dos dados de notas pagas, técnicos pagos e despesas pagas produzidos nas Phases 7-9
+- Pre-start (v1.2): Fechamento do mês (Phase 11) depende de todas as áreas financeiras anteriores estarem completas antes de travar lançamentos
 
 ### Pending Todos
 
-- Verificar Phase 4 com /gsd-verify-work 4 (todos os testes passando — verificação formal pendente)
+None yet.
 
 ### Blockers/Concerns
 
-- Phase 1 risk: env-guard bomb em firebase.js — resolvido por .env.test com stubs VITE_FIREBASE_*
-- Phase 3 risk: onAuthStateChanged fora de act() — resolvido por mock síncrono com cb(null)
-- Phase 4 risk: AdminPage 3264 linhas — testar handlers/hooks isolados, não renderizar o componente inteiro
-- Phase 6 review: CR-01 (checkPage não reserva rodapé), CR-02 (MESES[mes-1] sem validação), WR-01 (getLucroLocal duplicado) — registrados em 06-REVIEW.md para tratamento futuro
+- v1.2: Calendário de pagamento da Tempo e Maxpar ainda não foi levantado com o usuário — usar data manual até FAT-11 (v1.3) ser endereçado
+- v1.2 herdado de v1.0: AdminPage.jsx tem ~580 linhas pós-refatoração — abas/modais do Financeiro vivem em mp-react/src/components/admin/ e devem ser testados/implementados isoladamente, nunca renderizando o AdminPage inteiro
 
 ## Session Continuity
 
-Last session: 2026-05-20
-Stopped at: Phase 4 executada e 75 testes passando. Próximo: verificação formal da fase
+Last session: 2026-07-02
+Stopped at: ROADMAP.md, REQUIREMENTS.md e STATE.md atualizados para v1.2 (Phases 7-11). Próximo: `/gsd-plan-phase 7`
 Resume file: None

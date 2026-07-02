@@ -65,13 +65,32 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (preenchido na criação do roadmap) | | |
+| FAT-01 | Phase 7 | Pending |
+| FAT-02 | Phase 7 | Pending |
+| FAT-03 | Phase 7 | Pending |
+| FAT-04 | Phase 7 | Pending |
+| FAT-05 | Phase 7 | Pending |
+| FAT-06 | Phase 7 | Pending |
+| FAT-07 | Phase 7 | Pending |
+| FAT-08 | Phase 7 | Pending |
+| FAT-09 | Phase 7 | Pending |
+| FAT-10 | Phase 7 | Pending |
+| TEC-01 | Phase 8 | Pending |
+| TEC-02 | Phase 8 | Pending |
+| TEC-03 | Phase 8 | Pending |
+| PAG-01 | Phase 9 | Pending |
+| PAG-02 | Phase 9 | Pending |
+| PAG-03 | Phase 9 | Pending |
+| CAIXA-01 | Phase 10 | Pending |
+| CAIXA-02 | Phase 10 | Pending |
+| EXP-01 | Phase 11 | Pending |
+| EXP-02 | Phase 11 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 20 total
-- Mapped to phases: 0 (roadmap pendente)
-- Unmapped: 20 ⚠️
+- Mapped to phases: 20/20
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-07-02*
-*Last updated: 2026-07-02 após definição inicial*
+*Last updated: 2026-07-02 após criação do roadmap v1.2 (Phases 7-11)*
