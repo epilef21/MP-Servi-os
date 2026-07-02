@@ -33,6 +33,16 @@ function prioridadeSugerida(os) {
   return 'livre'
 }
 
+// Nome do técnico responsável pela OS (cadastrado ou digitado manualmente)
+function nomeTecnico(os) {
+  return os.tecnico_nome || os.tecnico_nome_manual || ''
+}
+
+// OS que ainda vai ser atendida (entra pré-selecionada na rota)
+function osPendente(os) {
+  return !['concluido', 'processado', 'enviado'].includes(os.status)
+}
+
 const LABEL_PRIORIDADE = {
   primeiro: '📌 Primeiro',
   manha:    '🌅 Manhã',
@@ -83,6 +93,7 @@ export default function RotaPage() {
   const [selecionadas, setSelecionadas] = useState({})   // { osId: true }
   const [prioridades,  setPrioridades]  = useState({})   // { osId: 'manha'|... }
   const [ordemPrimeiro, setOrdemPrimeiro] = useState([]) // [osId] na ordem de marcação
+  const [filtroTecnico, setFiltroTecnico] = useState('todos') // gera uma rota por técnico
 
   // Cálculo / resultado
   const [calculando, setCalculando] = useState(false)
@@ -127,13 +138,13 @@ export default function RotaPage() {
         // pré-seleciona o que ainda vai ser atendido e sugere prioridades
         const sel = {}, pri = {}
         lista.forEach(os => {
-          const finalizada = ['concluido', 'processado', 'enviado'].includes(os.status)
-          if (!finalizada && os.endereco) sel[os.id] = true
+          if (osPendente(os) && os.endereco) sel[os.id] = true
           pri[os.id] = prioridadeSugerida(os)
         })
         setSelecionadas(sel)
         setPrioridades(pri)
         setOrdemPrimeiro([])
+        setFiltroTecnico('todos')
       } catch (e) {
         if (!cancelado) setErroCalculo('Erro ao buscar as OS do dia: ' + e.message)
       } finally {
@@ -188,6 +199,39 @@ export default function RotaPage() {
       const sem = prev.filter(id => id !== osId)
       return valor === 'primeiro' ? [...sem, osId] : sem
     })
+  }
+
+  // Técnicos com OS no dia — alimenta o filtro do passo 2
+  const tecnicosNoDia = useMemo(() => {
+    const s = new Set()
+    let temSemTecnico = false
+    osList.forEach(os => {
+      const n = nomeTecnico(os)
+      if (n) s.add(n); else temSemTecnico = true
+    })
+    return { nomes: [...s].sort(), temSemTecnico }
+  }, [osList])
+
+  // OS visíveis conforme o filtro de técnico
+  const osVisiveis = useMemo(() => {
+    if (filtroTecnico === 'todos') return osList
+    if (filtroTecnico === '__sem__') return osList.filter(os => !nomeTecnico(os))
+    return osList.filter(os => nomeTecnico(os) === filtroTecnico)
+  }, [osList, filtroTecnico])
+
+  // Ao trocar o técnico, a seleção é refeita só com as OS dele —
+  // evita que OS escondidas pelo filtro entrem na rota sem querer
+  function mudarFiltroTecnico(valor) {
+    setFiltroTecnico(valor)
+    const visiveis = valor === 'todos'
+      ? osList
+      : valor === '__sem__'
+        ? osList.filter(os => !nomeTecnico(os))
+        : osList.filter(os => nomeTecnico(os) === valor)
+    const sel = {}
+    visiveis.forEach(os => { if (osPendente(os) && os.endereco) sel[os.id] = true })
+    setSelecionadas(sel)
+    setOrdemPrimeiro([])
   }
 
   const totalSelecionadas = useMemo(
@@ -333,8 +377,23 @@ export default function RotaPage() {
                 <label>Data:</label>
                 <input type="date" value={data} onChange={e => setData(e.target.value)} />
               </div>
+              {(tecnicosNoDia.nomes.length > 0 || tecnicosNoDia.temSemTecnico) && (
+                <div className="rota-data-row">
+                  <label>Técnico:</label>
+                  <select
+                    className="rota-filtro-tecnico"
+                    value={filtroTecnico}
+                    onChange={e => mudarFiltroTecnico(e.target.value)}
+                  >
+                    <option value="todos">👥 Todos os técnicos</option>
+                    {tecnicosNoDia.nomes.map(n => <option key={n} value={n}>👷 {n}</option>)}
+                    {tecnicosNoDia.temSemTecnico && <option value="__sem__">❔ Sem técnico definido</option>}
+                  </select>
+                </div>
+              )}
               <p className="rota-dica">
                 Marque quem entra na rota e ajuste a prioridade. A sugestão vem da faixa de horário da OS.
+                {filtroTecnico !== 'todos' && ' Com um técnico filtrado, a rota gerada é só dele — repita para cada técnico.'}
               </p>
 
               {loadingDia && (
@@ -344,11 +403,15 @@ export default function RotaPage() {
                 </div>
               )}
 
-              {!loadingDia && osList.length === 0 && (
-                <div className="rota-vazio">📭 Nenhuma OS agendada para esta data.</div>
+              {!loadingDia && osVisiveis.length === 0 && (
+                <div className="rota-vazio">
+                  {osList.length === 0
+                    ? '📭 Nenhuma OS agendada para esta data.'
+                    : '📭 Nenhuma OS deste técnico nesta data.'}
+                </div>
               )}
 
-              {!loadingDia && osList.map(os => (
+              {!loadingDia && osVisiveis.map(os => (
                 <div className="rota-os-item" key={os.id}>
                   <input
                     type="checkbox"
@@ -370,6 +433,7 @@ export default function RotaPage() {
                     </div>
                     <div className="rota-os-meta">
                       🔧 {os.servico || '—'}
+                      {nomeTecnico(os) ? ` · 👷 ${nomeTecnico(os)}` : ''}
                       {os.hora_agendada ? ` · 🕐 ${os.hora_agendada}` : ''}
                       {os.lat != null ? ' · 🗺️ já localizada' : ''}
                     </div>
@@ -481,7 +545,10 @@ export default function RotaPage() {
               </div>
 
               <div className="rota-card">
-                <h2>📋 Ordem das visitas</h2>
+                <h2>
+                  📋 Ordem das visitas
+                  {filtroTecnico !== 'todos' && filtroTecnico !== '__sem__' ? ` — 👷 ${filtroTecnico}` : ''}
+                </h2>
                 <div className="rota-parada">
                   <div className="num partida">🏁</div>
                   <div className="rota-os-info">

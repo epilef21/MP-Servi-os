@@ -146,6 +146,16 @@
   font-weight: 700;
   color: var(--muted, #666);
   white-space: nowrap;
+  min-width: 58px;
+}
+.rota-filtro-tecnico {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1.5px solid #cfd6e4;
+  border-radius: 8px;
+  font-family: 'Barlow', sans-serif;
+  font-size: .92rem;
+  background: #fff;
 }
 
 .rota-os-item {
