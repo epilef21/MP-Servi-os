@@ -12,6 +12,8 @@ import {
 import { useEmpresa } from '../hooks/useEmpresa.js'
 import { validarUpload } from '../utils/validarUpload.js'
 import { comprimirImagem } from '../utils/comprimirImagem.js'
+import { finalizarEventoOS } from '../utils/googleCalendarApi.js'
+import { notificarChecklistEnviado } from '../utils/notificacoesApi.js'
 
 // ── Chave do rascunho inclui o slug para isolar por empresa ─
 const getDraftKey = (slug) => `mp_form_draft_${slug}`
@@ -127,6 +129,10 @@ export default function FormPage() {
   const [tecnicoNome,      setTecnicoNome]      = useState('')
   const [submitPublicToken, setSubmitPublicToken] = useState('')
   const [erroToken,         setErroToken]         = useState(false)
+  const [jaEnviado,         setJaEnviado]         = useState(false)
+  // Dados do Calendar carregados junto com a OS pré-preenchida
+  const [osGoogleEventos,  setOsGoogleEventos]  = useState(null)
+  const [osDataAgendada,   setOsDataAgendada]   = useState('')
   const [progress,     setProgress]     = useState(0)
   const [hasDraft,     setHasDraft]     = useState(false)
   const [isOnline,     setIsOnline]     = useState(navigator.onLine)
@@ -184,6 +190,11 @@ export default function FormPage() {
           setErroToken(true)
           return
         }
+        // Bloqueia se o checklist já foi preenchido
+        if (d.finalizado_em) {
+          setJaEnviado(true)
+          return
+        }
         setForm(prev => ({
           ...prev,
           seguradora:    d.seguradora    || '',
@@ -197,6 +208,11 @@ export default function FormPage() {
           servico:       d.servico       || '',
           desc_problema: d.desc_problema || '',
         }))
+        // Guarda dados do Calendar para finalizar evento ao enviar
+        if (d.googleEventos && Object.keys(d.googleEventos).length) {
+          setOsGoogleEventos(d.googleEventos)
+        }
+        if (d.data_agendada) setOsDataAgendada(d.data_agendada)
       })
       .catch(() => { /* silencioso — form fica em branco mas funcional */ })
   }, [osId, empresaId])
@@ -410,6 +426,24 @@ export default function FormPage() {
       setSubmitId(id.slice(0, 8).toUpperCase())
       setSubmitOsId(id)
 
+      // Finaliza evento do Calendar (ajusta horário de fim para agora) — falha silenciosa
+      if (osGoogleEventos && osDataAgendada) {
+        try {
+          await finalizarEventoOS(empresaId, osGoogleEventos, osDataAgendada)
+        } catch (err) {
+          console.error('Erro ao finalizar evento no Calendar:', err)
+        }
+      }
+
+      // Notifica admins da empresa via push — falha silenciosa, não trava o envio
+      try {
+        const osSnap2 = await getDoc(doc(db, 'empresas', empresaId, 'checklist', id))
+        const dadosOS = osSnap2.exists() ? osSnap2.data() : base
+        await notificarChecklistEnviado(empresaId, dadosOS)
+      } catch (err) {
+        console.error('Erro ao notificar checklist enviado:', err)
+      }
+
       // Busca técnico e publicToken salvos na OS para usar na mensagem ao segurado
       try {
         const osSnap = await getDoc(doc(db, 'empresas', empresaId, 'checklist', id))
@@ -499,6 +533,22 @@ export default function FormPage() {
         <h2 style={{ color: 'var(--danger)', marginBottom: 8 }}>Link inválido</h2>
         <p style={{ color: 'var(--muted)', fontSize: '.9rem' }}>
           Este link não é válido ou já foi alterado. Peça um novo link para o responsável.
+        </p>
+      </div>
+    )
+  }
+
+  // ── Checklist já preenchido ──────────────────────────────
+  if (jaEnviado) {
+    return (
+      <div style={{ textAlign: 'center', padding: '4rem 2rem', fontFamily: 'Barlow, sans-serif' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
+        <h2 style={{ color: 'var(--primary)', marginBottom: 8 }}>Checklist já enviado</h2>
+        <p style={{ color: 'var(--muted)', fontSize: '.95rem', maxWidth: 340, margin: '0 auto' }}>
+          Este relatório já foi preenchido e enviado anteriormente. Não é possível enviar novamente.
+        </p>
+        <p style={{ color: 'var(--muted)', fontSize: '.85rem', marginTop: 16 }}>
+          Se precisar de ajustes, entre em contato com o responsável.
         </p>
       </div>
     )

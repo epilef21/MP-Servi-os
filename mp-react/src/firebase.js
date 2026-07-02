@@ -41,6 +41,10 @@ import {
   onAuthStateChanged,
 } from 'firebase/auth'
 
+// Functions — usado pelas Cloud Functions callable (Google Calendar, etc.)
+import { getFunctions } from 'firebase/functions'
+
+
 // ── Validação das variáveis de ambiente ─────────────────────
 const firebaseConfig = {
   apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
@@ -61,9 +65,11 @@ if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
 const app = initializeApp(firebaseConfig)
 
 // ── Instâncias dos serviços ──────────────────────────────────
-export const db      = getFirestore(app)
-export const storage = getStorage(app)
-export const auth    = getAuth(app)
+export const db        = getFirestore(app)
+export const storage   = getStorage(app)
+export const auth      = getAuth(app)
+export const functions = getFunctions(app)
+
 
 // ── Re-exportações do Firestore ──────────────────────────────
 export {

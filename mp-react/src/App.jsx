@@ -19,6 +19,7 @@ import AprovarOrcamentoPage   from './pages/AprovarOrcamentoPage.jsx'
 import AgendaPage             from './pages/AgendaPage.jsx'
 import RelatorioPage          from './pages/RelatorioPage.jsx'
 import AssinarClientePage     from './pages/AssinarClientePage.jsx'
+import OAuthCallbackPage      from './pages/OAuthCallbackPage.jsx'
 import NotFoundPage           from './pages/NotFoundPage.jsx'
 
 // ── Guarda de rota para admin da empresa ─────────────────────
@@ -59,6 +60,9 @@ export default function App() {
 
       {/* Assinatura remota do cliente — admin preenche, cliente só assina */}
       <Route path="/assinar/:slug/:osId" element={<AssinarClientePage />} />
+
+      {/* Callback OAuth do Google Calendar — recebe o code e conecta a conta */}
+      <Route path="/oauth-callback" element={<OAuthCallbackPage />} />
 
       {/* ── Superadmin ─────────────────────────────────────── */}
       <Route

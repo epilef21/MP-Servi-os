@@ -5,8 +5,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { onSnapshot } from 'firebase/firestore'
-import { db, collection, query, where, orderBy, atualizarOS } from '../firebase.js'
+import { db, collection, query, where, orderBy, atualizarOS, doc, updateDoc } from '../firebase.js'
 import { useEmpresa } from '../hooks/useEmpresa.js'
+import { listarContasGoogleCalendar, criarEventoOS } from '../utils/googleCalendarApi.js'
 import './AgendaPage.css'
 
 const STATUS_META = {
@@ -113,6 +114,13 @@ export default function AgendaPage() {
   const [reagendarModal,   setReagendarModal]  = useState(null)
   const [reagendarForm,    setReagendarForm]   = useState({ data: '', hora: '' })
   const [reagendarSaving,  setReagendarSaving] = useState(false)
+
+  // Painel de agendamento manual no Google Calendar
+  const [painelOs,            setPainelOs]            = useState(null)
+  const [horarioInicio,       setHorarioInicio]       = useState('')
+  const [contasSelecionadas,  setContasSelecionadas]  = useState([])
+  const [contasDisponiveis,   setContasDisponiveis]   = useState([])
+  const [salvandoAgendamento, setSalvandoAgendamento] = useState(false)
   const [horaAtual,        setHoraAtual]       = useState(() => {
     const n = new Date(); return n.getHours() * 60 + n.getMinutes()
   })
@@ -260,6 +268,53 @@ export default function AgendaPage() {
     window.open(`https://wa.me/55${tel}?text=${msg}`, '_blank')
   }
 
+  // ── Google Calendar — agendamento manual ────────────────────
+
+  async function abrirPainelAgendamento(os) {
+    setPainelOs(os)
+    setHorarioInicio('')
+    setContasSelecionadas([])
+    try {
+      const { contas } = await listarContasGoogleCalendar(empresaId)
+      setContasDisponiveis(contas || [])
+    } catch (err) {
+      console.error('Erro ao listar contas Google:', err)
+      setContasDisponiveis([])
+    }
+  }
+
+  async function confirmarAgendamento() {
+    if (!horarioInicio) {
+      alert('Defina o horário de início.')
+      return
+    }
+    if (contasSelecionadas.length === 0) {
+      alert('Selecione ao menos uma conta do Google.')
+      return
+    }
+    setSalvandoAgendamento(true)
+    try {
+      const osParaEvento = { ...painelOs, _horarioManualInicio: horarioInicio, _checklistLink: buildLink(painelOs) }
+      const resultado = await criarEventoOS(empresaId, osParaEvento, contasSelecionadas)
+      if (resultado.sucesso && resultado.eventosCriados) {
+        await updateDoc(
+          doc(db, `empresas/${empresaId}/checklist/${painelOs.id}`),
+          { googleEventos: resultado.eventosCriados }
+        )
+        // Atualiza lista local para refletir o novo estado
+        setOsList(prev => prev.map(o =>
+          o.id === painelOs.id ? { ...o, googleEventos: resultado.eventosCriados } : o
+        ))
+      }
+      setPainelOs(null)
+    } catch (err) {
+      console.error('Erro ao agendar no Calendar:', err)
+      alert('Não foi possível agendar no Google Calendar.')
+    } finally {
+      setSalvandoAgendamento(false)
+    }
+  }
+
   function limparFiltros() {
     setFiltroSecao('todos'); setFiltroTecnico('todos')
     setFiltroSeg('todos'); setFiltroCidade('todos')
@@ -369,7 +424,13 @@ export default function AgendaPage() {
     const meta    = STATUS_META[st] ?? STATUS_META.pendente
     const tec     = os.tecnico_nome || os.tecnico_nome_manual
     const tempo   = tempoDecorrido(os.criado_em)
-    const semHora = !os.hora_agendada
+    const FAIXA_LABEL = { manha: '🌅 Manhã', tarde: '☀️ Tarde', dia_todo: '📅 Dia todo', a_combinar: '🤝 A Combinar' }
+    const semHora  = !os.hora_agendada && !os.faixa_horario
+    const horaLabel = os.hora_agendada
+      ? `🕐 ${os.hora_agendada}`
+      : os.faixa_horario
+        ? FAIXA_LABEL[os.faixa_horario] || os.faixa_horario
+        : '⚠️ Sem horário'
     const atrasada = idsAtrasada.has(os.id)
     const conflito = idsConflito.has(os.id)
     const corTec   = tec ? corDoTecnico(tec) : null
@@ -382,7 +443,7 @@ export default function AgendaPage() {
 
         <div className="ag-card-header">
           <span className={`ag-card-hora${semHora ? ' ag-hora-vazia' : ''}`}>
-            {semHora ? '⚠️ Sem horário' : `🕐 ${os.hora_agendada}`}
+            {horaLabel}
           </span>
           <span className="ag-status-badge" style={{ color: meta.dot }}>
             <span className="ag-dot" style={{ background: meta.dot }} />
@@ -428,6 +489,19 @@ export default function AgendaPage() {
           >
             {copiado === os.id ? '✓ Copiado' : '📲 Link'}
           </button>
+          {os.googleEventos && Object.keys(os.googleEventos).length > 0 ? (
+            <button className="btn-calendar conectado" disabled title="Já adicionado ao Google Calendar">
+              ✅ No Calendar
+            </button>
+          ) : (
+            <button
+              className="btn-calendar"
+              onClick={() => abrirPainelAgendamento(os)}
+              title="Adicionar ao Google Calendar"
+            >
+              📅 Adicionar ao Calendar
+            </button>
+          )}
         </div>
       </div>
     )
@@ -631,6 +705,84 @@ export default function AgendaPage() {
                 onClick={() => salvarReagendar(false)}
               >
                 {reagendarSaving ? '⏳' : '💾 Salvar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal Agendar no Google Calendar ─────────────────── */}
+      {painelOs && (
+        <div className="ag-modal-overlay" onClick={e => e.target === e.currentTarget && setPainelOs(null)}>
+          <div className="ag-modal modal-agendamento-calendar">
+            <div className="ag-modal-header">
+              <h3>📅 Agendar no Google Calendar</h3>
+              <button className="ag-modal-close" onClick={() => setPainelOs(null)}>✕</button>
+            </div>
+            <div className="ag-modal-body">
+              <p className="ag-modal-cliente">
+                {painelOs.num_assist ? `OS ${painelOs.num_assist} — ` : ''}{painelOs.nome_segurado}
+              </p>
+              <p className="ag-modal-info">
+                📅 Data: {painelOs.data_agendada
+                  ? new Date(painelOs.data_agendada + 'T12:00:00').toLocaleDateString('pt-BR')
+                  : '—'} (não editável)
+              </p>
+
+              <div className="ag-modal-fields">
+                <label className="ag-modal-label">
+                  Horário de início *
+                  <input
+                    type="time"
+                    className="ag-modal-input"
+                    value={horarioInicio}
+                    onChange={e => setHorarioInicio(e.target.value)}
+                  />
+                </label>
+              </div>
+
+              <div className="modal-agendamento-info">
+                ℹ️ O horário de término será ajustado automaticamente quando o técnico enviar o checklist desta OS.
+              </div>
+
+              {contasDisponiveis.length > 0 ? (
+                <>
+                  <p style={{ fontSize: '.85rem', fontWeight: 600, marginBottom: 4 }}>
+                    Adicionar na agenda de:
+                  </p>
+                  <div className="contas-checklist">
+                    {contasDisponiveis.map(conta => (
+                      <label key={conta.id}>
+                        <input
+                          type="checkbox"
+                          checked={contasSelecionadas.includes(conta.id)}
+                          onChange={e => {
+                            if (e.target.checked) {
+                              setContasSelecionadas(prev => [...prev, conta.id])
+                            } else {
+                              setContasSelecionadas(prev => prev.filter(id => id !== conta.id))
+                            }
+                          }}
+                        />
+                        {conta.label}
+                      </label>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="modal-agendamento-info" style={{ color: '#b45309' }}>
+                  ⚠️ Nenhuma conta Google conectada. Configure em Admin → Calendário.
+                </p>
+              )}
+            </div>
+            <div className="ag-modal-footer">
+              <button className="ag-btn" onClick={() => setPainelOs(null)}>Cancelar</button>
+              <button
+                className="ag-btn ag-btn-ok"
+                disabled={salvandoAgendamento || !horarioInicio || contasSelecionadas.length === 0}
+                onClick={confirmarAgendamento}
+              >
+                {salvandoAgendamento ? '⏳ Agendando...' : '✅ Confirmar e Adicionar'}
               </button>
             </div>
           </div>

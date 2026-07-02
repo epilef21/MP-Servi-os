@@ -170,6 +170,21 @@ service cloud.firestore {
         allow delete: if isUserOfEmpresa(empresaId) || isSuperAdmin();
       }
 
+      // ── /empresas/{empresaId}/googleCalendarContas/{contaId} ─
+      // Tokens OAuth sensíveis — acesso exclusivo via Admin SDK (Cloud Functions).
+      // O client SDK nunca lê nem escreve aqui, mesmo sendo admin.
+      match /googleCalendarContas/{contaId} {
+        allow read, write: if false;
+      }
+
+      // ── /empresas/{empresaId}/notificacaoTokens/{tokenId} ───
+      // Tokens FCM para notificações push — escrita apenas por usuário autenticado.
+      // Leitura e exclusão apenas via Admin SDK (Cloud Function).
+      match /notificacaoTokens/{tokenId} {
+        allow create: if isAuthenticated();
+        allow read, update, delete: if false;
+      }
+
       // ── /empresas/{empresaId}/despesasRecorrentes/{id} ──
       match /despesasRecorrentes/{id} {
         allow read, write: if isUserOfEmpresa(empresaId) || isSuperAdmin();

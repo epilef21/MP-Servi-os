@@ -3,10 +3,8 @@ node_modules/
 
 # ── Variáveis de ambiente (senhas e chaves secretas) ─────────
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 
 # ── Build gerado ─────────────────────────────────────────────
 dist/
@@ -33,3 +31,4 @@ Thumbs.db
 *.sln
 
 .vercel
+caledario.json

@@ -11,6 +11,10 @@ import { useAuth }        from '../../contexts/AuthContext.jsx'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { maskPhone, maskCNPJ } from '../../utils/formatters.js'
 import { TABELAS, DESL_FAIXAS_PADRAO } from '../../utils/tarifas.js'
+import {
+  listarContasGoogleCalendar,
+  desconectarGoogleCalendar,
+} from '../../utils/googleCalendarApi.js'
 
 export default function ConfigTab() {
   const { emailUsuario } = useAuth()
@@ -46,6 +50,62 @@ export default function ConfigTab() {
   // ── Tarifas por seguradora ───────────────────────────────
   const [tarifaForm,    setTarifaForm]    = useState({})
   const [savingTarifa,  setSavingTarifa]  = useState(false)
+
+  // ── Google Calendar ──────────────────────────────────────
+  const GOOGLE_CLIENT_ID  = '294280485643-klje568cuifiopnnnjallavbrnelm8gi.apps.googleusercontent.com'
+  const REDIRECT_URI      = 'https://mp-servi-os.vercel.app/oauth-callback'
+  const SCOPE             = 'https://www.googleapis.com/auth/calendar.events'
+
+  const [contasGoogle,  setContasGoogle]  = useState([])
+  const [loadingContas, setLoadingContas] = useState(true)
+
+  useEffect(() => {
+    if (!empresaId) return
+    async function carregarContas() {
+      try {
+        const { contas } = await listarContasGoogleCalendar(empresaId)
+        setContasGoogle(contas || [])
+      } catch (err) {
+        console.error('Erro ao listar contas Google:', err)
+      } finally {
+        setLoadingContas(false)
+      }
+    }
+    carregarContas()
+  }, [empresaId])
+
+  async function handleDesconectar(contaId) {
+    if (!window.confirm('Desconectar esta conta do Google Calendar?')) return
+    try {
+      await desconectarGoogleCalendar(empresaId, contaId)
+      setContasGoogle(prev => prev.filter(c => c.id !== contaId))
+      showToast('Conta desconectada.')
+    } catch (err) {
+      console.error('Erro ao desconectar:', err)
+      showToast('Erro ao desconectar.', 'error')
+    }
+  }
+
+  function handleConectarNovaConta() {
+    const label = window.prompt('Nome para identificar esta conta (ex: Felipe, Tio):')
+    if (!label) return
+
+    localStorage.setItem('empresaIdAtual', empresaId)
+    localStorage.setItem('slugAtual', empresa?.slug || '')
+
+    const params = new URLSearchParams({
+      client_id:     GOOGLE_CLIENT_ID,
+      redirect_uri:  REDIRECT_URI,
+      response_type: 'code',
+      scope:         SCOPE,
+      access_type:   'offline',
+      prompt:        'consent',
+      // empresaId e slug viajam no state para não depender de localStorage
+      state:         JSON.stringify({ contaLabel: label, empresaId, slug: empresa?.slug || '' }),
+    })
+
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`
+  }
 
   // Inicializa form quando config/empresa carrega
   useEffect(() => {
@@ -190,9 +250,10 @@ export default function ConfigTab() {
     <div className="tab-content">
       <div className="config-tabs-bar">
         {[
-          { id: 'empresa', label: '🏢 Minha Empresa' },
-          { id: 'tarifas', label: '🧾 Tarifas'        },
-          { id: 'conta',   label: '👤 Minha Conta'   },
+          { id: 'empresa',    label: '🏢 Minha Empresa'  },
+          { id: 'tarifas',    label: '🧾 Tarifas'         },
+          { id: 'calendario', label: '📅 Calendário'      },
+          { id: 'conta',      label: '👤 Minha Conta'    },
         ].map(t => (
           <button key={t.id} className={`config-tab-btn${configAba === t.id ? ' active' : ''}`}
             onClick={() => setConfigAba(t.id)}>
@@ -385,6 +446,50 @@ export default function ConfigTab() {
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── Sub-aba: Google Calendário ── */}
+      {configAba === 'calendario' && (
+        <div style={{ maxWidth: 560 }}>
+          <div className="config-section">
+            <h3>📅 Google Calendar</h3>
+            <p style={{ fontSize: '.85rem', color: 'var(--muted)', marginBottom: 14 }}>
+              Conecte contas Google para que as OS agendadas apareçam automaticamente
+              na agenda — a sua e/ou a do proprietário. Cada conta conectada recebe
+              os eventos de forma independente.
+            </p>
+
+            {loadingContas ? (
+              <p style={{ fontSize: '.85rem', color: 'var(--muted)' }}>Carregando contas conectadas...</p>
+            ) : (
+              <div className="calendar-contas-lista">
+                {contasGoogle.length === 0 && (
+                  <p style={{ color: 'var(--muted)', fontSize: '.85rem' }}>
+                    Nenhuma conta conectada ainda.
+                  </p>
+                )}
+                {contasGoogle.map(conta => (
+                  <div key={conta.id} className="calendar-conta-item">
+                    <span className="status-conectado">✅ {conta.label}</span>
+                    <button className="btn-outline-sm" onClick={() => handleDesconectar(conta.id)}>
+                      Desconectar
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button className="btn-primary" onClick={handleConectarNovaConta}
+              style={{ marginTop: 12, fontSize: '.88rem' }}>
+              + Conectar Nova Conta Google
+            </button>
+          </div>
+
+          <div style={{ background: '#f0f5ff', border: '1px solid #b0c4f0', borderRadius: 'var(--r)', padding: '12px 16px', fontSize: '.8rem', color: '#1a3a8c' }}>
+            💡 Ao clicar em "Conectar", você será redirecionado para o Google para autorizar o acesso.
+            Após autorizar, a conta aparece aqui e todos os agendamentos passam a criar eventos automaticamente.
+          </div>
         </div>
       )}
 

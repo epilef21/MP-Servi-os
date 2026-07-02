@@ -6,7 +6,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' fonts.gstatic.com; img-src 'self' data: blob: *.firebasestorage.app firebasestorage.googleapis.com *.firebasestorage.googleapis.com; connect-src 'self' https://*.googleapis.com https://*.firebaseapp.com https://*.firebaseio.com https://*.firebasestorage.app https://us-central1-checklist-53795.cloudfunctions.net wss://*.firebaseio.com https://viacep.com.br; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self' fonts.gstatic.com; img-src 'self' data: blob: *.firebasestorage.app firebasestorage.googleapis.com *.firebasestorage.googleapis.com; connect-src 'self' https://*.googleapis.com https://*.firebaseapp.com https://*.firebaseio.com https://*.firebasestorage.app https://us-central1-checklist-53795.cloudfunctions.net wss://*.firebaseio.com https://viacep.com.br https://fcmregistrations.googleapis.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'"
         },
         {
           "key": "X-Frame-Options",
