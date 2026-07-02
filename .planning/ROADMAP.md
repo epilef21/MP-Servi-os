@@ -70,7 +70,7 @@
 Plans:
 - [x] 07-01-PLAN.md — utils/faturamento.js: regras de calendário, data prevista, dia útil, divergência + testes Vitest (FAT-07, FAT-08)
 - [x] 07-02-PLAN.md — DetalheOSModal: dois códigos por OS (MO + deslocamento), migração do legado (FAT-01)
-- [ ] 07-03-PLAN.md — ConfigTab: calendários de pagamento editáveis por seguradora (FAT-07)
+- [x] 07-03-PLAN.md — ConfigTab: calendários de pagamento editáveis por seguradora (FAT-07)
 - [ ] 07-04-PLAN.md — AbaFaturamento: fila por seguradora + checklist persistente + valor editável/divergência (FAT-02, FAT-03, FAT-04, FAT-05)
 - [ ] 07-05-PLAN.md — Fechar Nota + status/painel a receber + marcar paga (FAT-06, FAT-07, FAT-08, FAT-09, FAT-10)
 **UI hint**: yes
@@ -140,7 +140,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 4. Fluxos Críticos | v1.0 | 2/2 | Complete | 2026-05-20 |
 | 5. Compressão de Imagens | v1.1 | 1/1 | Complete | 2026-05-04 |
 | 6. Relatório Mensal em PDF | v1.1 | 2/2 | Complete | 2026-05-05 |
-| 7. Faturamento e Contas a Receber | v1.2 | 2/5 | In Progress | - |
+| 7. Faturamento e Contas a Receber | v1.2 | 3/5 | In Progress | - |
 | 8. Fechamento de Técnicos | v1.2 | 0/TBD | Not started | - |
 | 9. Contas a Pagar | v1.2 | 0/TBD | Not started | - |
 | 10. Fluxo de Caixa e Evolução | v1.2 | 0/TBD | Not started | - |
