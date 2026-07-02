@@ -9,7 +9,9 @@ vi.mock('firebase/firestore', () => ({
   addDoc:             vi.fn(),
   updateDoc:          vi.fn(),
   getDocs:            vi.fn(),
+  getDoc:             vi.fn(),
   setDoc:             vi.fn(),
+  deleteDoc:          vi.fn(),
   doc:                vi.fn(() => 'mock-doc-ref'),
   query:              vi.fn(() => 'mock-query'),
   where:              vi.fn(() => 'mock-where'),
@@ -17,6 +19,8 @@ vi.mock('firebase/firestore', () => ({
   limit:              vi.fn(() => 'mock-limit'),
   serverTimestamp:    vi.fn(() => 'SERVERTIMESTAMP'),
   getCountFromServer: vi.fn(),
+  arrayUnion:         vi.fn(),
+  onSnapshot:         vi.fn(() => () => {}),
   Timestamp:          { now: vi.fn() },
 }))
 
@@ -37,6 +41,11 @@ vi.mock('firebase/storage', () => ({
 
 vi.mock('firebase/app', () => ({
   initializeApp: vi.fn(() => ({})),
+}))
+
+vi.mock('firebase/functions', () => ({
+  getFunctions:  vi.fn(() => ({})),
+  httpsCallable: vi.fn(),
 }))
 
 import { addDoc, updateDoc, getDocs, setDoc, getCountFromServer } from 'firebase/firestore'

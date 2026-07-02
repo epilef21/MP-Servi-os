@@ -16,16 +16,7 @@ const PIE_COLORS = {
   enviado:            '#1a3fa8',
 }
 
-const STATUS_META = {
-  aguardando_tecnico: { label: '🔔 Aguardando',     cls: 'aguardando-t' },
-  pendente:           { label: '⏳ Pendente',         cls: 'pendente-y'   },
-  processado:         { label: '✅ Processado',       cls: 'processado-g' },
-  enviado:            { label: '📤 Enviado',          cls: 'enviado-b'    },
-  ficou_visita:       { label: '🔄 Ficou na Visita', cls: 'ficou-visita' },
-  cliente_ausente:    { label: '🚪 Cliente Ausente', cls: 'cliente-ausente' },
-}
-const badgeLabel = s => STATUS_META[s]?.label ?? STATUS_META.pendente.label
-const badgeCls   = s => STATUS_META[s]?.cls   ?? 'pendente-y'
+import { badgeLabel, badgeCls } from './statusMeta.js'
 
 function CustomBarTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null

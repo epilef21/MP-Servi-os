@@ -2,16 +2,7 @@ import { useState, useMemo } from 'react'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { fmtDate } from '../../utils/formatters.js'
 
-const STATUS_META = {
-  aguardando_tecnico: { label: '🔔 Aguardando',     cls: 'aguardando-t'    },
-  pendente:           { label: '⏳ Pendente',         cls: 'pendente-y'      },
-  processado:         { label: '✅ Processado',       cls: 'processado-g'    },
-  enviado:            { label: '📤 Enviado',          cls: 'enviado-b'       },
-  ficou_visita:       { label: '🔄 Ficou na Visita', cls: 'ficou-visita'    },
-  cliente_ausente:    { label: '🚪 Cliente Ausente', cls: 'cliente-ausente' },
-}
-const badgeLabel = s => STATUS_META[s]?.label ?? STATUS_META.pendente.label
-const badgeCls   = s => STATUS_META[s]?.cls   ?? 'pendente-y'
+import { badgeLabel, badgeCls } from './statusMeta.js'
 
 export default function SeguradosTab({ onSelectOS }) {
   const { reports } = useAdminContext()

@@ -40,7 +40,7 @@ Este projeto usa o workflow GSD (Get Shit Done). Siga estas regras:
 - **Mock de Firebase:** sempre via `vi.mock('../firebase')` — nunca mockar `firebase/firestore` diretamente
 - **clearMocks: true** no vitest.config.js — nunca usar `resetMocks: true` ou `restoreMocks: true`
 - **`.env.test`** com stubs de VITE_FIREBASE_* é **obrigatório** — firebase.js lança erro se variáveis faltarem
-- **AdminPage.jsx** tem 3264 linhas — testar comportamentos isolados, nunca renderizar o componente inteiro
+- **AdminPage.jsx** foi refatorado (2026-07): é um orquestrador de ~580 linhas; as abas e os modais vivem em `mp-react/src/components/admin/` (NovaOSModal, DetalheOSModal, NovoOrcamentoModal, RevisarOrcamentoModal etc.) e consomem `useAdminContext()`. Testar comportamentos isolados por componente, nunca renderizar o AdminPage inteiro
 
 ## Armadilhas críticas
 

@@ -36,6 +36,18 @@ export function maskPhone(v) {
   return d.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '')
 }
 
+export function fmtDatetime(ts) {
+  if (!ts) return '—'
+  try {
+    const d = ts.toDate ? ts.toDate() : new Date(ts)
+    return d.toLocaleString('pt-BR')
+  } catch { return '—' }
+}
+
+export function fmtSN(v) {
+  return v === 'sim' ? '✅ Sim' : v === 'nao' ? '❌ Não' : '—'
+}
+
 export function maskCNPJ(v) {
   const d = v.replace(/\D/g, '').slice(0, 14)
   return d
