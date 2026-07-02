@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
 status: executing
-stopped_at: "Completado 07-01-PLAN.md (utils/faturamento.js). Proximo: 07-02"
-last_updated: "2026-07-02T23:18:12.139Z"
+stopped_at: "Completado 07-02-PLAN.md (DetalheOSModal: codigos MO+deslocamento). Proximo: 07-03"
+last_updated: "2026-07-02T23:25:08Z"
 last_activity: 2026-07-02
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 5
-  completed_plans: 1
-  percent: 20
+  completed_plans: 2
+  percent: 40
 ---
 
 # Project State
@@ -26,19 +26,19 @@ See: .planning/PROJECT.md (updated 2026-07-02)
 ## Current Position
 
 Phase: 7 (Faturamento e Contas a Receber) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-07-02
 
-Progress: [██░░░░░░░░] 20%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 11 (2 v1.0 infra/base + 2 v1.0 auth/fluxos + 1 v1.1 imagens + 2 v1.1 relatório, arredondado — ver ROADMAP.md para detalhe por fase)
+- Total plans completed: 12 (2 v1.0 infra/base + 2 v1.0 auth/fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 2 v1.2 fase 7, arredondado — ver ROADMAP.md para detalhe por fase)
 - Average duration: ~6 min
-- Total execution time: ~0.7 hours
+- Total execution time: ~0.8 hours
 
 **By Phase:**
 
@@ -50,15 +50,16 @@ Progress: [██░░░░░░░░] 20%
 | 4. Fluxos Críticos | 2 | 2 | ~4 min |
 | 5. Compressão de Imagens | 1 | 1 | ~4 min |
 | 6. Relatório Mensal em PDF | 2 | 2 | ~8 min |
-| 7-11. Financeiro Completo | TBD | 0 | - |
+| 7-11. Financeiro Completo | TBD | 2 | ~8 min |
 
-**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7 Plan 1 executado (utils/faturamento.js + 27 testes Vitest).
+**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7 Plan 1 (utils/faturamento.js + 27 testes Vitest) e Plan 2 (DetalheOSModal: códigos MO+deslocamento) executados.
 
 **Per-Plan Metrics (v1.2):**
 
 | Phase/Plan | Duration | Tasks | Files |
 |------------|----------|-------|-------|
 | Phase 07 P01 | 12min | 2 tasks | 2 files |
+| Phase 07 P02 | 5min | 2 tasks | 1 file |
 
 ## Accumulated Context
 
@@ -71,6 +72,8 @@ Progress: [██░░░░░░░░] 20%
 - Pre-start (v1.2): Fechamento do mês (Phase 11) depende de todas as áreas financeiras anteriores estarem completas antes de travar lançamentos
 - [Phase 7]: 07-01: Mondial usa o mesmo objeto de calendario da Allianz (alias, nao copia)
 - [Phase 7]: 07-01: calcularDataPrevista formata data com helper local (padStart) em vez de toISOString, evitando bug de timezone
+- [Phase 7]: 07-02: mo_seguradora/valor_deslocamento nao sao sobrescritos ao salvar codigos MO/deslocamento — preservam o valor da OS para permitir a divergencia do Plano 04 (FAT-05)
+- [Phase 7]: 07-02: Handler marcarLancado e estado savingLancado removidos do DetalheOSModal — checklist de lancamento passa a viver exclusivamente na fila da AbaFaturamento (Plano 04), fonte de verdade unica
 
 ### Pending Todos
 
@@ -83,6 +86,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-02T23:18:12.129Z
-Stopped at: Completado 07-01-PLAN.md (utils/faturamento.js). Proximo: 07-02
+Last session: 2026-07-02T23:25:08Z
+Stopped at: Completado 07-02-PLAN.md (DetalheOSModal: codigos MO+deslocamento). Proximo: 07-03
 Resume file: None

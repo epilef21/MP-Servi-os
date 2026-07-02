@@ -12,7 +12,7 @@
 
 ### Faturamento e Contas a Receber (FAT)
 
-- [ ] **FAT-01**: Admin pode registrar em cada OS os códigos de faturamento com valor — dois por OS (mão de obra e deslocamento), sendo o segundo opcional
+- [x] **FAT-01**: Admin pode registrar em cada OS os códigos de faturamento com valor — dois por OS (mão de obra e deslocamento), sendo o segundo opcional
 - [ ] **FAT-02**: Admin vê a fila de faturamento por seguradora: todos os códigos/OS finalizadas que ainda não entraram em nenhuma nota
 - [ ] **FAT-03**: Na fila da Tempo e Maxpar, as OS finalizadas entram automaticamente pelo nº da assistência (num_assist), sem digitação de código
 - [ ] **FAT-04**: Admin pode marcar cada código/OS como "lançado no portal" (checklist), e o progresso fica salvo — ao voltar, vê exatamente onde parou
@@ -65,7 +65,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FAT-01 | Phase 7 | Pending |
+| FAT-01 | Phase 7 | Complete |
 | FAT-02 | Phase 7 | Pending |
 | FAT-03 | Phase 7 | Pending |
 | FAT-04 | Phase 7 | Pending |
