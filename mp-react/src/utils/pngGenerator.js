@@ -1,4 +1,5 @@
-import html2canvas from 'html2canvas'
+// html2canvas é carregado sob demanda dentro de generatePNG
+// para não entrar no bundle inicial do app.
 
 function fmtDate(d) {
   if (!d) return '—'
@@ -20,6 +21,7 @@ function fmtBRL(v) {
 }
 
 export async function generatePNG(r) {
+  const { default: html2canvas } = await import('html2canvas')
   // Create a temporary off-screen div
   const container = document.createElement('div')
   container.id = 'png-report-container'

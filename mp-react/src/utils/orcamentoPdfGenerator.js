@@ -1,4 +1,5 @@
-import jsPDF from 'jspdf'
+// jsPDF é carregado sob demanda dentro dos exports (generatePDFCliente /
+// generatePDFSeguradora) para não entrar no bundle inicial do app.
 
 // Substitui acentos para compatibilidade com jsPDF (fonte helvetica)
 function s(v) {
@@ -33,8 +34,9 @@ function fmtBRL(v) {
   return `R$ ${n.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.')}`
 }
 
-// Cria a estrutura base do PDF e retorna helpers + doc
-function criarDoc(titulo) {
+// Cria a estrutura base do PDF e retorna helpers + doc.
+// Recebe a classe jsPDF (carregada sob demanda pelos exports).
+function criarDoc(jsPDF, titulo) {
   const doc = new jsPDF({ unit:'mm', format:'a4' })
   const W   = doc.internal.pageSize.getWidth()
   const H   = doc.internal.pageSize.getHeight()
@@ -349,8 +351,9 @@ function desenharFooter(ctx, empresa) {
 
 // ── VERSÃO CLIENTE ───────────────────────────────────────────
 // Mostra apenas o que o cliente paga. Sem valores da seguradora.
-export function generatePDFCliente(orc, empresa) {
-  const ctx = criarDoc('ORCAMENTO')
+export async function generatePDFCliente(orc, empresa) {
+  const { default: jsPDF } = await import('jspdf')
+  const ctx = criarDoc(jsPDF, 'ORCAMENTO')
   desenharHeader(ctx, orc, empresa, 'ORCAMENTO')
 
   const { sectionHeader, textBlock, doc, W, M, getY, setY } = ctx
@@ -421,8 +424,9 @@ export function generatePDFCliente(orc, empresa) {
 // ── VERSÃO SEGURADORA ────────────────────────────────────────
 // Mostra apenas o que a seguradora paga. Inclui nº assistência.
 // Sem valores do cliente.
-export function generatePDFSeguradora(orc, empresa) {
-  const ctx = criarDoc('ORCAMENTO TECNICO')
+export async function generatePDFSeguradora(orc, empresa) {
+  const { default: jsPDF } = await import('jspdf')
+  const ctx = criarDoc(jsPDF, 'ORCAMENTO TECNICO')
   desenharHeader(ctx, orc, empresa, 'ORCAMENTO TECNICO')
 
   const { sectionHeader, doc, M, getY, setY } = ctx

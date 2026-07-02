@@ -1,6 +1,7 @@
-import jsPDF from 'jspdf'
+// jsPDF é carregado sob demanda dentro de gerarRelatorioMensalPdf
+// para não entrar no bundle inicial do app.
 
-const MESES = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+const MESES =['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 
 const STATUS_LABELS = {
   aguardando_tecnico: 'Aguardando Tecnico',
@@ -80,7 +81,8 @@ export function agregarRelatorio(os, mes, ano) {
   }
 }
 
-export function gerarRelatorioMensalPdf(dados, mes, ano, nomeEmpresa) {
+export async function gerarRelatorioMensalPdf(dados, mes, ano, nomeEmpresa) {
+  const { default: jsPDF } = await import('jspdf')
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const W   = doc.internal.pageSize.getWidth()
   const H   = doc.internal.pageSize.getHeight()

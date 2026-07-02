@@ -1,26 +1,39 @@
 // ============================================================
 // APP — Definição de rotas multi-tenant
+// Páginas carregadas sob demanda (lazy) para reduzir o bundle
+// inicial — o técnico no campo não baixa o painel admin inteiro.
 // ============================================================
+import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './contexts/AuthContext'
 
-// Páginas existentes (serão adaptadas nos próximos arquivos)
-import FormPage    from './pages/FormPage.jsx'
-import AdminPage   from './pages/AdminPage.jsx'
-import LoginPage   from './pages/LoginPage.jsx'
+// Páginas leves e de entrada — carregam junto com o app
+import LoginPage    from './pages/LoginPage.jsx'
+import NotFoundPage from './pages/NotFoundPage.jsx'
 
-// Páginas novas e auxiliares
-import CadastroPage           from './pages/CadastroPage.jsx'
-import SuperAdminPage         from './pages/SuperAdminPage.jsx'
-import EmpresaNaoEncontrada   from './pages/EmpresaNaoEncontrada.jsx'
-import AvaliacaoPage          from './pages/AvaliacaoPage.jsx'
-import OrcamentoTecnicoPage   from './pages/OrcamentoTecnicoPage.jsx'
-import AprovarOrcamentoPage   from './pages/AprovarOrcamentoPage.jsx'
-import AgendaPage             from './pages/AgendaPage.jsx'
-import RelatorioPage          from './pages/RelatorioPage.jsx'
-import AssinarClientePage     from './pages/AssinarClientePage.jsx'
-import OAuthCallbackPage      from './pages/OAuthCallbackPage.jsx'
-import NotFoundPage           from './pages/NotFoundPage.jsx'
+// Demais páginas — cada uma vira um arquivo separado, baixado só quando acessada
+const FormPage              = lazy(() => import('./pages/FormPage.jsx'))
+const AdminPage             = lazy(() => import('./pages/AdminPage.jsx'))
+const CadastroPage          = lazy(() => import('./pages/CadastroPage.jsx'))
+const SuperAdminPage        = lazy(() => import('./pages/SuperAdminPage.jsx'))
+const EmpresaNaoEncontrada  = lazy(() => import('./pages/EmpresaNaoEncontrada.jsx'))
+const AvaliacaoPage         = lazy(() => import('./pages/AvaliacaoPage.jsx'))
+const OrcamentoTecnicoPage  = lazy(() => import('./pages/OrcamentoTecnicoPage.jsx'))
+const AprovarOrcamentoPage  = lazy(() => import('./pages/AprovarOrcamentoPage.jsx'))
+const AgendaPage            = lazy(() => import('./pages/AgendaPage.jsx'))
+const RelatorioPage         = lazy(() => import('./pages/RelatorioPage.jsx'))
+const AssinarClientePage    = lazy(() => import('./pages/AssinarClientePage.jsx'))
+const OAuthCallbackPage     = lazy(() => import('./pages/OAuthCallbackPage.jsx'))
+
+// Tela exibida enquanto o arquivo da página é baixado
+function CarregandoPagina() {
+  return (
+    <div className="loading-state" style={{ paddingTop: '20vh' }}>
+      <div className="spinner" />
+      <p className="loading-text">Carregando...</p>
+    </div>
+  )
+}
 
 // ── Guarda de rota para admin da empresa ─────────────────────
 // Redireciona para /login se o usuário não estiver autenticado
@@ -40,6 +53,7 @@ function RotaSuperAdmin({ children }) {
 
 export default function App() {
   return (
+    <Suspense fallback={<CarregandoPagina />}>
     <Routes>
       {/* ── Rotas públicas ─────────────────────────────────── */}
       <Route path="/login"    element={<LoginPage />} />
@@ -105,5 +119,6 @@ export default function App() {
       {/* Qualquer rota desconhecida exibe a página 404 */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
+    </Suspense>
   )
 }

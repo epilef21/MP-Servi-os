@@ -1,4 +1,5 @@
-import jsPDF from 'jspdf'
+// jsPDF é carregado sob demanda (dynamic import) dentro de generatePDF
+// para não entrar no bundle inicial do app.
 
 // ── Fix: use standard font, replace accented chars for PDF ──
 function sanitize(str) {
@@ -34,7 +35,8 @@ function fmtBRL(v) {
   return `R$ ${n.toFixed(2).replace('.',',')}`
 }
 
-export function generatePDF(r) {
+export async function generatePDF(r) {
+  const { default: jsPDF } = await import('jspdf')
   const doc = new jsPDF({ unit:'mm', format:'a4' })
   const W   = doc.internal.pageSize.getWidth()
   const H   = doc.internal.pageSize.getHeight()
