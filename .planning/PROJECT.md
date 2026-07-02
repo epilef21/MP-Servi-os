@@ -1,6 +1,19 @@
 # AssistHub — Projeto
 
-## Milestone: v1.0 Test Coverage — COMPLETO (2026-05-20)
+## Current Milestone: v1.2 Financeiro Completo
+
+**Goal:** Transformar o módulo Financeiro (DRE) em controle financeiro completo: da OS finalizada até o dinheiro na conta — faturamento por seguradora, pagamento de técnicos, contas a pagar, fluxo de caixa e exportação.
+
+**Target features:**
+- Faturamento e contas a receber por seguradora: códigos de faturamento por OS (mão de obra + deslocamento na Mapfre/Allianz; nº da assistência na Tempo/Maxpar), fila de faturamento tipo checklist com progresso salvo ("parei aqui"), notas/faturas com data prevista de pagamento calculada pelo calendário de cada seguradora e status aguardando/paga/atrasada
+- Fechamento mensal de técnicos: total a pagar por técnico com OS listadas, chave PIX no cadastro, marcar como pago com histórico
+- Contas a pagar: vencimento e status nas despesas, alerta de contas a vencer
+- Fluxo de caixa (entradas/saídas reais) e gráfico de evolução de 12 meses
+- Exportar DRE em PDF e fechamento do mês (travar lançamentos)
+
+**Key context:** Fluxo real de faturamento levantado com o usuário em 2026-07-02 (calendários Mapfre/Allianz documentados; Tempo/Maxpar pendentes — data prevista manual até lá). Valores na Tempo/Maxpar mudam com frequência: valor é confirmado na hora de faturar, não travado da OS. Detalhes em memória do projeto (project_faturamento_seguradoras.md).
+
+## Previous Milestone: v1.0 Test Coverage — COMPLETO (2026-05-20)
 
 **Status:** Todas as 4 fases completas. 75 testes passando (INFRA + UTIL + DATA + AUTH + OS + ORC).
 
@@ -62,7 +75,7 @@ ORC-01..06 — Fluxo técnico→cliente de orçamento: OrcamentoTecnicoPage e Ap
 
 ### Active
 
-(Nenhum — milestone v1.0 concluído)
+(v1.2 Financeiro Completo — ver REQUIREMENTS.md: FAT-01..10, TEC-01..03, PAG-01..03, CAIXA-01..02, EXP-01..02)
 
 ### Out of Scope
 
