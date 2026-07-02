@@ -635,7 +635,12 @@ export default function DetalheOSModal({ os: selected, onClose }) {
             const desl     = calcDeslocamento(km, faixas)
             const total    = moUsado + desl
             const r        = n => Number(n).toFixed(2).replace('.', ',')
-            const codigoDigitos = seg === 'Allianz' || seg === 'Tempo' ? 2 : 8
+            const codigoDigitos = digitosCodigo(seg)
+            const temCodigo = SEGS_COM_CODIGO.includes(seg)
+            // Migração do legado: OS antiga marcada com fat_lancado_em + código legado conta como MO lançada
+            const moLancadoEm     = selected.fat_lancado_mo_em
+              || ((selected.fat_codigo_mo || selected.fat_codigo) && selected.fat_lancado_em ? selected.fat_lancado_em : null)
+            const deslocLancadoEm = selected.fat_lancado_desloc_em || null
             return (
               <div className="md-section" style={{ background: '#eef3ff', border: '1.5px solid #adc5f5', borderRadius: 8, padding: '14px 16px' }}>
                 <h3 style={{ color: '#1a3fa8', marginBottom: 14 }}>🧾 Tarifação</h3>
@@ -743,68 +748,102 @@ export default function DetalheOSModal({ os: selected, onClose }) {
                 <p style={{ fontSize: '.73rem', fontWeight: 700, color: '#1a3fa8', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 10 }}>
                   2 · Código recebido da seguradora
                 </p>
-                {selected.fat_codigo && (
-                  <div style={{ background: '#e8f5e9', border: '1px solid #81c784', borderRadius: 6, padding: '8px 12px', marginBottom: 10, fontSize: '.88rem', display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-                    <span>🔑 Código: <strong style={{ letterSpacing: 3, fontFamily: 'monospace' }}>{selected.fat_codigo}</strong></span>
-                    <span>Valor aprovado: <strong>{fmtBRL(selected.fat_valor_aprovado)}</strong></span>
+                {temCodigo ? (
+                  <>
+                    {(selected.fat_codigo_mo || selected.fat_codigo) && (
+                      <div style={{ background: '#e8f5e9', border: '1px solid #81c784', borderRadius: 6, padding: '8px 12px', marginBottom: 10, fontSize: '.88rem', display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+                        <span>🔑 Mão de obra: <strong style={{ letterSpacing: 3, fontFamily: 'monospace' }}>{selected.fat_codigo_mo || selected.fat_codigo}</strong></span>
+                        <span>Valor: <strong>{fmtBRL(selected.fat_valor_mo ?? selected.fat_valor_aprovado)}</strong></span>
+                        {selected.fat_codigo_desloc && (
+                          <>
+                            <span>🚗 Deslocamento: <strong style={{ letterSpacing: 3, fontFamily: 'monospace' }}>{selected.fat_codigo_desloc}</strong></span>
+                            <span>Valor: <strong>{fmtBRL(selected.fat_valor_desloc)}</strong></span>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                      <div className="md-field">
+                        <label>Mão de obra — Código ({codigoDigitos} dígitos)</label>
+                        <input
+                          value={codigoMoForm.codigo}
+                          onChange={e => setCodigoMoForm(p => ({ ...p, codigo: e.target.value }))}
+                          placeholder={'X'.repeat(codigoDigitos)}
+                          maxLength={codigoDigitos}
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'monospace', fontSize: '1.05rem', fontWeight: 700, letterSpacing: 3 }}
+                        />
+                      </div>
+                      <div className="md-field">
+                        <label>Mão de obra — Valor (R$)</label>
+                        <input type="number" step="0.01" min="0"
+                          value={codigoMoForm.valor}
+                          onChange={e => setCodigoMoForm(p => ({ ...p, valor: e.target.value }))}
+                          placeholder="0,00"
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.9rem' }}
+                        />
+                      </div>
+                      <div className="md-field">
+                        <label>Deslocamento (opcional) — Código ({codigoDigitos} dígitos)</label>
+                        <input
+                          value={codigoDeslocForm.codigo}
+                          onChange={e => setCodigoDeslocForm(p => ({ ...p, codigo: e.target.value }))}
+                          placeholder={'X'.repeat(codigoDigitos)}
+                          maxLength={codigoDigitos}
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'monospace', fontSize: '1.05rem', fontWeight: 700, letterSpacing: 3 }}
+                        />
+                      </div>
+                      <div className="md-field">
+                        <label>Deslocamento — Valor (R$)</label>
+                        <input type="number" step="0.01" min="0"
+                          value={codigoDeslocForm.valor}
+                          onChange={e => setCodigoDeslocForm(p => ({ ...p, valor: e.target.value }))}
+                          placeholder="0,00"
+                          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.9rem' }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                      <button
+                        disabled={savingCodigo}
+                        onClick={saveCodigos}
+                        style={{ background: '#1a3fa8', color: '#fff', border: 'none', borderRadius: 7, padding: '8px 18px', fontFamily: 'Barlow Condensed,sans-serif', fontWeight: 700, fontSize: '.92rem', cursor: 'pointer', opacity: savingCodigo ? .6 : 1 }}
+                      >
+                        {savingCodigo ? '⏳ Salvando...' : '💾 Salvar códigos'}
+                      </button>
+                      <span style={{ fontSize: '.78rem', color: 'var(--muted)' }}>Deslocamento é opcional — deixe em branco se a OS não tiver</span>
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ background: '#eef3ff', border: '1px solid #adc5f5', borderRadius: 6, padding: '10px 14px', fontSize: '.86rem', color: '#1a3fa8' }}>
+                    ℹ️ {seg || 'Esta seguradora'} não usa código de faturamento. Esta OS entra automaticamente na fila de faturamento pelo nº da assistência ({selected.num_assist || '—'}).
                   </div>
                 )}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
-                  <div className="md-field">
-                    <label>Código ({codigoDigitos} dígitos)</label>
-                    <input
-                      value={codigoForm.codigo}
-                      onChange={e => setCodigoForm(p => ({ ...p, codigo: e.target.value }))}
-                      placeholder={'X'.repeat(codigoDigitos)}
-                      maxLength={codigoDigitos}
-                      style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'monospace', fontSize: '1.05rem', fontWeight: 700, letterSpacing: 3 }}
-                    />
-                  </div>
-                  <div className="md-field">
-                    <label>Valor aprovado (R$)</label>
-                    <input type="number" step="0.01" min="0"
-                      value={codigoForm.valor_aprovado}
-                      onChange={e => setCodigoForm(p => ({ ...p, valor_aprovado: e.target.value }))}
-                      placeholder="0,00"
-                      style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.9rem' }}
-                    />
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                  <button
-                    disabled={savingCodigo}
-                    onClick={saveCodigo}
-                    style={{ background: '#1a3fa8', color: '#fff', border: 'none', borderRadius: 7, padding: '8px 18px', fontFamily: 'Barlow Condensed,sans-serif', fontWeight: 700, fontSize: '.92rem', cursor: 'pointer', opacity: savingCodigo ? .6 : 1 }}
-                  >
-                    {savingCodigo ? '⏳ Salvando...' : '💾 Salvar código'}
-                  </button>
-                  <span style={{ fontSize: '.78rem', color: 'var(--muted)' }}>Preenche o financeiro automaticamente</span>
-                </div>
 
                 <div style={{ borderTop: '1px solid #adc5f5', margin: '16px 0' }} />
 
-                {/* ── Passo 3: Lançado no portal ── */}
+                {/* ── Passo 3: Lançado no portal (status somente-leitura) ── */}
                 <p style={{ fontSize: '.73rem', fontWeight: 700, color: '#1a3fa8', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 10 }}>
                   3 · Lançamento no portal {seg}
                 </p>
-                {selected.fat_lancado_em ? (
-                  <div style={{ background: '#e8f5e9', border: '1px solid #81c784', borderRadius: 7, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: '1.4rem' }}>✅</span>
-                    <div>
-                      <strong>Lançado no portal {seg}</strong>
-                      <div style={{ color: 'var(--muted)', fontSize: '.8rem' }}>em {fmtDatetime(selected.fat_lancado_em)}</div>
+                {temCodigo ? (
+                  <div style={{ display: 'grid', gap: 6 }}>
+                    <div style={{ background: moLancadoEm ? '#e8f5e9' : '#f5f5f5', border: `1px solid ${moLancadoEm ? '#81c784' : 'var(--border)'}`, borderRadius: 6, padding: '8px 12px' }}>
+                      Mão de obra: {moLancadoEm ? <>✅ lançada em {fmtDatetime(moLancadoEm)}</> : '⏳ ainda não lançada'}
                     </div>
+                    {selected.fat_codigo_desloc && (
+                      <div style={{ background: deslocLancadoEm ? '#e8f5e9' : '#f5f5f5', border: `1px solid ${deslocLancadoEm ? '#81c784' : 'var(--border)'}`, borderRadius: 6, padding: '8px 12px' }}>
+                        Deslocamento: {deslocLancadoEm ? <>✅ lançado em {fmtDatetime(deslocLancadoEm)}</> : '⏳ ainda não lançado'}
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <button
-                    disabled={savingLancado || !selected.fat_codigo}
-                    onClick={marcarLancado}
-                    title={!selected.fat_codigo ? 'Salve o código primeiro (passo 2)' : ''}
-                    style={{ background: !selected.fat_codigo ? '#aaa' : '#2d8a4e', color: '#fff', border: 'none', borderRadius: 7, padding: '10px 22px', fontFamily: 'Barlow Condensed,sans-serif', fontWeight: 700, fontSize: '1rem', cursor: !selected.fat_codigo ? 'not-allowed' : 'pointer', opacity: savingLancado ? .6 : 1 }}
-                  >
-                    {savingLancado ? '⏳ Salvando...' : `✅ Marcar como lançado no portal ${seg}`}
-                  </button>
+                  <div style={{ background: selected.fat_lancado_em ? '#e8f5e9' : '#f5f5f5', border: `1px solid ${selected.fat_lancado_em ? '#81c784' : 'var(--border)'}`, borderRadius: 6, padding: '8px 12px' }}>
+                    {selected.fat_lancado_em ? <>✅ Lançada em {fmtDatetime(selected.fat_lancado_em)}</> : '⏳ Ainda não lançada'}
+                  </div>
                 )}
+                <p style={{ fontSize: '.78rem', color: 'var(--muted)', marginTop: 8 }}>
+                  Para marcar como lançado, use o checklist da fila em Financeiro → 📄 Faturamento.
+                </p>
               </div>
             )
           })()}
