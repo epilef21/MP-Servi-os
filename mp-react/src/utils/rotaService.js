@@ -52,27 +52,56 @@ async function consultarNominatim(query) {
   return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
 }
 
-// Converte um endereço em coordenadas, com fallback progressivo:
-//   1ª tentativa: endereço completo com número
-//   2ª tentativa: sem o número (rua + bairro + cidade)
-// Retorna { lat, lng } ou null se não encontrado.
+// Tipos de logradouro (para detectar prefixo duplicado tipo "AV AVENIDA X")
+const TIPO_LOGRADOURO = /^(av|avenida|r|rua|al|alameda|tv|trav|travessa|rod|rodovia|estr|estrada|pc|praca|praça)\.?$/i
+
+// Limpa o endereço como vem dos portais das seguradoras:
+//   "AV AVENIDA BRIGADEIRO GOMES - RESIDENCIAL VALE VERDE"
+//   → { rua: 'AVENIDA BRIGADEIRO GOMES', bairro: 'RESIDENCIAL VALE VERDE' }
+// Também remove vírgulas soltas/duplicadas e espaços extras.
+export function limparEndereco(enderecoBruto) {
+  const texto = String(enderecoBruto || '')
+    .replace(/\s*,\s*(?=,|$)/g, '')  // vírgulas duplicadas ou penduradas
+    .replace(/\s{2,}/g, ' ')
+    .replace(/^[\s,]+|[\s,]+$/g, '')
+
+  // separa "rua - bairro" (hífen com espaços; hífen de nome próprio fica)
+  const [ruaParte, ...resto] = texto.split(/\s+-\s+/)
+  let rua = ruaParte.trim()
+  const bairro = resto.join(' ').replace(/[:,]\s*$/, '').trim()
+
+  // remove tipo de logradouro duplicado no início ("AV AVENIDA", "R R.")
+  const tokens = rua.split(/\s+/)
+  if (tokens.length >= 2 && TIPO_LOGRADOURO.test(tokens[0]) && TIPO_LOGRADOURO.test(tokens[1])) {
+    tokens.shift()
+    rua = tokens.join(' ')
+  }
+  return { rua, bairro }
+}
+
+// Converte um endereço em coordenadas com tentativas em cascata:
+//   1ª: rua limpa + número + cidade
+//   2ª: rua limpa + cidade (centro da rua)
+//   3ª: bairro + cidade (localização aproximada)
+// Retorna { lat, lng, aproximado } ou null se nada for encontrado.
 //
 // `endereco` no formato do projeto: "Rua X - Bairro" (número separado)
 export async function geocodificarEndereco({ endereco, numero, cidade }) {
-  const cidadeLimpa = (cidade || '').replace(/-/g, ',').trim() // "Marília - SP" → "Marília , SP"
-  const base = `${endereco || ''}`.trim()
-  if (!base) return null
+  const cidadeLimpa = (cidade || '').replace(/-/g, ' ').replace(/\s{2,}/g, ' ').trim()
+  const { rua, bairro } = limparEndereco(endereco)
+  if (!rua && !bairro) return null
 
   const montar = partes => partes.filter(Boolean).join(', ')
+  const tentativas = []
+  if (rua && numero) tentativas.push({ q: montar([rua, numero, cidadeLimpa, 'Brasil']), aproximado: false })
+  if (rua)           tentativas.push({ q: montar([rua, cidadeLimpa, 'Brasil']),         aproximado: false })
+  if (bairro)        tentativas.push({ q: montar([bairro, cidadeLimpa, 'Brasil']),      aproximado: true })
 
-  // 1ª tentativa: com número
-  if (numero) {
-    const comNumero = await consultarNominatim(montar([base, numero, cidadeLimpa, 'Brasil']))
-    if (comNumero) return comNumero
+  for (const { q, aproximado } of tentativas) {
+    const coord = await consultarNominatim(q)
+    if (coord) return { ...coord, aproximado }
   }
-
-  // 2ª tentativa: sem número (centro da rua — precisão suficiente p/ rota)
-  return consultarNominatim(montar([base, cidadeLimpa, 'Brasil']))
+  return null
 }
 
 // ── Matriz de tempos/distâncias (OSRM Table) ─────────────────

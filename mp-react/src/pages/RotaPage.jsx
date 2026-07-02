@@ -217,9 +217,9 @@ export default function RotaPage() {
           endereco: os.endereco, numero: os.numero, cidade: os.cidade,
         })
         if (!coord) { naoLocalizadas.push(os); continue }
-        localizadas.push({ os, ...coord })
+        localizadas.push({ os, lat: coord.lat, lng: coord.lng, aproximado: coord.aproximado })
         // salva o cache na OS — nas próximas rotas não geocodifica de novo
-        updateDoc(doc(db, `empresas/${empresaId}/checklist`, os.id), coord)
+        updateDoc(doc(db, `empresas/${empresaId}/checklist`, os.id), { lat: coord.lat, lng: coord.lng })
           .catch(err => console.error('[Rota] Falha ao salvar lat/lng:', err))
       }
 
@@ -471,6 +471,7 @@ export default function RotaPage() {
                             📍 {p.os.endereco}{p.os.numero ? `, ${p.os.numero}` : ''}<br />
                             🔧 {p.os.servico || '—'}
                             {p.os.hora_agendada ? <><br />🕐 {p.os.hora_agendada}</> : null}
+                            {p.aproximado ? <><br />≈ localização aproximada (bairro)</> : null}
                           </>
                         )}
                       </Popup>
@@ -499,6 +500,7 @@ export default function RotaPage() {
                       <div className="rota-os-meta">
                         {LABEL_PRIORIDADE[prioridades[p.os.id] || 'livre']}
                         {p.os.hora_agendada ? ` · 🕐 ${p.os.hora_agendada}` : ''}
+                        {p.aproximado ? ' · ≈ local aproximado (bairro)' : ''}
                       </div>
                     </div>
                   </div>

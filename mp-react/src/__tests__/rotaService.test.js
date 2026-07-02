@@ -4,7 +4,7 @@
 // reta onde duração = distância entre posições.
 // ============================================================
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { otimizarRota, buildLinkGoogleMaps } from '../utils/rotaService.js'
+import { otimizarRota, buildLinkGoogleMaps, limparEndereco } from '../utils/rotaService.js'
 
 // Gera matriz de durações a partir de posições numa linha reta:
 // duração(i→j) = |pos[i] - pos[j]| segundos
@@ -87,6 +87,37 @@ describe('otimizarRota — prioridades', () => {
 
   it('exige ao menos uma parada além da partida', async () => {
     await expect(otimizarRota([{ lat: 0, lng: 0 }])).rejects.toThrow()
+  })
+})
+
+describe('limparEndereco — sujeira dos portais das seguradoras', () => {
+  it('remove tipo de logradouro duplicado ("AV AVENIDA")', () => {
+    const { rua, bairro } = limparEndereco('AV AVENIDA BRIGADEIRO EDUARDO GOMES - RESIDENCIAL VALE VERDE')
+    expect(rua).toBe('AVENIDA BRIGADEIRO EDUARDO GOMES')
+    expect(bairro).toBe('RESIDENCIAL VALE VERDE')
+  })
+
+  it('remove duplicação abreviada ("R R. DA ESTACAO")', () => {
+    const { rua, bairro } = limparEndereco('R R. DA ESTACAO - ARACELI')
+    expect(rua).toBe('R. DA ESTACAO')
+    expect(bairro).toBe('ARACELI')
+  })
+
+  it('limpa vírgulas soltas e espaços duplicados', () => {
+    const { rua } = limparEndereco('Rua kazuma Takamoto , ,  ')
+    expect(rua).toBe('Rua kazuma Takamoto')
+  })
+
+  it('separa bairro com sufixo de dois-pontos ("- Região:")', () => {
+    const { rua, bairro } = limparEndereco('AV AVENIDA JOAO SPADOTO - Região:')
+    expect(rua).toBe('AVENIDA JOAO SPADOTO')
+    expect(bairro).toBe('Região')
+  })
+
+  it('não mexe em endereço já limpo', () => {
+    const { rua, bairro } = limparEndereco('Rua Vereador Manoel Barbosa Silva')
+    expect(rua).toBe('Rua Vereador Manoel Barbosa Silva')
+    expect(bairro).toBe('')
   })
 })
 
