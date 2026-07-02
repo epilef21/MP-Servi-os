@@ -7,10 +7,24 @@
 import { useState, useMemo, useEffect } from 'react'
 import { db, collection, addDoc, getDocs, updateDoc, doc, query, orderBy, serverTimestamp, atualizarOS } from '../../../firebase.js'
 import { useAdminContext } from '../../../contexts/AdminContext.jsx'
-import { fmtBRL } from '../../../utils/formatters.js'
+import { fmtBRL, fmtDate } from '../../../utils/formatters.js'
 import { copyToClipboard } from '../../../utils/clipboard.js'
 import { SEGS_COM_CODIGO, SEGS_AUTO_NUM_ASSIST, STATUS_FATURAVEIS, getDivergenciaFat } from '../../../utils/faturamento.js'
 import ModalFecharNota from './ModalFecharNota.jsx'
+
+// Status derivado da nota — 'atrasada' NUNCA é gravado, só calculado na leitura.
+function statusNota(nota) {
+  if (nota.status === 'paga') return 'paga'
+  const hoje = new Date()
+  const hojeStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`
+  if (nota.data_prevista && nota.data_prevista < hojeStr) return 'atrasada'
+  return 'aguardando'
+}
+const STATUS_NOTA_META = {
+  aguardando: { label: '⏳ Aguardando pagamento', cor: '#b8860b', bg: '#fff8e1' },
+  paga:       { label: '✅ Paga',                  cor: '#1e6e3e', bg: '#e8f5e9' },
+  atrasada:   { label: '🔴 Atrasada',              cor: '#c0392b', bg: '#fdecea' },
+}
 
 export default function AbaFaturamento() {
   const { empresaId, reports, setReports, showToast, config } = useAdminContext()
@@ -95,6 +109,19 @@ export default function AbaFaturamento() {
   // Itens já lançados no portal e ainda não vinculados a nenhuma nota — prontos para fechar nota.
   const lancadosPendentes = fila.filter(i => i.lancado)
 
+  // Painel-resumo: total a receber por seguradora (notas não pagas), com a data prevista mais próxima.
+  const aReceber = useMemo(() => {
+    const m = {}
+    notas.filter(n => n.status !== 'paga').forEach(n => {
+      if (!m[n.seguradora]) m[n.seguradora] = { total: 0, proxData: null }
+      m[n.seguradora].total += (n.total || 0)
+      if (n.data_prevista && (!m[n.seguradora].proxData || n.data_prevista < m[n.seguradora].proxData)) {
+        m[n.seguradora].proxData = n.data_prevista
+      }
+    })
+    return m
+  }, [notas])
+
   // Marca/desmarca "lançado no portal" — grava direto no doc da OS por tipo de item.
   // A fila é a ÚNICA fonte de escrita de fat_lancado_* (o modal do Plano 02 só lê).
   async function toggleLancado(item) {
@@ -168,8 +195,39 @@ export default function AbaFaturamento() {
     finally { setSalvandoNota(false) }
   }
 
+  // Marca a nota como paga e quita TODAS as OS vinculadas de uma vez (FAT-10).
+  async function marcarNotaPaga(nota) {
+    if (!window.confirm(`Marcar a nota ${nota.numero} como paga? Isso quita todas as ${nota.itens?.length || 0} OS vinculadas.`)) return
+    const hoje = new Date()
+    const hojeStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`
+    try {
+      await updateDoc(doc(db, `empresas/${empresaId}/notasFiscais`, nota.id), { status: 'paga', pago_em: hojeStr })
+      // Quitar as OS vinculadas (carimbo fat_pago_em) — de uma vez, via Promise.all
+      await Promise.all((nota.itens || []).map(it => atualizarOS(empresaId, it.os_id, { fat_pago_em: hojeStr })))
+      setNotas(prev => prev.map(n => n.id === nota.id ? { ...n, status: 'paga', pago_em: hojeStr } : n))
+      setReports(p => p.map(r => (nota.itens || []).some(it => it.os_id === r.id) ? { ...r, fat_pago_em: hojeStr } : r))
+      showToast('💵 Nota marcada como paga! OS vinculadas quitadas.')
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
+  }
+
   return (
     <div>
+      {Object.keys(aReceber).length > 0 && (
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', gap: 14, marginBottom: 16, padding: '12px 14px',
+          border: '1px solid var(--border)', borderRadius: 8, background: 'var(--light)',
+        }}>
+          <div style={{ fontWeight: 800, fontFamily: 'Barlow Condensed,sans-serif', textTransform: 'uppercase', color: 'var(--primary)' }}>
+            💰 Total a receber por seguradora
+          </div>
+          {Object.entries(aReceber).map(([seg, info]) => (
+            <div key={seg} style={{ fontSize: '.85rem' }}>
+              <strong>{seg}:</strong> {fmtBRL(info.total)} {info.proxData ? `até ${fmtDate(info.proxData)}` : '(data manual pendente)'}
+            </div>
+          ))}
+        </div>
+      )}
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 10 }}>
         <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase' }}>
           📄 Fila de Faturamento
@@ -236,6 +294,37 @@ export default function AbaFaturamento() {
                 </>
               )}
             </div>
+          </div>
+        )
+      })}
+
+      <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', margin: '22px 0 12px' }}>
+        🧾 Notas — {segSel}
+      </h4>
+      {notas.filter(n => n.seguradora === segSel).length === 0 && (
+        <div className="empty-state" style={{ padding: '24px' }}>
+          <p>Nenhuma nota fechada ainda para {segSel}.</p>
+        </div>
+      )}
+      {notas.filter(n => n.seguradora === segSel).map(nota => {
+        const st = statusNota(nota)
+        const meta = STATUS_NOTA_META[st]
+        return (
+          <div key={nota.id} style={{
+            display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px',
+            border: '1px solid var(--border)', borderRadius: 8, marginBottom: 8, flexWrap: 'wrap',
+          }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontWeight: 600 }}>Nota nº {nota.numero}</div>
+              <div style={{ fontSize: '.8rem', color: 'var(--muted)' }}>
+                Emissão: {fmtDate(nota.data_emissao)} · Prevista: {fmtDate(nota.data_prevista)} · {nota.itens?.length || 0} itens
+              </div>
+            </div>
+            <div style={{ fontWeight: 700 }}>{fmtBRL(nota.total)}</div>
+            <span className="badge" style={{ background: meta.bg, color: meta.cor }}>{meta.label}</span>
+            {st !== 'paga' && (
+              <button className="btn-sm btn-primary" onClick={() => marcarNotaPaga(nota)}>💵 Marcar como paga</button>
+            )}
           </div>
         )
       })}
