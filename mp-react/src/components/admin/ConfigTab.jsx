@@ -11,10 +11,19 @@ import { useAuth }        from '../../contexts/AuthContext.jsx'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { maskPhone, maskCNPJ } from '../../utils/formatters.js'
 import { TABELAS, DESL_FAIXAS_PADRAO } from '../../utils/tarifas.js'
+import { REGRAS_FATURAMENTO_PADRAO } from '../../utils/faturamento.js'
 import {
   listarContasGoogleCalendar,
   desconectarGoogleCalendar,
 } from '../../utils/googleCalendarApi.js'
+
+// Normaliza uma faixa de calendário de pagamento antes de gravar no Firestore:
+// converte campos numéricos com parseInt (com fallback seguro) e preserva naoFaturavel.
+function normalizarFaixa(f) {
+  const base = { diaDe: parseInt(f.diaDe) || 1, diaAte: parseInt(f.diaAte) || 31 }
+  if (f.naoFaturavel) return { ...base, naoFaturavel: true }
+  return { ...base, addMeses: parseInt(f.addMeses) || 0, diaPagto: parseInt(f.diaPagto) || 1 }
+}
 
 export default function ConfigTab() {
   const { emailUsuario } = useAuth()
@@ -50,6 +59,10 @@ export default function ConfigTab() {
   // ── Tarifas por seguradora ───────────────────────────────
   const [tarifaForm,    setTarifaForm]    = useState({})
   const [savingTarifa,  setSavingTarifa]  = useState(false)
+
+  // ── Calendário de pagamento por seguradora ───────────────
+  const [calForm,   setCalForm]   = useState({}) // { Mapfre: {faixas:[...]}, Allianz: {faixas:[...]} }
+  const [savingCal, setSavingCal] = useState(false)
 
   // ── Google Calendar ──────────────────────────────────────
   const GOOGLE_CLIENT_ID  = '294280485643-klje568cuifiopnnnjallavbrnelm8gi.apps.googleusercontent.com'
@@ -140,6 +153,18 @@ export default function ConfigTab() {
       setNomeUsuario(auth.currentUser.displayName)
     }
   }, [])
+
+  // Inicializa calForm a partir de config.calendarioFaturamento, com fallback
+  // para o calendário padrão (REGRAS_FATURAMENTO_PADRAO) quando o admin ainda não customizou
+  useEffect(() => {
+    const cf = {}
+    ;['Mapfre', 'Allianz'].forEach(seg => {
+      const saved = config?.calendarioFaturamento?.[seg]?.faixas
+      const base  = (Array.isArray(saved) && saved.length) ? saved : REGRAS_FATURAMENTO_PADRAO[seg].faixas
+      cf[seg] = { faixas: base.map(f => ({ ...f })) }
+    })
+    setCalForm(cf)
+  }, [config])
 
   function toggleSeguradora(seg) {
     setConfigForm(p => ({
@@ -232,6 +257,35 @@ export default function ConfigTab() {
       showToast('Erro ao salvar: ' + e.message, 'error')
     } finally {
       setSavingTarifa(false)
+    }
+  }
+
+  // Edição imutável de um campo de uma faixa do calendário
+  function setFaixa(seg, idx, campo, valor) {
+    setCalForm(p => {
+      const faixas = p[seg].faixas.map((f, i) => i === idx ? { ...f, [campo]: valor } : f)
+      return { ...p, [seg]: { faixas } }
+    })
+  }
+
+  async function saveCalendario() {
+    if (!empresaId) return
+    setSavingCal(true)
+    try {
+      // Mescla com o que já existe em config.calendarioFaturamento para não sobrescrever outras chaves
+      const atual = config?.calendarioFaturamento || {}
+      const calendarioFaturamento = {
+        ...atual,
+        Mapfre:  { faixas: (calForm.Mapfre?.faixas  || []).map(f => normalizarFaixa(f)) },
+        Allianz: { faixas: (calForm.Allianz?.faixas || []).map(f => normalizarFaixa(f)) },
+      }
+      calendarioFaturamento.Mondial = calendarioFaturamento.Allianz // Mondial usa o mesmo calendário da Allianz
+      await updateDoc(refConfig(empresaId), { calendarioFaturamento })
+      showToast('✅ Calendário de pagamento salvo!')
+    } catch (e) {
+      showToast('Erro ao salvar: ' + e.message, 'error')
+    } finally {
+      setSavingCal(false)
     }
   }
 
