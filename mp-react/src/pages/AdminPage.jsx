@@ -217,7 +217,7 @@ export default function AdminPage() {
         ...p, status: newStatus,
         status_historico: [...(p.status_historico || []), entrada],
       }))
-    } catch (e) { alert('Erro: ' + e.message) }
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
     finally { setUpdating(false) }
   }
 

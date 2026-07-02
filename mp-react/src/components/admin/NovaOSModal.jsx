@@ -18,7 +18,7 @@ export const OS_INITIAL = {
 export default function NovaOSModal({ prefill, onClose }) {
   const {
     empresaId, seguradoras, tecnicos, limite,
-    buildLink, setReports, setTotalMes, setGeneratedLink,
+    buildLink, setReports, setTotalMes, setGeneratedLink, showToast,
   } = useAdminContext()
 
   const [osForm,       setOsForm]       = useState({ ...OS_INITIAL, ...(prefill || {}) })
@@ -68,7 +68,7 @@ export default function NovaOSModal({ prefill, onClose }) {
   async function saveOs() {
     if (!validateOs()) return
     if (limite.bloqueado) {
-      alert(`Limite de ${limite.limite} OS/mês atingido. Faça upgrade do plano.`)
+      showToast(`Limite de ${limite.limite} OS/mês atingido. Faça upgrade do plano.`, 'error')
       return
     }
     setSavingOs(true)
@@ -105,7 +105,7 @@ export default function NovaOSModal({ prefill, onClose }) {
       setTotalMes(p => p + 1)
       setGeneratedLink({ link: buildLink(newRec), os: ref.id, nome: osForm.nome_segurado, seguradora: osForm.seguradora, num_assist: osForm.num_assist })
       onClose()
-    } catch (e) { alert('Erro ao salvar OS: ' + e.message) }
+    } catch (e) { showToast('Erro ao salvar OS: ' + e.message, 'error') }
     finally { setSavingOs(false) }
   }
 

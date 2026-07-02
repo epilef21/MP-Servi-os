@@ -242,7 +242,7 @@ export default function ConfigTab() {
       setResetEmailEnviado(true)
       setTimeout(() => setResetEmailEnviado(false), 5000)
     } catch (e) {
-      alert('Erro: ' + e.message)
+      showToast('Erro: ' + e.message, 'error')
     }
   }
 

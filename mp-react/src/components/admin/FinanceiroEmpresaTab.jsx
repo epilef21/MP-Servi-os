@@ -96,7 +96,7 @@ const FORM_RESULT_FIN_INICIAL = {
 
 // ── Componente principal ─────────────────────────────────────
 export default function FinanceiroEmpresaTab() {
-  const { empresaId, reports, nomeEmpresa } = useAdminContext()
+  const { empresaId, reports, nomeEmpresa, showToast } = useAdminContext()
 
   const [mesRef, setMesRef] = useState(mesAtual)
   const [abaFin, setAbaFin] = useState('dre')
@@ -181,7 +181,7 @@ export default function FinanceiroEmpresaTab() {
 
     } catch (e) {
       console.error('Erro ao carregar financeiro:', e)
-      alert('Erro ao carregar dados financeiros: ' + e.message)
+      showToast('Erro ao carregar dados financeiros: ' + e.message, 'error')
     } finally {
       setCarregando(false)
     }
@@ -218,7 +218,7 @@ export default function FinanceiroEmpresaTab() {
       setShowAutoLancar(false)
       await carregarDados()
     } catch (e) {
-      alert('Erro ao lançar fixas: ' + e.message)
+      showToast('Erro ao lançar fixas: ' + e.message, 'error')
     } finally {
       setAutoLancando(false)
     }
@@ -236,7 +236,7 @@ export default function FinanceiroEmpresaTab() {
     setShowModalRecorrente(true)
   }
   async function salvarRecorrente() {
-    if (!formRecorrente.descricao.trim()) { alert('Informe a descrição.'); return }
+    if (!formRecorrente.descricao.trim()) { showToast('Informe a descrição.', 'error'); return }
     setSalvandoRecorrente(true)
     try {
       const payload = {
@@ -253,7 +253,7 @@ export default function FinanceiroEmpresaTab() {
       }
       setShowModalRecorrente(false)
       await carregarDados()
-    } catch (e) { alert('Erro ao salvar: ' + e.message) }
+    } catch (e) { showToast('Erro ao salvar: ' + e.message, 'error') }
     finally { setSalvandoRecorrente(false) }
   }
   async function excluirRecorrente(r) {
@@ -261,7 +261,7 @@ export default function FinanceiroEmpresaTab() {
     try {
       await deleteDoc(doc(db, `empresas/${empresaId}/despesasRecorrentes`, r.id))
       await carregarDados()
-    } catch (e) { alert('Erro: ' + e.message) }
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
   }
 
   // ── CRUD Lançamento Mensal ───────────────────────────────
@@ -288,7 +288,7 @@ export default function FinanceiroEmpresaTab() {
     setShowModalMensal(true)
   }
   async function salvarMensal() {
-    if (!formMensal.descricao.trim()) { alert('Informe a descrição.'); return }
+    if (!formMensal.descricao.trim()) { showToast('Informe a descrição.', 'error'); return }
     setSalvandoMensal(true)
     try {
       const payload = {
@@ -306,7 +306,7 @@ export default function FinanceiroEmpresaTab() {
       }
       setShowModalMensal(false)
       await carregarDados()
-    } catch (e) { alert('Erro ao salvar: ' + e.message) }
+    } catch (e) { showToast('Erro ao salvar: ' + e.message, 'error') }
     finally { setSalvandoMensal(false) }
   }
   async function excluirMensal(l) {
@@ -314,7 +314,7 @@ export default function FinanceiroEmpresaTab() {
     try {
       await deleteDoc(doc(db, `empresas/${empresaId}/despesasMensais`, l.id))
       await carregarDados()
-    } catch (e) { alert('Erro: ' + e.message) }
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
   }
 
   // ── CRUD Serviços Particulares ───────────────────────────
@@ -336,7 +336,7 @@ export default function FinanceiroEmpresaTab() {
     setShowModalParticular(true)
   }
   async function salvarParticular() {
-    if (!formParticular.descricao.trim()) { alert('Informe a descrição.'); return }
+    if (!formParticular.descricao.trim()) { showToast('Informe a descrição.', 'error'); return }
     setSalvandoParticular(true)
     try {
       const rec   = parseFloat(formParticular.valor_recebido) || 0
@@ -358,7 +358,7 @@ export default function FinanceiroEmpresaTab() {
       }
       setShowModalParticular(false)
       await carregarDados()
-    } catch (e) { alert('Erro ao salvar: ' + e.message) }
+    } catch (e) { showToast('Erro ao salvar: ' + e.message, 'error') }
     finally { setSalvandoParticular(false) }
   }
   async function excluirParticular(p) {
@@ -366,7 +366,7 @@ export default function FinanceiroEmpresaTab() {
     try {
       await deleteDoc(doc(db, `empresas/${empresaId}/servicosParticulares`, p.id))
       await carregarDados()
-    } catch (e) { alert('Erro: ' + e.message) }
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
   }
 
   // ── CRUD Deduções (impostos) ─────────────────────────────
@@ -381,8 +381,8 @@ export default function FinanceiroEmpresaTab() {
     setShowModalDeducao(true)
   }
   async function salvarDeducao() {
-    if (!formDeducao.descricao.trim()) { alert('Informe a descrição.'); return }
-    if (!formDeducao.valor)            { alert('Informe o valor.'); return }
+    if (!formDeducao.descricao.trim()) { showToast('Informe a descrição.', 'error'); return }
+    if (!formDeducao.valor)            { showToast('Informe o valor.', 'error'); return }
     setSalvandoDeducao(true)
     try {
       const payload = {
@@ -399,7 +399,7 @@ export default function FinanceiroEmpresaTab() {
       }
       setShowModalDeducao(false)
       await carregarDados()
-    } catch (e) { alert('Erro ao salvar: ' + e.message) }
+    } catch (e) { showToast('Erro ao salvar: ' + e.message, 'error') }
     finally { setSalvandoDeducao(false) }
   }
   async function excluirDeducao(d) {
@@ -407,7 +407,7 @@ export default function FinanceiroEmpresaTab() {
     try {
       await deleteDoc(doc(db, `empresas/${empresaId}/deducoesMensais`, d.id))
       await carregarDados()
-    } catch (e) { alert('Erro: ' + e.message) }
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
   }
 
   // ── CRUD Resultado Financeiro ────────────────────────────
@@ -422,8 +422,8 @@ export default function FinanceiroEmpresaTab() {
     setShowModalResultFin(true)
   }
   async function salvarResultFin() {
-    if (!formResultFin.descricao.trim()) { alert('Informe a descrição.'); return }
-    if (!formResultFin.valor)            { alert('Informe o valor.'); return }
+    if (!formResultFin.descricao.trim()) { showToast('Informe a descrição.', 'error'); return }
+    if (!formResultFin.valor)            { showToast('Informe o valor.', 'error'); return }
     setSalvandoResultFin(true)
     try {
       const payload = {
@@ -440,7 +440,7 @@ export default function FinanceiroEmpresaTab() {
       }
       setShowModalResultFin(false)
       await carregarDados()
-    } catch (e) { alert('Erro ao salvar: ' + e.message) }
+    } catch (e) { showToast('Erro ao salvar: ' + e.message, 'error') }
     finally { setSalvandoResultFin(false) }
   }
   async function excluirResultFin(f) {
@@ -448,7 +448,7 @@ export default function FinanceiroEmpresaTab() {
     try {
       await deleteDoc(doc(db, `empresas/${empresaId}/resultadoFinanceiroMensal`, f.id))
       await carregarDados()
-    } catch (e) { alert('Erro: ' + e.message) }
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
   }
 
   // ── Render ───────────────────────────────────────────────

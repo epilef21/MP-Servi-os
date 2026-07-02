@@ -5,8 +5,10 @@
 import { useState, useRef } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
 import { db, doc, updateDoc, serverTimestamp, arrayUnion } from '../../firebase.js'
+import { useAdminContext } from '../../contexts/AdminContext.jsx'
 
 export default function PreencherOSModal({ os, empresaId, slug, onClose, onSaved }) {
+  const { showToast } = useAdminContext()
   const [descServico,  setDescServico]  = useState(os.desc_servico  || '')
   const [dataAtend,    setDataAtend]    = useState(os.data_atend    || os.data_chegada || '')
   const [horaChegada,  setHoraChegada]  = useState(os.hora_chegada  || '')
@@ -51,7 +53,7 @@ export default function PreencherOSModal({ os, empresaId, slug, onClose, onSaved
       setLinkGerado(link)
       onSaved({ ...os, ...payload, status: 'aguardando_assinatura_cliente' })
     } catch (e) {
-      alert('Erro ao salvar: ' + e.message)
+      showToast('Erro ao salvar: ' + e.message, 'error')
     } finally {
       setSalvando(false)
     }

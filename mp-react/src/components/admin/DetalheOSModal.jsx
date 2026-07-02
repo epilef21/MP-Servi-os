@@ -137,7 +137,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
       setReports(p => p.map(r => r.id === selected.id ? updated : r))
       setSelected(updated)
       showToast('💰 Financeiro salvo!')
-    } catch (e) { alert('Erro ao salvar financeiro: ' + e.message) }
+    } catch (e) { showToast('Erro ao salvar financeiro: ' + e.message, 'error') }
     finally { setSavingFin(false) }
   }
 
@@ -205,7 +205,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
       setReports(p => p.map(r => r.id === selected.id ? updated : r))
       setSelected(updated)
       showToast('👷 Técnico salvo!')
-    } catch (e) { alert('Erro ao salvar técnico: ' + e.message) }
+    } catch (e) { showToast('Erro ao salvar técnico: ' + e.message, 'error') }
     finally { setSavingTecnico(false) }
   }
 
@@ -226,7 +226,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
 
   async function handlePNG(r) {
     setGenPng(true)
-    try { await generatePNG(r) } catch (e) { alert('Erro ao gerar PNG: ' + e.message) }
+    try { await generatePNG(r) } catch (e) { showToast('Erro ao gerar PNG: ' + e.message, 'error') }
     finally { setGenPng(false) }
   }
 
