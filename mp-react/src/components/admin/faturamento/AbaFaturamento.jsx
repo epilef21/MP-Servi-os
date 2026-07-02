@@ -8,6 +8,7 @@ import { useState, useMemo } from 'react'
 import { atualizarOS, serverTimestamp } from '../../../firebase.js'
 import { useAdminContext } from '../../../contexts/AdminContext.jsx'
 import { fmtBRL } from '../../../utils/formatters.js'
+import { copyToClipboard } from '../../../utils/clipboard.js'
 import { SEGS_COM_CODIGO, SEGS_AUTO_NUM_ASSIST, STATUS_FATURAVEIS, getDivergenciaFat } from '../../../utils/faturamento.js'
 
 export default function AbaFaturamento() {
@@ -78,6 +79,47 @@ export default function AbaFaturamento() {
   const totalItens = fila.length
   const somaValores = fila.reduce((acc, i) => acc + (i.valorCodigo || 0), 0)
 
+  // Marca/desmarca "lançado no portal" — grava direto no doc da OS por tipo de item.
+  // A fila é a ÚNICA fonte de escrita de fat_lancado_* (o modal do Plano 02 só lê).
+  async function toggleLancado(item) {
+    if (item.lancado && !window.confirm('Desmarcar este item como lançado?')) return
+    const novoValor = item.lancado ? null : serverTimestamp()
+    const novoLocal = item.lancado ? null : new Date()
+    let payload, patchLocal
+    if (item.tipo === 'mo') {
+      // migração definitiva: grava o campo granular novo e limpa o rastro legado
+      payload    = { fat_lancado_mo_em: novoValor, fat_lancado_em: null }
+      patchLocal = { fat_lancado_mo_em: novoLocal, fat_lancado_em: null }
+    } else if (item.tipo === 'desloc') {
+      payload    = { fat_lancado_desloc_em: novoValor }
+      patchLocal = { fat_lancado_desloc_em: novoLocal }
+    } else {
+      payload    = { fat_lancado_em: novoValor }
+      patchLocal = { fat_lancado_em: novoLocal }
+    }
+    try {
+      await atualizarOS(empresaId, item.osId, payload)
+      setReports(p => p.map(r => r.id === item.osId ? { ...r, ...patchLocal } : r))
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
+  }
+
+  // Valor editável (Tempo/Maxpar) — a OS é só sugestão, o valor confirmado é o que entra na nota.
+  async function salvarValorFaturado(item, valorStr) {
+    const valor = parseFloat(valorStr)
+    if (isNaN(valor)) return
+    try {
+      await atualizarOS(empresaId, item.osId, { fat_valor_faturado: valor })
+      setReports(p => p.map(r => r.id === item.osId ? { ...r, fat_valor_faturado: valor } : r))
+      showToast('💰 Valor atualizado.')
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
+  }
+
+  async function copiarCodigos() {
+    const naoLancados = fila.filter(i => !i.lancado).map(i => i.codigo).join('\n')
+    await copyToClipboard(naoLancados)
+    showToast('📋 Códigos copiados!')
+  }
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 10 }}>
@@ -94,6 +136,9 @@ export default function AbaFaturamento() {
           {lancadosCount} lançados ✓ · {totalItens - lancadosCount} faltando
         </div>
         <div style={{ fontWeight: 700 }}>Total da fila: {fmtBRL(somaValores)}</div>
+        {totalItens > 0 && (
+          <button className="btn-sm btn-view" onClick={copiarCodigos}>📋 Copiar todos os códigos</button>
+        )}
       </div>
 
       {totalItens === 0 && (
@@ -109,8 +154,7 @@ export default function AbaFaturamento() {
             display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px',
             border: '1px solid var(--border)', borderRadius: 8, marginBottom: 8,
           }}>
-            {/* Persistência real do checklist entra na Task 2 (toggleLancado) */}
-            <input type="checkbox" checked={item.lancado} onChange={() => {}} />
+            <input type="checkbox" checked={item.lancado} onChange={() => toggleLancado(item)} />
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 600 }}>
                 {item.os.num_assist ? `#${item.os.num_assist} — ` : ''}{item.os.nome_segurado || '—'}
@@ -132,8 +176,9 @@ export default function AbaFaturamento() {
                 </>
               ) : (
                 <>
-                  {/* Input editável entra na Task 2 (salvarValorFaturado) — por ora só a sugestão */}
-                  <div>{fmtBRL(item.valorCodigo)}</div>
+                  <input type="number" step="0.01" defaultValue={item.valorCodigo}
+                    onBlur={e => salvarValorFaturado(item, e.target.value)}
+                    style={{ width: 100, textAlign: 'right' }} />
                   <div style={{ fontSize: '.78rem', color: 'var(--muted)' }}>a OS diz {fmtBRL(item.valorSugerido)}</div>
                 </>
               )}
