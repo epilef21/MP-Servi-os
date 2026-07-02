@@ -500,6 +500,54 @@ export default function ConfigTab() {
               </button>
             </div>
           )}
+
+          {/* Calendário de pagamento por seguradora */}
+          <h3 className="config-section-title" style={{ marginTop: 28, fontSize: '.8rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.6px', paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 12 }}>
+            📅 Calendário de pagamento por seguradora
+          </h3>
+          <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginBottom: 12 }}>
+            Quando você envia a nota fiscal, o sistema calcula sozinho a data prevista de pagamento usando estas regras. Ajuste aqui se a seguradora mudar o calendário. Allianz e Mondial usam o mesmo calendário.
+          </p>
+
+          {['Mapfre', 'Allianz'].map(seg => (
+            <div key={seg} style={{ background: '#f8faff', border: '1px solid #c8d8ec', borderRadius: 8, padding: '14px 16px', marginBottom: 14 }}>
+              <h4 style={{ color: '#1a3fa8', marginBottom: 12, fontFamily: 'Barlow Condensed,sans-serif', fontSize: '1.05rem', fontWeight: 800 }}>
+                {seg}{seg === 'Allianz' ? ' / Mondial' : ''}
+              </h4>
+              {calForm[seg]?.faixas.map((f, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 6 }}>
+                  <span style={{ fontSize: '.85rem' }}>Do dia</span>
+                  <input type="number" min="1" max="31" value={f.diaDe}
+                    onChange={e => setFaixa(seg, idx, 'diaDe', e.target.value)}
+                    style={{ width: 56, padding: '5px 8px', border: '1px solid var(--border)', borderRadius: 5 }} />
+                  <span style={{ fontSize: '.85rem' }}>até</span>
+                  <input type="number" min="1" max="31" value={f.diaAte}
+                    onChange={e => setFaixa(seg, idx, 'diaAte', e.target.value)}
+                    style={{ width: 56, padding: '5px 8px', border: '1px solid var(--border)', borderRadius: 5 }} />
+                  {f.naoFaturavel
+                    ? <span style={{ color: '#c0392b', fontWeight: 700, fontSize: '.85rem' }}>🚫 Não faturável</span>
+                    : (
+                      <>
+                        <span style={{ fontSize: '.85rem' }}>→ paga em +</span>
+                        <input type="number" min="0" max="3" value={f.addMeses}
+                          onChange={e => setFaixa(seg, idx, 'addMeses', e.target.value)}
+                          style={{ width: 48, padding: '5px 8px', border: '1px solid var(--border)', borderRadius: 5 }} />
+                        <span style={{ fontSize: '.85rem' }}>mês(es), no dia</span>
+                        <input type="number" min="1" max="31" value={f.diaPagto}
+                          onChange={e => setFaixa(seg, idx, 'diaPagto', e.target.value)}
+                          style={{ width: 56, padding: '5px 8px', border: '1px solid var(--border)', borderRadius: 5 }} />
+                      </>
+                    )}
+                </div>
+              ))}
+            </div>
+          ))}
+
+          <div style={{ marginTop: 10, textAlign: 'right' }}>
+            <button className="btn-primary" onClick={saveCalendario} disabled={savingCal} style={{ padding: '10px 28px', fontSize: '.9rem' }}>
+              {savingCal ? '⏳ Salvando...' : '💾 Salvar calendário'}
+            </button>
+          </div>
         </div>
       )}
 
