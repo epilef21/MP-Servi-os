@@ -4,16 +4,29 @@
 // Tempo/Maxpar: item único por OS pelo nº da assistência (sem código)
 // A fila é a ÚNICA fonte de gravação do checklist "lançado no portal" (fat_lancado_*)
 // ============================================================
-import { useState, useMemo } from 'react'
-import { atualizarOS, serverTimestamp } from '../../../firebase.js'
+import { useState, useMemo, useEffect } from 'react'
+import { db, collection, addDoc, getDocs, updateDoc, doc, query, orderBy, serverTimestamp, atualizarOS } from '../../../firebase.js'
 import { useAdminContext } from '../../../contexts/AdminContext.jsx'
 import { fmtBRL } from '../../../utils/formatters.js'
 import { copyToClipboard } from '../../../utils/clipboard.js'
 import { SEGS_COM_CODIGO, SEGS_AUTO_NUM_ASSIST, STATUS_FATURAVEIS, getDivergenciaFat } from '../../../utils/faturamento.js'
+import ModalFecharNota from './ModalFecharNota.jsx'
 
 export default function AbaFaturamento() {
-  const { empresaId, reports, setReports, showToast } = useAdminContext()
+  const { empresaId, reports, setReports, showToast, config } = useAdminContext()
   const [segSel, setSegSel] = useState('Mapfre')
+  const [notas, setNotas] = useState([])
+  const [showFechar, setShowFechar] = useState(false)
+  const [salvandoNota, setSalvandoNota] = useState(false)
+
+  // Carrega as notas fiscais da empresa ao trocar de empresa.
+  useEffect(() => {
+    if (!empresaId) return
+    getDocs(query(collection(db, `empresas/${empresaId}/notasFiscais`), orderBy('criado_em', 'desc')))
+      .then(s => setNotas(s.docs.map(d => ({ id: d.id, ...d.data() }))))
+      .catch(e => showToast('Erro ao carregar notas: ' + e.message, 'error'))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [empresaId])
 
   // Seguradoras disponíveis no seletor: lista fixa conhecida + o que existir em reports
   const seguradoras = useMemo(() => {
@@ -79,6 +92,9 @@ export default function AbaFaturamento() {
   const totalItens = fila.length
   const somaValores = fila.reduce((acc, i) => acc + (i.valorCodigo || 0), 0)
 
+  // Itens já lançados no portal e ainda não vinculados a nenhuma nota — prontos para fechar nota.
+  const lancadosPendentes = fila.filter(i => i.lancado)
+
   // Marca/desmarca "lançado no portal" — grava direto no doc da OS por tipo de item.
   // A fila é a ÚNICA fonte de escrita de fat_lancado_* (o modal do Plano 02 só lê).
   async function toggleLancado(item) {
@@ -120,6 +136,38 @@ export default function AbaFaturamento() {
     showToast('📋 Códigos copiados!')
   }
 
+  // Fecha a nota: grava em notasFiscais e vincula os itens lançados (que saem da fila).
+  async function confirmarNota({ numero, dataEmissao, dataPrevista, dataPrevistaManual, total }) {
+    setSalvandoNota(true)
+    try {
+      const itensSnap = lancadosPendentes.map(i => ({
+        os_id: i.osId, tipo: i.tipo, codigo: i.codigo, valor: i.valorCodigo,
+        num_assist: i.os.num_assist || '', nome_segurado: i.os.nome_segurado || '',
+      }))
+      const ref = await addDoc(collection(db, `empresas/${empresaId}/notasFiscais`), {
+        seguradora: segSel, numero: numero.trim(), data_emissao: dataEmissao,
+        data_prevista: dataPrevista || '', data_prevista_manual: !!dataPrevistaManual,
+        total, itens: itensSnap, status: 'aguardando', pago_em: null,
+        criado_em: serverTimestamp(),
+      })
+      // Vincular cada item à nota (sai da fila)
+      const campoNota = t => t === 'mo' ? 'fat_nota_mo_id' : t === 'desloc' ? 'fat_nota_desloc_id' : 'fat_nota_id'
+      await Promise.all(lancadosPendentes.map(i =>
+        atualizarOS(empresaId, i.osId, { [campoNota(i.tipo)]: ref.id })
+      ))
+      setReports(p => p.map(r => {
+        const meus = lancadosPendentes.filter(i => i.osId === r.id)
+        if (!meus.length) return r
+        const patch = {}; meus.forEach(i => { patch[campoNota(i.tipo)] = ref.id })
+        return { ...r, ...patch }
+      }))
+      setNotas(prev => [{ id: ref.id, seguradora: segSel, numero: numero.trim(), data_emissao: dataEmissao, data_prevista: dataPrevista || '', total, itens: itensSnap, status: 'aguardando', pago_em: null }, ...prev])
+      setShowFechar(false)
+      showToast('🧾 Nota fechada!')
+    } catch (e) { showToast('Erro ao fechar nota: ' + e.message, 'error') }
+    finally { setSalvandoNota(false) }
+  }
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 10 }}>
@@ -136,9 +184,14 @@ export default function AbaFaturamento() {
           {lancadosCount} lançados ✓ · {totalItens - lancadosCount} faltando
         </div>
         <div style={{ fontWeight: 700 }}>Total da fila: {fmtBRL(somaValores)}</div>
-        {totalItens > 0 && (
-          <button className="btn-sm btn-view" onClick={copiarCodigos}>📋 Copiar todos os códigos</button>
-        )}
+        <div style={{ display: 'flex', gap: 8 }}>
+          {totalItens > 0 && (
+            <button className="btn-sm btn-view" onClick={copiarCodigos}>📋 Copiar todos os códigos</button>
+          )}
+          <button className="btn-sm btn-primary" disabled={lancadosPendentes.length === 0} onClick={() => setShowFechar(true)}>
+            🧾 Fechar nota com os {lancadosPendentes.length} itens lançados
+          </button>
+        </div>
       </div>
 
       {totalItens === 0 && (
@@ -186,6 +239,11 @@ export default function AbaFaturamento() {
           </div>
         )
       })}
+
+      {showFechar && (
+        <ModalFecharNota seguradora={segSel} itens={lancadosPendentes} config={config}
+          salvando={salvandoNota} onConfirmar={confirmarNota} onFechar={() => setShowFechar(false)} />
+      )}
     </div>
   )
 }
