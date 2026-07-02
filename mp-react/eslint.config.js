@@ -1,6 +1,7 @@
 // Configuração do ESLint 9 (flat config) — padrão Vite + React
 import js from '@eslint/js'
 import globals from 'globals'
+import react from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
@@ -17,12 +18,16 @@ export default [
       },
     },
     plugins: {
+      react,
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,
     },
     rules: {
       ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
+      // sem esta regra, componentes usados apenas no JSX
+      // seriam marcados como "não usados" pelo no-unused-vars
+      'react/jsx-uses-vars': 'error',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       // variáveis não usadas: aviso (não erro) e ignora args iniciados com _
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrors: 'none' }],

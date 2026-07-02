@@ -21,6 +21,7 @@ const AvaliacaoPage         = lazy(() => import('./pages/AvaliacaoPage.jsx'))
 const OrcamentoTecnicoPage  = lazy(() => import('./pages/OrcamentoTecnicoPage.jsx'))
 const AprovarOrcamentoPage  = lazy(() => import('./pages/AprovarOrcamentoPage.jsx'))
 const AgendaPage            = lazy(() => import('./pages/AgendaPage.jsx'))
+const RotaPage              = lazy(() => import('./pages/RotaPage.jsx'))
 const RelatorioPage         = lazy(() => import('./pages/RelatorioPage.jsx'))
 const AssinarClientePage    = lazy(() => import('./pages/AssinarClientePage.jsx'))
 const OAuthCallbackPage     = lazy(() => import('./pages/OAuthCallbackPage.jsx'))
@@ -109,6 +110,16 @@ export default function App() {
         element={
           <RotaAdmin>
             <AgendaPage />
+          </RotaAdmin>
+        }
+      />
+
+      {/* Otimização de rota do dia — /:slug/rota (protegido) */}
+      <Route
+        path="/:slug/rota"
+        element={
+          <RotaAdmin>
+            <RotaPage />
           </RotaAdmin>
         }
       />

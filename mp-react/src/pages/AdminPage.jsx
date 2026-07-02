@@ -372,6 +372,7 @@ export default function AdminPage() {
           {[
             { id: 'dashboard',  icon: '📊', label: 'Dashboard'         },
             { id: 'agenda',     icon: '📅', label: 'Agenda'            },
+            { id: 'rota',       icon: '🗺️', label: 'Rota do Dia'       },
             { id: 'os',         icon: '📋', label: 'Ordens de Serviço' },
             { id: 'orcamentos', icon: '📄', label: 'Orçamentos'        },
             { id: 'segurados',  icon: '👥', label: 'Segurados'         },
@@ -384,7 +385,8 @@ export default function AdminPage() {
               key={item.id}
               className={`sidebar-item${abaAtiva === item.id ? ' active' : ''}`}
               onClick={() => {
-                if (item.id === 'agenda') { navigate(`/${slug}/agenda`); setSidebarOpen(false) }
+                if (item.id === 'agenda')    { navigate(`/${slug}/agenda`); setSidebarOpen(false) }
+                else if (item.id === 'rota') { navigate(`/${slug}/rota`);   setSidebarOpen(false) }
                 else { setAbaAtiva(item.id); setSidebarOpen(false) }
               }}
             >

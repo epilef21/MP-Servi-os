@@ -224,13 +224,10 @@ export default function AgendaPage() {
     window.open(`https://www.google.com/maps/search/?api=1&query=${addr}`, '_blank')
   }
 
+  // Abre a tela de otimização de rota do dia (substitui o link
+  // antigo do Google Maps, que não otimizava a ordem das paradas)
   function tracarRota() {
-    const validos = osList.filter(o => o.status !== 'cancelada' && o.endereco)
-    if (!validos.length) { alert('Nenhum endereço válido para traçar rota.'); return }
-    const enc    = validos.map(o => encodeURIComponent(`${o.endereco}, ${o.cidade}`))
-    const origem = enc[0], dest = enc[enc.length - 1]
-    const wps    = enc.length > 2 ? `&waypoints=${enc.slice(1, -1).join('|')}` : ''
-    window.open(`https://www.google.com/maps/dir/?api=1&origin=${origem}&destination=${dest}${wps}&travelmode=driving`, '_blank')
+    navigate(`/${slug}/rota`)
   }
 
   // ── Reagendar
@@ -539,7 +536,7 @@ export default function AgendaPage() {
             <span className="ag-empresa-nome">{config?.nome || empresa?.nome}</span>
           )}
         </div>
-        <button className="ag-rota-btn" onClick={tracarRota}>🗺️ Rota</button>
+        <button className="ag-rota-btn" onClick={tracarRota}>🗺️ Rota do Dia</button>
       </header>
 
       {/* ── Navegação de dia ────────────────────────────────── */}

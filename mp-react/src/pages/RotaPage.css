@@ -1,0 +1,340 @@
+/* ============================================================
+   ROTA PAGE — Otimização de rota do dia
+   Mobile first: coluna única; em telas largas, mapa ao lado
+   ============================================================ */
+
+.rota-page {
+  min-height: 100vh;
+  background: #f4f6f9;
+  padding-bottom: 40px;
+}
+
+.rota-header {
+  background: #1a3fa8;
+  color: #fff;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+}
+.rota-header h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  flex: 1;
+}
+.rota-header .rota-voltar {
+  background: rgba(255, 255, 255, .15);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 7px 12px;
+  font-size: .85rem;
+  cursor: pointer;
+}
+
+.rota-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+/* ── Passos (indicador) ────────────────────────────────────── */
+.rota-passos {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.rota-passo {
+  flex: 1;
+  text-align: center;
+  font-size: .74rem;
+  font-weight: 700;
+  color: var(--muted, #888);
+  background: #e8ecf3;
+  border-radius: 7px;
+  padding: 7px 4px;
+}
+.rota-passo.ativo    { background: #1a3fa8; color: #fff; }
+.rota-passo.completo { background: #d9e6d9; color: #1e6e3e; }
+
+/* ── Cartões genéricos ─────────────────────────────────────── */
+.rota-card {
+  background: #fff;
+  border: 1px solid #e0e4ec;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.rota-card h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.05rem;
+  margin: 0 0 10px;
+  color: #1a3fa8;
+}
+.rota-card .rota-dica {
+  font-size: .8rem;
+  color: var(--muted, #888);
+  margin-bottom: 12px;
+}
+
+/* ── Passo 1: partida ──────────────────────────────────────── */
+.rota-partida-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rota-partida-form input[type="text"],
+.rota-data-row input[type="date"] {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1.5px solid #cfd6e4;
+  border-radius: 8px;
+  font-family: 'Barlow', sans-serif;
+  font-size: .95rem;
+}
+.rota-partida-form input.erro { border-color: #c0392b; }
+
+.rota-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.rota-btn:disabled { opacity: .55; cursor: not-allowed; }
+.rota-btn-primario   { background: #1a3fa8; color: #fff; }
+.rota-btn-secundario { background: #eef1f7; color: #333; border: 1px solid #cfd6e4; }
+.rota-btn-verde      { background: #2d8a4e; color: #fff; }
+.rota-btn-whatsapp   { background: #25d366; color: #fff; }
+
+.rota-erro {
+  background: #fdecea;
+  border: 1px solid #f5b7b1;
+  color: #922b21;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: .85rem;
+  margin-top: 10px;
+}
+.rota-aviso {
+  background: #fff8e0;
+  border: 1px solid #f0d080;
+  color: #7a5c00;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: .85rem;
+  margin-top: 10px;
+}
+
+/* ── Passo 2: seleção de OS ────────────────────────────────── */
+.rota-data-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.rota-data-row label {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--muted, #666);
+  white-space: nowrap;
+}
+
+.rota-os-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 10px;
+  border-bottom: 1px solid #eef0f5;
+}
+.rota-os-item:last-child { border-bottom: none; }
+.rota-os-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 3px;
+  accent-color: #1a3fa8;
+  flex-shrink: 0;
+}
+.rota-os-info { flex: 1; min-width: 0; }
+.rota-os-nome {
+  font-weight: 700;
+  font-size: .95rem;
+  color: #222;
+}
+.rota-os-end {
+  font-size: .82rem;
+  color: var(--muted, #777);
+  margin-top: 2px;
+}
+.rota-os-meta {
+  font-size: .76rem;
+  color: var(--muted, #999);
+  margin-top: 2px;
+}
+.rota-os-item select {
+  padding: 7px 8px;
+  border: 1.5px solid #cfd6e4;
+  border-radius: 7px;
+  font-family: 'Barlow', sans-serif;
+  font-size: .8rem;
+  background: #fff;
+  flex-shrink: 0;
+}
+.rota-badge-primeiro {
+  display: inline-block;
+  background: #1a3fa8;
+  color: #fff;
+  border-radius: 9px;
+  font-size: .7rem;
+  font-weight: 700;
+  padding: 1px 8px;
+  margin-left: 6px;
+}
+
+.rota-vazio {
+  text-align: center;
+  color: var(--muted, #888);
+  font-size: .9rem;
+  padding: 24px 10px;
+}
+
+/* rodapé fixo do passo 2 */
+.rota-acao-fixa {
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(transparent, #f4f6f9 30%);
+  padding: 12px 0 4px;
+  display: flex;
+  gap: 10px;
+}
+.rota-acao-fixa .rota-btn { flex: 1; }
+
+/* ── Loading do cálculo ────────────────────────────────────── */
+.rota-calculando {
+  text-align: center;
+  padding: 34px 16px;
+}
+.rota-calculando .spinner {
+  margin: 0 auto 14px;
+}
+.rota-calculando p {
+  font-size: .92rem;
+  color: #444;
+  font-weight: 600;
+}
+
+/* ── Passo 3: resultado ────────────────────────────────────── */
+.rota-resumo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.rota-resumo-item {
+  background: #fff;
+  border: 1px solid #e0e4ec;
+  border-radius: 10px;
+  padding: 12px 8px;
+  text-align: center;
+}
+.rota-resumo-item .valor {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #1a3fa8;
+}
+.rota-resumo-item .rotulo {
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--muted, #888);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+.rota-mapa-wrap {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e0e4ec;
+  margin-bottom: 14px;
+}
+.rota-mapa-wrap .leaflet-container {
+  height: 55vh;
+  min-height: 320px;
+  width: 100%;
+}
+
+/* marcadores numerados */
+.rota-marker { background: transparent; border: none; }
+.rota-marker-pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: #1a3fa8;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rota-marker-pin span {
+  transform: rotate(45deg);
+  color: #fff;
+  font-weight: 900;
+  font-size: .82rem;
+  font-family: 'Barlow', sans-serif;
+}
+.rota-marker-pin.partida { background: #2d8a4e; }
+
+/* lista ordenada do resultado */
+.rota-parada {
+  display: flex;
+  gap: 12px;
+  padding: 11px 4px;
+  border-bottom: 1px solid #eef0f5;
+  align-items: flex-start;
+}
+.rota-parada:last-child { border-bottom: none; }
+.rota-parada .num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #1a3fa8;
+  color: #fff;
+  font-weight: 900;
+  font-size: .82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.rota-parada .num.partida { background: #2d8a4e; }
+
+.rota-botoes-final {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* ── Telas largas: seleção e mapa lado a lado ──────────────── */
+@media (min-width: 900px) {
+  .rota-resultado-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  .rota-mapa-wrap .leaflet-container { height: 66vh; }
+  .rota-botoes-final { flex-direction: row; }
+  .rota-botoes-final .rota-btn { flex: 1; }
+}
