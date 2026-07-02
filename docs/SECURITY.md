@@ -126,7 +126,7 @@ default-src 'self'
 script-src 'self'
 style-src 'self' 'unsafe-inline'
 font-src 'self' fonts.gstatic.com
-img-src 'self' data: blob: *.firebasestorage.app *.firebasestorage.googleapis.com
+img-src 'self' data: blob: *.firebasestorage.app *.firebasestorage.googleapis.com https://*.tile.openstreetmap.org
 connect-src 'self'
   https://*.googleapis.com
   https://*.firebaseapp.com
@@ -134,6 +134,10 @@ connect-src 'self'
   https://*.firebasestorage.app
   https://us-central1-checklist-53795.cloudfunctions.net
   wss://*.firebaseio.com
+  https://viacep.com.br
+  https://fcmregistrations.googleapis.com
+  https://nominatim.openstreetmap.org
+  https://router.project-osrm.org
 frame-src 'none'
 object-src 'none'
 base-uri 'self'
