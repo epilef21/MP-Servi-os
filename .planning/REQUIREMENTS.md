@@ -13,10 +13,10 @@
 ### Faturamento e Contas a Receber (FAT)
 
 - [x] **FAT-01**: Admin pode registrar em cada OS os códigos de faturamento com valor — dois por OS (mão de obra e deslocamento), sendo o segundo opcional
-- [ ] **FAT-02**: Admin vê a fila de faturamento por seguradora: todos os códigos/OS finalizadas que ainda não entraram em nenhuma nota
-- [ ] **FAT-03**: Na fila da Tempo e Maxpar, as OS finalizadas entram automaticamente pelo nº da assistência (num_assist), sem digitação de código
-- [ ] **FAT-04**: Admin pode marcar cada código/OS como "lançado no portal" (checklist), e o progresso fica salvo — ao voltar, vê exatamente onde parou
-- [ ] **FAT-05**: Na fila da Tempo e Maxpar o valor é editável na hora de faturar (valor da OS aparece só como sugestão); na Mapfre/Allianz o sistema destaca divergência entre valor do código e valor da OS
+- [x] **FAT-02**: Admin vê a fila de faturamento por seguradora: todos os códigos/OS finalizadas que ainda não entraram em nenhuma nota
+- [x] **FAT-03**: Na fila da Tempo e Maxpar, as OS finalizadas entram automaticamente pelo nº da assistência (num_assist), sem digitação de código
+- [x] **FAT-04**: Admin pode marcar cada código/OS como "lançado no portal" (checklist), e o progresso fica salvo — ao voltar, vê exatamente onde parou
+- [x] **FAT-05**: Na fila da Tempo e Maxpar o valor é editável na hora de faturar (valor da OS aparece só como sugestão); na Mapfre/Allianz o sistema destaca divergência entre valor do código e valor da OS
 - [ ] **FAT-06**: Admin pode fechar uma nota informando número da fatura e data de emissão, vinculando todos os itens marcados; a nota guarda o total somado
 - [x] **FAT-07**: Sistema calcula a data prevista de pagamento da nota pelo calendário da seguradora (Mapfre e Allianz pré-cadastrados, editáveis na Config; data manual quando a seguradora não tem calendário cadastrado)
 - [x] **FAT-08**: Sistema avisa quando a data de emissão cai em período sem faturamento (Allianz dia 26–31: nota não é paga)
@@ -66,10 +66,10 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | FAT-01 | Phase 7 | Complete |
-| FAT-02 | Phase 7 | Pending |
-| FAT-03 | Phase 7 | Pending |
-| FAT-04 | Phase 7 | Pending |
-| FAT-05 | Phase 7 | Pending |
+| FAT-02 | Phase 7 | Complete |
+| FAT-03 | Phase 7 | Complete |
+| FAT-04 | Phase 7 | Complete |
+| FAT-05 | Phase 7 | Complete |
 | FAT-06 | Phase 7 | Pending |
 | FAT-07 | Phase 7 | Complete |
 | FAT-08 | Phase 7 | Complete |

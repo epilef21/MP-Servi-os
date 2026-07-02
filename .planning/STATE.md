@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
 status: executing
-stopped_at: "Completado 07-03-PLAN.md (ConfigTab: calendarios de pagamento editaveis). Proximo: 07-04"
-last_updated: "2026-07-02T23:34:13Z"
+stopped_at: "Completado 07-04-PLAN.md (AbaFaturamento: fila por seguradora + checklist persistente). Proximo: 07-05"
+last_updated: "2026-07-02T23:50:00Z"
 last_activity: 2026-07-02
 progress:
   total_phases: 5
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
-  percent: 60
+  completed_plans: 4
+  percent: 80
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-02)
 ## Current Position
 
 Phase: 7 (Faturamento e Contas a Receber) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-07-02
 
-Progress: [██████░░░░] 60%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -52,7 +52,7 @@ Progress: [██████░░░░] 60%
 | 6. Relatório Mensal em PDF | 2 | 2 | ~8 min |
 | 7-11. Financeiro Completo | TBD | 2 | ~8 min |
 
-**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7 Plan 1 (utils/faturamento.js + 27 testes Vitest), Plan 2 (DetalheOSModal: códigos MO+deslocamento) e Plan 3 (ConfigTab: calendário de pagamento editável) executados.
+**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7 Plan 1 (utils/faturamento.js + 27 testes Vitest), Plan 2 (DetalheOSModal: códigos MO+deslocamento), Plan 3 (ConfigTab: calendário de pagamento editável) e Plan 4 (AbaFaturamento: fila por seguradora + checklist persistente) executados.
 
 **Per-Plan Metrics (v1.2):**
 
@@ -61,6 +61,7 @@ Progress: [██████░░░░] 60%
 | Phase 07 P01 | 12min | 2 tasks | 2 files |
 | Phase 07 P02 | 5min | 2 tasks | 1 file |
 | Phase 07 P03 | 9min | 2 tasks | 1 file |
+| Phase 07 P04 | ~15min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,8 @@ Progress: [██████░░░░] 60%
 - [Phase 7]: 07-02: Handler marcarLancado e estado savingLancado removidos do DetalheOSModal — checklist de lancamento passa a viver exclusivamente na fila da AbaFaturamento (Plano 04), fonte de verdade unica
 - [Phase 7]: 07-03: Secao de calendario adicionada dentro da sub-aba "Tarifas" do ConfigTab (nao criou sub-aba nova) — evita colidir com a sub-aba 'calendario' que ja e usada para Google Calendar
 - [Phase 7]: 07-03: saveCalendario sempre espelha Mondial = Allianz ao gravar, mantendo o alias estabelecido em 07-01
+- [Phase 7]: 07-04: AbaFaturamento e a UNICA fonte de escrita do checklist fat_lancado_* — DetalheOSModal (07-02) permanece somente-leitura
+- [Phase 7]: 07-04: toggleLancado migra definitivamente o legado ao gravar item MO — zera fat_lancado_em e grava fat_lancado_mo_em
 
 ### Pending Todos
 
@@ -89,6 +92,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-02T23:34:13Z
-Stopped at: Completado 07-03-PLAN.md (ConfigTab: calendarios de pagamento editaveis). Proximo: 07-04
+Last session: 2026-07-02T23:50:00Z
+Stopped at: Completado 07-04-PLAN.md (AbaFaturamento: fila por seguradora + checklist persistente). Proximo: 07-05
 Resume file: None
