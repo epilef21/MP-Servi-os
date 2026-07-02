@@ -68,7 +68,7 @@
   5. Admin fecha uma nota informando número e data de emissão vinculando os itens marcados; o sistema calcula sozinho a data prevista de pagamento pelo calendário da seguradora (avisando quando a data cai em período sem faturamento), mostra status aguardando/paga/atrasada por seguradora, e marcar como paga quita de uma vez todas as OS vinculadas
 **Plans**: 5 plans (3 waves)
 Plans:
-- [ ] 07-01-PLAN.md — utils/faturamento.js: regras de calendário, data prevista, dia útil, divergência + testes Vitest (FAT-07, FAT-08)
+- [x] 07-01-PLAN.md — utils/faturamento.js: regras de calendário, data prevista, dia útil, divergência + testes Vitest (FAT-07, FAT-08)
 - [ ] 07-02-PLAN.md — DetalheOSModal: dois códigos por OS (MO + deslocamento), migração do legado (FAT-01)
 - [ ] 07-03-PLAN.md — ConfigTab: calendários de pagamento editáveis por seguradora (FAT-07)
 - [ ] 07-04-PLAN.md — AbaFaturamento: fila por seguradora + checklist persistente + valor editável/divergência (FAT-02, FAT-03, FAT-04, FAT-05)

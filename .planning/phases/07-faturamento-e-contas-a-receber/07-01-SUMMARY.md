@@ -92,6 +92,14 @@ None - no external service configuration required.
 - Módulo `utils/faturamento.js` pronto para ser consumido por: ConfigTab (editar `calendarioFaturamento`), fila de faturamento (usar `getDivergenciaFat` e `digitosCodigo`), e fluxo "Fechar Nota" (usar `calcularDataPrevista`)
 - Nenhum bloqueio identificado para os próximos planos da Phase 7 (fila de faturamento, códigos na OS, notas/faturas, painel-resumo)
 
+## Self-Check: PASSED
+
+- FOUND: mp-react/src/utils/faturamento.js
+- FOUND: mp-react/src/__tests__/faturamento.test.js
+- FOUND: .planning/phases/07-faturamento-e-contas-a-receber/07-01-SUMMARY.md
+- FOUND commit: 53615e1
+- FOUND commit: 53aeda6
+
 ---
 *Phase: 07-faturamento-e-contas-a-receber*
 *Completed: 2026-07-02*

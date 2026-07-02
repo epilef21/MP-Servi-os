@@ -18,8 +18,8 @@
 - [ ] **FAT-04**: Admin pode marcar cada código/OS como "lançado no portal" (checklist), e o progresso fica salvo — ao voltar, vê exatamente onde parou
 - [ ] **FAT-05**: Na fila da Tempo e Maxpar o valor é editável na hora de faturar (valor da OS aparece só como sugestão); na Mapfre/Allianz o sistema destaca divergência entre valor do código e valor da OS
 - [ ] **FAT-06**: Admin pode fechar uma nota informando número da fatura e data de emissão, vinculando todos os itens marcados; a nota guarda o total somado
-- [ ] **FAT-07**: Sistema calcula a data prevista de pagamento da nota pelo calendário da seguradora (Mapfre e Allianz pré-cadastrados, editáveis na Config; data manual quando a seguradora não tem calendário cadastrado)
-- [ ] **FAT-08**: Sistema avisa quando a data de emissão cai em período sem faturamento (Allianz dia 26–31: nota não é paga)
+- [x] **FAT-07**: Sistema calcula a data prevista de pagamento da nota pelo calendário da seguradora (Mapfre e Allianz pré-cadastrados, editáveis na Config; data manual quando a seguradora não tem calendário cadastrado)
+- [x] **FAT-08**: Sistema avisa quando a data de emissão cai em período sem faturamento (Allianz dia 26–31: nota não é paga)
 - [ ] **FAT-09**: Admin vê as notas com status aguardando pagamento / paga / atrasada, e o total a receber por seguradora com datas previstas
 - [ ] **FAT-10**: Admin pode marcar uma nota como paga, quitando todas as OS vinculadas de uma vez
 
@@ -71,8 +71,8 @@
 | FAT-04 | Phase 7 | Pending |
 | FAT-05 | Phase 7 | Pending |
 | FAT-06 | Phase 7 | Pending |
-| FAT-07 | Phase 7 | Pending |
-| FAT-08 | Phase 7 | Pending |
+| FAT-07 | Phase 7 | Complete |
+| FAT-08 | Phase 7 | Complete |
 | FAT-09 | Phase 7 | Pending |
 | FAT-10 | Phase 7 | Pending |
 | TEC-01 | Phase 8 | Pending |

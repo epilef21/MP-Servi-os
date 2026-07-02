@@ -2,15 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
-status: planning
-last_updated: "2026-07-02T19:30:00.000Z"
+status: executing
+stopped_at: "Completado 07-01-PLAN.md (utils/faturamento.js). Proximo: 07-02"
+last_updated: "2026-07-02T23:18:12.139Z"
 last_activity: 2026-07-02
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 5
+  completed_plans: 1
+  percent: 20
 ---
 
 # Project State
@@ -20,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-02)
 
 **Core value:** Da OS finalizada até o dinheiro na conta — o admin controla faturamento, recebimento, pagamentos e caixa em um lugar só.
-**Current focus:** v1.2 Financeiro Completo — Roadmap criado (Phases 7-11), pronto para planejar Phase 7
+**Current focus:** Phase 7 — Faturamento e Contas a Receber
 
 ## Current Position
 
-Phase: Not started (Phase 7 of 11 — Faturamento e Contas a Receber)
-Plan: — (TBD, definido em /gsd-plan-phase 7)
-Status: Ready to plan Phase 7
-Last activity: 2026-07-02 — ROADMAP.md criado para v1.2 (Phases 7-11), 20/20 requisitos mapeados
+Phase: 7 (Faturamento e Contas a Receber) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-07-02
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
@@ -51,7 +52,13 @@ Progress: [░░░░░░░░░░] 0%
 | 6. Relatório Mensal em PDF | 2 | 2 | ~8 min |
 | 7-11. Financeiro Completo | TBD | 0 | - |
 
-**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — requisitos definidos e roadmap criado, execução ainda não começou.
+**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7 Plan 1 executado (utils/faturamento.js + 27 testes Vitest).
+
+**Per-Plan Metrics (v1.2):**
+
+| Phase/Plan | Duration | Tasks | Files |
+|------------|----------|-------|-------|
+| Phase 07 P01 | 12min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -62,6 +69,8 @@ Progress: [░░░░░░░░░░] 0%
 - Pre-start (v1.2): Calendários de pagamento (Mapfre, Allianz) pré-cadastrados e editáveis via Config; demais seguradoras usam data manual até serem levantadas
 - Pre-start (v1.2): Fluxo de Caixa (Phase 10) depende dos dados de notas pagas, técnicos pagos e despesas pagas produzidos nas Phases 7-9
 - Pre-start (v1.2): Fechamento do mês (Phase 11) depende de todas as áreas financeiras anteriores estarem completas antes de travar lançamentos
+- [Phase 7]: 07-01: Mondial usa o mesmo objeto de calendario da Allianz (alias, nao copia)
+- [Phase 7]: 07-01: calcularDataPrevista formata data com helper local (padStart) em vez de toISOString, evitando bug de timezone
 
 ### Pending Todos
 
@@ -74,6 +83,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-02
-Stopped at: ROADMAP.md, REQUIREMENTS.md e STATE.md atualizados para v1.2 (Phases 7-11). Próximo: `/gsd-plan-phase 7`
+Last session: 2026-07-02T23:18:12.129Z
+Stopped at: Completado 07-01-PLAN.md (utils/faturamento.js). Proximo: 07-02
 Resume file: None
