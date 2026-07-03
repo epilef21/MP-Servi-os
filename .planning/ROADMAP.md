@@ -85,7 +85,12 @@ Plans:
   1. Admin cadastra chave PIX e forma de pagamento no cadastro do técnico
   2. Admin vê o fechamento mensal por técnico: lista das OS do mês com valor do prestador e total a pagar
   3. Admin marca o fechamento do técnico como pago (com data) e consulta depois o histórico de pagamentos daquele técnico
-**Plans**: TBD
+**Plans**: 4 plans (3 waves)
+Plans:
+- [ ] 08-01-PLAN.md — utils/fechamentoTecnicos.js: agrupamento por técnico + total do mês (criado_em) + testes Vitest (TEC-02)
+- [ ] 08-02-PLAN.md — TecnicosTab: chave PIX + forma de pagamento no cadastro do técnico (TEC-01)
+- [ ] 08-03-PLAN.md — Firestore rule fechamentosTecnicos + deploy + aba "👷 Técnicos" (fechamento mensal por técnico, PIX copiável, status derivado) (TEC-02, TEC-03)
+- [ ] 08-04-PLAN.md — Marcar fechamento como pago (snapshot imutável) + histórico consultável de pagamentos (TEC-03)
 **UI hint**: yes
 
 ---
@@ -141,7 +146,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 5. Compressão de Imagens | v1.1 | 1/1 | Complete | 2026-05-04 |
 | 6. Relatório Mensal em PDF | v1.1 | 2/2 | Complete | 2026-05-05 |
 | 7. Faturamento e Contas a Receber | v1.2 | 5/5 | Complete | 2026-07-02 |
-| 8. Fechamento de Técnicos | v1.2 | 0/TBD | Not started | - |
+| 8. Fechamento de Técnicos | v1.2 | 0/4 | Planned | - |
 | 9. Contas a Pagar | v1.2 | 0/TBD | Not started | - |
 | 10. Fluxo de Caixa e Evolução | v1.2 | 0/TBD | Not started | - |
 | 11. Exportação e Fechamento do Mês | v1.2 | 0/TBD | Not started | - |
