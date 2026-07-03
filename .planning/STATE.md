@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
 status: executing
-stopped_at: "Completado 07-04-PLAN.md (AbaFaturamento: fila por seguradora + checklist persistente). Proximo: 07-05"
-last_updated: "2026-07-02T23:50:00Z"
+stopped_at: "Completado 07-05-PLAN.md (Fechar Nota + status/painel a receber + marcar paga). Phase 7 completa (5/5). Proximo: Phase 8"
+last_updated: "2026-07-02T23:59:00Z"
 last_activity: 2026-07-02
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 5
-  completed_plans: 4
-  percent: 80
+  completed_plans: 5
+  percent: 100
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-02)
 
 **Core value:** Da OS finalizada até o dinheiro na conta — o admin controla faturamento, recebimento, pagamentos e caixa em um lugar só.
-**Current focus:** Phase 7 — Faturamento e Contas a Receber
+**Current focus:** Phase 7 — Faturamento e Contas a Receber (COMPLETA) — próximo: Phase 8 (Fechamento de Técnicos)
 
 ## Current Position
 
-Phase: 7 (Faturamento e Contas a Receber) — EXECUTING
+Phase: 7 (Faturamento e Contas a Receber) — COMPLETE (5/5 plans)
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase concluída — aguardando /gsd-plan-phase 8
 Last activity: 2026-07-02
 
-Progress: [████████░░] 80%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 12 (2 v1.0 infra/base + 2 v1.0 auth/fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 2 v1.2 fase 7, arredondado — ver ROADMAP.md para detalhe por fase)
-- Average duration: ~6 min
-- Total execution time: ~0.8 hours
+- Total plans completed: 15 (2 v1.0 infra/base + 2 v1.0 auth/fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 5 v1.2 fase 7, arredondado — ver ROADMAP.md para detalhe por fase)
+- Average duration: ~7 min
+- Total execution time: ~1 hour
 
 **By Phase:**
 
@@ -50,9 +50,10 @@ Progress: [████████░░] 80%
 | 4. Fluxos Críticos | 2 | 2 | ~4 min |
 | 5. Compressão de Imagens | 1 | 1 | ~4 min |
 | 6. Relatório Mensal em PDF | 2 | 2 | ~8 min |
-| 7-11. Financeiro Completo | TBD | 2 | ~8 min |
+| 7. Faturamento e Contas a Receber | 5 | 5 | ~11 min |
+| 8-11. Financeiro Completo (restante) | TBD | 0 | - |
 
-**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7 Plan 1 (utils/faturamento.js + 27 testes Vitest), Plan 2 (DetalheOSModal: códigos MO+deslocamento), Plan 3 (ConfigTab: calendário de pagamento editável) e Plan 4 (AbaFaturamento: fila por seguradora + checklist persistente) executados.
+**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7 completa: Plan 1 (utils/faturamento.js + 27 testes Vitest), Plan 2 (DetalheOSModal: códigos MO+deslocamento), Plan 3 (ConfigTab: calendário de pagamento editável), Plan 4 (AbaFaturamento: fila por seguradora + checklist persistente) e Plan 5 (Fechar Nota + status/painel a receber + marcar paga) executados. Phase 7 (Faturamento e Contas a Receber) 100% concluída — próxima: Phase 8 (Fechamento de Técnicos).
 
 **Per-Plan Metrics (v1.2):**
 
@@ -62,6 +63,7 @@ Progress: [████████░░] 80%
 | Phase 07 P02 | 5min | 2 tasks | 1 file |
 | Phase 07 P03 | 9min | 2 tasks | 1 file |
 | Phase 07 P04 | ~15min | 2 tasks | 2 files |
+| Phase 07 P05 | ~20min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -80,6 +82,9 @@ Progress: [████████░░] 80%
 - [Phase 7]: 07-03: saveCalendario sempre espelha Mondial = Allianz ao gravar, mantendo o alias estabelecido em 07-01
 - [Phase 7]: 07-04: AbaFaturamento e a UNICA fonte de escrita do checklist fat_lancado_* — DetalheOSModal (07-02) permanece somente-leitura
 - [Phase 7]: 07-04: toggleLancado migra definitivamente o legado ao gravar item MO — zera fat_lancado_em e grava fat_lancado_mo_em
+- [Phase 7]: 07-05: statusNota deriva atrasada comparando data_prevista com hoje na leitura — nunca gravado no Firestore, sem job/cron
+- [Phase 7]: 07-05: Quitacao em massa das OS vinculadas usa Promise.all de atualizarOS (loop), nao writeBatch — firebase.js nao exporta essa funcao
+- [Phase 7]: 07-05: Nota grava snapshot imutavel dos itens (os_id, tipo, codigo, valor, num_assist, nome_segurado) em vez de referencia viva a OS, protegendo o historico contra edicoes futuras
 
 ### Pending Todos
 
@@ -92,6 +97,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-02T23:50:00Z
-Stopped at: Completado 07-04-PLAN.md (AbaFaturamento: fila por seguradora + checklist persistente). Proximo: 07-05
+Last session: 2026-07-02T23:59:00Z
+Stopped at: Completado 07-05-PLAN.md (Fechar Nota + status/painel a receber + marcar paga). Phase 7 completa (5/5). Proximo: /gsd-plan-phase 8
 Resume file: None
