@@ -8,8 +8,16 @@
 export const SEGS_COM_CODIGO = ['Mapfre', 'Allianz', 'Mondial']
 // Seguradoras cuja fila monta automática pelo nº da assistência, sem código
 export const SEGS_AUTO_NUM_ASSIST = ['Tempo', 'Maxpar']
-// Status de OS considerados "finalizados"/faturáveis (espelha DashboardTab.jsx:104)
-export const STATUS_FATURAVEIS = ['processado', 'enviado']
+// Status de OS considerados "finalizados"/faturáveis.
+// Inclui 'concluido': o técnico terminou e a seguradora já pode liberar o código —
+// é exatamente a OS que o admin fatura na prática (para Mapfre/Allianz o item só
+// entra na fila se o código estiver preenchido, então não há risco de faturar cedo demais).
+export const STATUS_FATURAVEIS = ['concluido', 'processado', 'enviado']
+
+// Normaliza nome de seguradora para comparação (portais variam maiúsculas/espaços)
+export function normSeguradora(s) {
+  return String(s || '').trim().toLowerCase()
+}
 
 // Nº de dígitos do código por seguradora
 // Mapfre = 8 dígitos ("movimento económico" MAWDY); Allianz/Mondial = 2 dígitos

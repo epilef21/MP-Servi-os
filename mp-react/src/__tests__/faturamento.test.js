@@ -133,6 +133,6 @@ describe('grupos de seguradora', () => {
   it('Mapfre e Allianz têm código; Tempo e Maxpar entram pelo num_assist', () => {
     expect(SEGS_COM_CODIGO).toContain('Mapfre')
     expect(SEGS_AUTO_NUM_ASSIST).toEqual(['Tempo', 'Maxpar'])
-    expect(STATUS_FATURAVEIS).toEqual(['processado', 'enviado'])
+    expect(STATUS_FATURAVEIS).toEqual(['concluido', 'processado', 'enviado'])
   })
 })

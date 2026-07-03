@@ -210,6 +210,12 @@ service cloud.firestore {
         allow read, write: if isUserOfEmpresa(empresaId) || isSuperAdmin();
       }
 
+      // ── /empresas/{empresaId}/notasFiscais/{id} ──────────
+      // Notas de faturamento por seguradora (aba Faturamento).
+      match /notasFiscais/{id} {
+        allow read, write: if isUserOfEmpresa(empresaId) || isSuperAdmin();
+      }
+
       // ── /empresas/{empresaId}/orcamentos/{orcamentoId} ───
       // Orçamentos gerados pelo admin, preenchidos pelo técnico,
       // aprovados/reprovados pelo cliente via link público.

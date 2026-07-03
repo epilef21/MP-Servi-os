@@ -9,7 +9,7 @@ import { db, collection, addDoc, getDocs, updateDoc, doc, query, orderBy, server
 import { useAdminContext } from '../../../contexts/AdminContext.jsx'
 import { fmtBRL, fmtDate } from '../../../utils/formatters.js'
 import { copyToClipboard } from '../../../utils/clipboard.js'
-import { SEGS_COM_CODIGO, SEGS_AUTO_NUM_ASSIST, STATUS_FATURAVEIS, getDivergenciaFat } from '../../../utils/faturamento.js'
+import { SEGS_COM_CODIGO, SEGS_AUTO_NUM_ASSIST, STATUS_FATURAVEIS, getDivergenciaFat, normSeguradora } from '../../../utils/faturamento.js'
 import ModalFecharNota from './ModalFecharNota.jsx'
 
 // Status derivado da nota — 'atrasada' NUNCA é gravado, só calculado na leitura.
@@ -44,20 +44,31 @@ export default function AbaFaturamento() {
 
   // Seguradoras disponíveis no seletor: lista fixa conhecida + o que existir em reports
   const seguradoras = useMemo(() => {
-    const doReports = new Set(
-      reports.filter(r => STATUS_FATURAVEIS.includes(r.status)).map(r => r.seguradora).filter(Boolean)
-    )
-    return [...new Set([...SEGS_COM_CODIGO, ...SEGS_AUTO_NUM_ASSIST, ...doReports])]
+    const lista = [...SEGS_COM_CODIGO, ...SEGS_AUTO_NUM_ASSIST]
+    const conhecidas = new Set(lista.map(normSeguradora))
+    for (const r of reports) {
+      if (!r.seguradora) continue
+      const norm = normSeguradora(r.seguradora)
+      if (!conhecidas.has(norm)) {
+        conhecidas.add(norm)
+        lista.push(String(r.seguradora).trim())
+      }
+    }
+    return lista
   }, [reports])
 
   const comCodigo = SEGS_COM_CODIGO.includes(segSel)
 
+  // OS da seguradora selecionada (comparação tolerante a maiúsculas/espaços —
+  // os portais gravam "MAPFRE", "Mapfre " etc.)
+  const osDaSeguradora = useMemo(() =>
+    reports.filter(r => normSeguradora(r.seguradora) === normSeguradora(segSel)),
+  [reports, segSel])
+
   // Fila derivada de reports para a seguradora selecionada.
   // Um item só entra se ainda NÃO estiver vinculado a nenhuma nota (fat_nota_*_id vazio).
   const fila = useMemo(() => {
-    const finalizadas = reports.filter(r =>
-      r.seguradora === segSel && STATUS_FATURAVEIS.includes(r.status)
-    )
+    const finalizadas = osDaSeguradora.filter(r => STATUS_FATURAVEIS.includes(r.status))
     const itens = []
     for (const os of finalizadas) {
       if (SEGS_COM_CODIGO.includes(segSel)) {
@@ -100,7 +111,20 @@ export default function AbaFaturamento() {
       }
     }
     return itens
-  }, [reports, segSel])
+  }, [osDaSeguradora, segSel])
+
+  // Diagnóstico da fila vazia: explica POR QUE cada OS da seguradora não entrou
+  const diagnostico = useMemo(() => {
+    const naoFinalizadas = osDaSeguradora.filter(r => !STATUS_FATURAVEIS.includes(r.status)).length
+    const finalizadas = osDaSeguradora.filter(r => STATUS_FATURAVEIS.includes(r.status))
+    const semCodigo = SEGS_COM_CODIGO.includes(segSel)
+      ? finalizadas.filter(os => !(os.fat_codigo_mo || os.fat_codigo) && !os.fat_nota_mo_id).length
+      : 0
+    const jaFaturadas = finalizadas.filter(os =>
+      SEGS_COM_CODIGO.includes(segSel) ? !!os.fat_nota_mo_id : !!os.fat_nota_id
+    ).length
+    return { totalSeg: osDaSeguradora.length, naoFinalizadas, semCodigo, jaFaturadas }
+  }, [osDaSeguradora, segSel])
 
   const lancadosCount = fila.filter(i => i.lancado).length
   const totalItens = fila.length
@@ -254,7 +278,25 @@ export default function AbaFaturamento() {
 
       {totalItens === 0 && (
         <div className="empty-state" style={{ padding: '24px' }}>
-          <p>Nenhum item finalizado pendente de faturamento para {segSel}.</p>
+          <p>Nenhum item pendente de faturamento para {segSel}.</p>
+          {diagnostico.totalSeg === 0 ? (
+            <p style={{ fontSize: '.85rem', color: 'var(--muted)', marginTop: 8 }}>
+              Nenhuma OS da {segSel} encontrada no sistema.
+            </p>
+          ) : (
+            <div style={{ fontSize: '.85rem', color: 'var(--muted)', marginTop: 8, lineHeight: 1.7 }}>
+              {segSel} tem {diagnostico.totalSeg} OS no total:
+              {diagnostico.naoFinalizadas > 0 && (
+                <div>• {diagnostico.naoFinalizadas} ainda não finalizada{diagnostico.naoFinalizadas > 1 ? 's' : ''} (entram na fila quando o status virar concluído, processado ou enviado)</div>
+              )}
+              {diagnostico.semCodigo > 0 && (
+                <div>• {diagnostico.semCodigo} finalizada{diagnostico.semCodigo > 1 ? 's' : ''} sem código de faturamento — abra a OS e preencha o código no Passo de faturamento</div>
+              )}
+              {diagnostico.jaFaturadas > 0 && (
+                <div>• {diagnostico.jaFaturadas} já vinculada{diagnostico.jaFaturadas > 1 ? 's' : ''} a uma nota (veja a lista de notas abaixo)</div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
