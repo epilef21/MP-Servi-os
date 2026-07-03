@@ -22,7 +22,7 @@ Fechamento mensal de pagamento dos técnicos: quanto devo a cada técnico no mê
 
 ### Modelo de negócio relevante (da conversa e do código)
 - O valor devido ao técnico por OS já existe: campo `valor_prestador` na OS (`empresas/{id}/checklist/{osId}`).
-- O técnico da OS está no campo `tecnico` (nome) da OS; técnicos cadastrados vivem em `empresas/{id}/tecnicos`.
+- O técnico da OS está nos campos `tecnico_nome` (nome, texto livre) e `tecnico_id` (id do cadastro, quando selecionado) — confirmado em DetalheOSModal.jsx/NovaOSModal.jsx. NÃO existe campo `tecnico` na OS. Técnicos cadastrados vivem em `empresas/{id}/tecnicos`. Casar por `tecnico_id` primeiro, com fallback por nome normalizado.
 - Mês de referência: mesmo padrão `mesRef` (YYYY-MM) do FinanceiroEmpresaTab, navegável ◄ ►.
 
 ### Onde vive na UI (LOCKED)
