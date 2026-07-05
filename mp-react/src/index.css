@@ -1541,6 +1541,23 @@ body {
 }
 .fin-periodo-btn:hover { background: #e8f0fb; border-color: var(--primary); }
 
+/* ── FINANCEIRO — Banner de contas a vencer/atrasadas (topo, qualquer aba) ── */
+.fin-alerta-contas {
+  background: #fff8e6;
+  border: 1.5px solid #f0a500;
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: .85rem;
+  color: #6d4800;
+  font-weight: 600;
+}
+
 /* ── FINANCEIRO — Alerta de despesas pendentes ── */
 .despesa-alerta {
   background: #fff8e6;

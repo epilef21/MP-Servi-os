@@ -18,7 +18,7 @@ import {
 } from '../../firebase.js'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { fmtBRL } from '../../utils/formatters.js'
-import { dataVencimentoDoMes, statusDespesa, diasParaVencer } from '../../utils/contasPagar.js'
+import { dataVencimentoDoMes, statusDespesa, diasParaVencer, resumoAlertas } from '../../utils/contasPagar.js'
 import AbaFaturamento from './faturamento/AbaFaturamento.jsx'
 import AbaFechamentoTecnicos from './fechamento/AbaFechamentoTecnicos.jsx'
 
@@ -199,6 +199,9 @@ export default function FinanceiroEmpresaTab() {
 
   // ── DRE calculado em memória ─────────────────────────────
   const dre = calcularDRE(reports, mesRef, particulares, despesasMensais, deducoes, resultFinanceiro)
+
+  // ── Alertas de contas a pagar (mês corrente já carregado) ─
+  const alertas = resumoAlertas(despesasMensais, hojeISO())
 
   // ── Despesas variáveis pendentes ─────────────────────────
   const pendentes = despesasRecorrentes.filter(r =>
@@ -489,6 +492,18 @@ export default function FinanceiroEmpresaTab() {
           <button className="fin-periodo-btn" onClick={() => setMesRef(m => navegarMes(m, +1))}>►</button>
         </div>
       </div>
+
+      {!carregando && alertas.total > 0 && (
+        <div className="fin-alerta-contas">
+          <span>
+            🔔 {[
+              alertas.aVencer > 0 ? `${alertas.aVencer} conta${alertas.aVencer > 1 ? 's' : ''} vence${alertas.aVencer > 1 ? 'm' : ''} esta semana` : null,
+              alertas.atrasadas > 0 ? `${alertas.atrasadas} atrasada${alertas.atrasadas > 1 ? 's' : ''}` : null,
+            ].filter(Boolean).join(' · ')}
+          </span>
+          <button className="btn-sm btn-view" onClick={() => setAbaFin('despesas')}>Ver despesas</button>
+        </div>
+      )}
 
       {/* Abas internas */}
       <div className="fin-tabs">
