@@ -208,6 +208,27 @@ export default function TecnicosTab() {
                   />
                 </div>
 
+                <div className="field" style={{ gridColumn: '1/-1' }}>
+                  <label>Chave PIX (opcional)</label>
+                  <input
+                    value={formData.chave_pix}
+                    onChange={e => setFormData(p => ({ ...p, chave_pix: e.target.value }))}
+                    placeholder="CPF, telefone, e-mail ou chave aleatória"
+                  />
+                </div>
+
+                <div className="field">
+                  <label>Forma de pagamento</label>
+                  <select
+                    value={formData.forma_pagamento}
+                    onChange={e => setFormData(p => ({ ...p, forma_pagamento: e.target.value }))}
+                  >
+                    <option value="pix">PIX</option>
+                    <option value="dinheiro">Dinheiro</option>
+                    <option value="transferencia">Transferência</option>
+                  </select>
+                </div>
+
                 <div style={{ gridColumn: '1/-1' }}>
                   <div className="toggle-wrap">
                     <label className="toggle-switch">
