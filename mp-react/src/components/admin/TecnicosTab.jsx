@@ -9,6 +9,7 @@ const AVATAR_COLORS = ['av0', 'av1', 'av2', 'av3']
 
 const TECNICO_FORM_INITIAL = {
   nome: '', telefone: '', email: '', especialidade: '', ativo: true,
+  chave_pix: '', forma_pagamento: 'pix',
 }
 
 export default function TecnicosTab() {
@@ -26,7 +27,11 @@ export default function TecnicosTab() {
   function openModal(tec = null) {
     setEditando(tec)
     setFormData(tec
-      ? { nome: tec.nome || '', telefone: tec.telefone || '', email: tec.email || '', especialidade: tec.especialidade || '', ativo: tec.ativo !== false }
+      ? {
+        nome: tec.nome || '', telefone: tec.telefone || '', email: tec.email || '', especialidade: tec.especialidade || '', ativo: tec.ativo !== false,
+        chave_pix:       tec.chave_pix || '',
+        forma_pagamento: tec.forma_pagamento || 'pix',
+      }
       : TECNICO_FORM_INITIAL
     )
     setFormErrors({})
@@ -48,6 +53,8 @@ export default function TecnicosTab() {
         email:         formData.email.trim()         || '',
         especialidade: formData.especialidade.trim() || '',
         ativo:         formData.ativo,
+        chave_pix:       formData.chave_pix.trim() || '',
+        forma_pagamento: formData.forma_pagamento || 'pix',
       }
 
       if (editando) {
