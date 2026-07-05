@@ -18,6 +18,7 @@ import {
 } from '../../firebase.js'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { fmtBRL } from '../../utils/formatters.js'
+import { dataVencimentoDoMes } from '../../utils/contasPagar.js'
 import AbaFaturamento from './faturamento/AbaFaturamento.jsx'
 import AbaFechamentoTecnicos from './fechamento/AbaFechamentoTecnicos.jsx'
 
@@ -83,7 +84,7 @@ const FORM_DESP_RECORRENTE_INICIAL = {
 }
 const FORM_DESP_MENSAL_INICIAL = {
   descricao: '', categoria: 'outro', valor: '',
-  despesa_recorrente_id: '', data_pagamento: '',
+  despesa_recorrente_id: '', data_pagamento: '', data_vencimento: '',
 }
 const FORM_PARTICULAR_INICIAL = {
   descricao: '', cliente: '', valor_recebido: '', valor_custo: '',
@@ -214,6 +215,7 @@ export default function FinanceiroEmpresaTab() {
           valor:          f.valor || 0,
           mes_referencia: mesRef,
           data_pagamento: '',
+          data_vencimento: f.dia_vencimento ? (dataVencimentoDoMes(f.dia_vencimento, mesRef) || '') : '',
           criado_em:      serverTimestamp(),
         })
       }
@@ -293,6 +295,7 @@ export default function FinanceiroEmpresaTab() {
       valor:                 String(l.valor || ''),
       despesa_recorrente_id: l.despesa_recorrente_id || '',
       data_pagamento:        l.data_pagamento || '',
+      data_vencimento:       l.data_vencimento || '',
     })
     setShowModalMensal(true)
   }
@@ -306,6 +309,7 @@ export default function FinanceiroEmpresaTab() {
         valor:                 parseFloat(formMensal.valor) || 0,
         mes_referencia:        mesRef,
         data_pagamento:        formMensal.data_pagamento || '',
+        data_vencimento:       formMensal.data_vencimento || '',
         despesa_recorrente_id: formMensal.despesa_recorrente_id || '',
       }
       if (editandoMensal) {
@@ -1280,10 +1284,17 @@ function ModalLancamentoMensal({ form, setForm, salvando, editando, mesRef, onSa
             </div>
           </div>
 
-          <div className="field">
-            <label>Data de Pagamento</label>
-            <input type="date" value={form.data_pagamento}
-              onChange={e => setForm(p => ({ ...p, data_pagamento: e.target.value }))} />
+          <div className="row col-2">
+            <div className="field">
+              <label>Vence em</label>
+              <input type="date" value={form.data_vencimento}
+                onChange={e => setForm(p => ({ ...p, data_vencimento: e.target.value }))} />
+            </div>
+            <div className="field">
+              <label>Pago em</label>
+              <input type="date" value={form.data_pagamento}
+                onChange={e => setForm(p => ({ ...p, data_pagamento: e.target.value }))} />
+            </div>
           </div>
         </div>
         <div className="modal-footer">
