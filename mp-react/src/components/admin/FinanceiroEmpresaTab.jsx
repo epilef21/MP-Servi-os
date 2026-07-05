@@ -79,7 +79,7 @@ const GRUPOS_DESPESA = {
 
 // ── Estados iniciais dos modais ──────────────────────────────
 const FORM_DESP_RECORRENTE_INICIAL = {
-  descricao: '', categoria: 'outro', valor: '', tipo: 'fixa',
+  descricao: '', categoria: 'outro', valor: '', tipo: 'fixa', dia_vencimento: '',
 }
 const FORM_DESP_MENSAL_INICIAL = {
   descricao: '', categoria: 'outro', valor: '',
@@ -234,7 +234,13 @@ export default function FinanceiroEmpresaTab() {
   }
   function abrirEditarRecorrente(r) {
     setEditandoRecorrente(r)
-    setFormRecorrente({ descricao: r.descricao, categoria: r.categoria, valor: String(r.valor || ''), tipo: r.tipo })
+    setFormRecorrente({
+      descricao: r.descricao,
+      categoria: r.categoria,
+      valor: String(r.valor || ''),
+      tipo: r.tipo,
+      dia_vencimento: r.dia_vencimento ? String(r.dia_vencimento) : '',
+    })
     setShowModalRecorrente(true)
   }
   async function salvarRecorrente() {
@@ -247,6 +253,7 @@ export default function FinanceiroEmpresaTab() {
         valor:     parseFloat(formRecorrente.valor) || 0,
         tipo:      formRecorrente.tipo,
         ativa:     true,
+        dia_vencimento: formRecorrente.dia_vencimento ? Number(formRecorrente.dia_vencimento) : null,
       }
       if (editandoRecorrente) {
         await updateDoc(doc(db, `empresas/${empresaId}/despesasRecorrentes`, editandoRecorrente.id), payload)
@@ -1191,6 +1198,15 @@ function ModalDespesaRecorrente({ form, setForm, salvando, editando, onSalvar, o
                 onChange={e => setForm(p => ({ ...p, valor: e.target.value }))}
                 placeholder="0,00" />
             </div>
+          </div>
+
+          <div className="field" style={{ marginBottom: 12 }}>
+            <label>Dia de Vencimento</label>
+            <input type="number" min="1" max="31"
+              value={form.dia_vencimento}
+              onChange={e => setForm(p => ({ ...p, dia_vencimento: e.target.value }))}
+              placeholder="Ex: 10" />
+            <small style={{ color: 'var(--muted)' }}>Dia do mês em que vence (opcional)</small>
           </div>
 
           <div className="field" style={{ marginBottom: 4 }}>
