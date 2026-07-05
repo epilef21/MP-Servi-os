@@ -105,7 +105,11 @@ Plans:
   1. Toda despesa mensal tem data de vencimento e status pendente / pago / atrasado visível
   2. Admin vê alerta de contas a vencer nos próximos 7 dias e das contas já atrasadas
   3. Despesas recorrentes fixas entram automaticamente no mês novo já com o dia de vencimento preenchido
-**Plans**: TBD
+**Plans**: 3 plans (3 waves)
+Plans:
+- [ ] 09-01-PLAN.md — utils/contasPagar.js: statusDespesa, diasParaVencer, dataVencimentoDoMes (clamp fim de mês), resumoAlertas + testes Vitest (PAG-01, PAG-02, PAG-03)
+- [ ] 09-02-PLAN.md — FinanceiroEmpresaTab: dia_vencimento no cadastro recorrente + data_vencimento no lançamento mensal + auto-lançamento de fixas com vencimento (PAG-01, PAG-03)
+- [ ] 09-03-PLAN.md — FinanceiroEmpresaTab: badges de status + botão Pagar + banner de contas a vencer/atrasadas (PAG-01, PAG-02)
 **UI hint**: yes
 
 ---
