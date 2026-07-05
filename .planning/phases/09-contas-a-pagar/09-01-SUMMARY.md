@@ -95,3 +95,11 @@ None - no external service configuration required.
 ---
 *Phase: 09-contas-a-pagar*
 *Completed: 2026-07-05*
+
+## Self-Check: PASSED
+
+- FOUND: mp-react/src/utils/contasPagar.js
+- FOUND: mp-react/src/__tests__/contasPagar.test.js
+- FOUND: .planning/phases/09-contas-a-pagar/09-01-SUMMARY.md
+- FOUND commit: 264b1f5
+- FOUND commit: 4edd1f6

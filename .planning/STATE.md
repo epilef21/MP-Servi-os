@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
 status: executing
-stopped_at: "Completado 08-04-PLAN.md (marcar pago + historico de pagamentos). Phase 8 100% concluida (4/4). Proximo: planejar Phase 9 (Contas a Pagar)"
-last_updated: "2026-07-05T18:36:40.000Z"
-last_activity: 2026-07-05 -- Phase 8 Plan 4 completo -- Phase 8 CONCLUIDA
+stopped_at: "Completado 09-01-PLAN.md (utils/contasPagar.js + 21 testes). Phase 9 1/3 concluida. Proximo: 09-02-PLAN.md"
+last_updated: "2026-07-05T21:06:08Z"
+last_activity: 2026-07-05 -- Phase 9 Plan 1 completo
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
+  total_plans: 13
+  completed_plans: 10
+  percent: 77
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-02)
 
 **Core value:** Da OS finalizada até o dinheiro na conta — o admin controla faturamento, recebimento, pagamentos e caixa em um lugar só.
-**Current focus:** Phase 9 — Contas a Pagar (planejamento pendente)
+**Current focus:** Phase 9 — Contas a Pagar
 
 ## Current Position
 
-Phase: 8 (Fechamento de Técnicos) — COMPLETE
-Plan: 4 of 4
-Status: Phase 8 concluída — aguardando /gsd-plan-phase 9
-Last activity: 2026-07-05 -- Phase 8 Plan 4 completo (marcar pago + histórico de pagamentos) -- Phase 8 100% concluída
+Phase: 9 (Contas a Pagar) — EXECUTING
+Plan: 2 of 3
+Status: Executing Phase 9 -- Plan 1 concluido
+Last activity: 2026-07-05 -- Phase 9 Plan 1 completo (utils/contasPagar.js + 21 testes)
 
-Progress: [██████████] 100%
+Progress: [████████░░] 77%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 19 (2 v1.0 infra + 2 v1.0 base + 2 v1.0 auth + 2 v1.0 fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 5 v1.2 fase 7 + 4 v1.2 fase 8, arredondado — ver ROADMAP.md para detalhe por fase)
+- Total plans completed: 20 (2 v1.0 infra + 2 v1.0 base + 2 v1.0 auth + 2 v1.0 fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 5 v1.2 fase 7 + 4 v1.2 fase 8 + 1 v1.2 fase 9, arredondado — ver ROADMAP.md para detalhe por fase)
 - Average duration: ~7 min
 - Total execution time: ~1 hour
 
@@ -52,9 +52,10 @@ Progress: [██████████] 100%
 | 6. Relatório Mensal em PDF | 2 | 2 | ~8 min |
 | 7. Faturamento e Contas a Receber | 5 | 5 | ~11 min |
 | 8. Fechamento de Técnicos | 4 | 4 | ~7 min |
-| 9-11. Financeiro Completo (restante) | TBD | 0 | - |
+| 9. Contas a Pagar | 3 | 1 | ~8 min |
+| 10-11. Financeiro Completo (restante) | TBD | 0 | - |
 
-**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7 completa: Plan 1 (utils/faturamento.js + 27 testes Vitest), Plan 2 (DetalheOSModal: códigos MO+deslocamento), Plan 3 (ConfigTab: calendário de pagamento editável), Plan 4 (AbaFaturamento: fila por seguradora + checklist persistente) e Plan 5 (Fechar Nota + status/painel a receber + marcar paga) executados. Phase 7 (Faturamento e Contas a Receber) 100% concluída. Phase 8 (Fechamento de Técnicos) 100% concluída: Plan 1 (utils/fechamentoTecnicos.js + 16 testes), Plan 2 (TecnicosTab: chave PIX + forma de pagamento), Plan 3 (regra fechamentosTecnicos deployada + aba "👷 Técnicos" com fechamento mensal por técnico) e Plan 4 (marcar pago com snapshot imutável + histórico consultável de pagamentos) executados. Próximo: planejar Phase 9 (Contas a Pagar).
+**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7 completa: Plan 1 (utils/faturamento.js + 27 testes Vitest), Plan 2 (DetalheOSModal: códigos MO+deslocamento), Plan 3 (ConfigTab: calendário de pagamento editável), Plan 4 (AbaFaturamento: fila por seguradora + checklist persistente) e Plan 5 (Fechar Nota + status/painel a receber + marcar paga) executados. Phase 7 (Faturamento e Contas a Receber) 100% concluída. Phase 8 (Fechamento de Técnicos) 100% concluída: Plan 1 (utils/fechamentoTecnicos.js + 16 testes), Plan 2 (TecnicosTab: chave PIX + forma de pagamento), Plan 3 (regra fechamentosTecnicos deployada + aba "👷 Técnicos" com fechamento mensal por técnico) e Plan 4 (marcar pago com snapshot imutável + histórico consultável de pagamentos) executados. Phase 9 (Contas a Pagar) iniciada: Plan 1 (utils/contasPagar.js: statusDespesa/diasParaVencer/dataVencimentoDoMes/resumoAlertas + 21 testes Vitest) executado — suite total 150 testes verdes. Próximo: 09-02-PLAN.md (UI de vencimento nas despesas).
 
 **Per-Plan Metrics (v1.2):**
 
@@ -69,6 +70,7 @@ Progress: [██████████] 100%
 | Phase 08 P02 | 6min | 2 tasks | 1 file |
 | Phase 08 P03 | ~6min | 3 tasks | 3 files |
 | Phase 08 P04 | ~8min | 2 tasks | 1 file |
+| Phase 09 P01 | ~8min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -99,6 +101,10 @@ Progress: [██████████] 100%
 - [Phase 8]: 08-04: marcarPago sempre le identidade do GRUPO (g.tecnicoNome/g.tecnicoNorm/g.osList), nunca da OS direta -- snapshot imutavel gravado em fechamentosTecnicos com status:'pago' (pendente e sempre derivado, nunca gravado)
 - [Phase 8]: 08-04: trava de pagamento duplo no mesmo mes e client-side apenas (acharFechamento) -- risco de corrida por 2 abas simultaneas aceito (T-08-12), mesmo precedente de notasFiscais na Fase 7
 - [Phase 8]: 08-04: Phase 8 (Fechamento de Tecnicos) 100% concluida (4/4 planos) -- TEC-01, TEC-02, TEC-03 completos
+- [Phase 9]: 09-01: diasParaVencer usa Date.UTC(y, m-1, d) nos dois lados da subtracao, evitando vies de fuso/DST (mesma cautela de calcularDataPrevista da Fase 7)
+- [Phase 9]: 09-01: dataVencimentoDoMes clampa com new Date(ano, mes, 0).getDate() + Math.min -- dia 31 em mes de 30 dias e dia 30 em fevereiro (comum e bissexto) tratados
+- [Phase 9]: 09-01: statusDespesa trata despesa sem data_vencimento como nunca-atrasado (compat lancamentos antigos sem vencimento cadastrado) -- so pode ser 'pago' ou 'pendente'
+- [Phase 9]: 09-01: PAG-01/02/03 permanecem Pending em REQUIREMENTS.md -- 09-01 entrega so a logica pura (sem UI); comportamento observavel pelo admin (data de vencimento visivel, alerta, auto-lancamento) e responsabilidade de 09-02/09-03
 
 ### Pending Todos
 
@@ -111,6 +117,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-05T18:36:40Z
-Stopped at: Completado 08-04-PLAN.md (marcar pago + historico de pagamentos). Phase 8 100% concluida (4/4). Proximo: /gsd-plan-phase 9 (Contas a Pagar)
+Last session: 2026-07-05T21:06:08Z
+Stopped at: Completado 09-01-PLAN.md (utils/contasPagar.js + 21 testes). Phase 9 1/3 concluida. Proximo: 09-02-PLAN.md
 Resume file: None
