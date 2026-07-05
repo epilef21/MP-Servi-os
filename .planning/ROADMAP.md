@@ -108,11 +108,11 @@ Plans:
 **Plans**: 3 plans (3 waves)
 Plans:
 - [x] 09-01-PLAN.md — utils/contasPagar.js: statusDespesa, diasParaVencer, dataVencimentoDoMes (clamp fim de mês), resumoAlertas + testes Vitest (PAG-01, PAG-02, PAG-03)
-- [ ] 09-02-PLAN.md — FinanceiroEmpresaTab: dia_vencimento no cadastro recorrente + data_vencimento no lançamento mensal + auto-lançamento de fixas com vencimento (PAG-01, PAG-03)
+- [x] 09-02-PLAN.md — FinanceiroEmpresaTab: dia_vencimento no cadastro recorrente + data_vencimento no lançamento mensal + auto-lançamento de fixas com vencimento (PAG-01, PAG-03)
 - [ ] 09-03-PLAN.md — FinanceiroEmpresaTab: badges de status + botão Pagar + banner de contas a vencer/atrasadas (PAG-01, PAG-02)
 **UI hint**: yes
 
-**Phase 9: 1/3 planos concluídos — 09-01 (2026-07-05).**
+**Phase 9: 2/3 planos concluídos — 09-01, 09-02 (2026-07-05).**
 
 ---
 
@@ -155,7 +155,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 6. Relatório Mensal em PDF | v1.1 | 2/2 | Complete | 2026-05-05 |
 | 7. Faturamento e Contas a Receber | v1.2 | 5/5 | Complete | 2026-07-02 |
 | 8. Fechamento de Técnicos | v1.2 | 4/4 | Complete | 2026-07-05 |
-| 9. Contas a Pagar | v1.2 | 1/3 | In Progress | - |
+| 9. Contas a Pagar | v1.2 | 2/3 | In Progress | - |
 | 10. Fluxo de Caixa e Evolução | v1.2 | 0/TBD | Not started | - |
 | 11. Exportação e Fechamento do Mês | v1.2 | 0/TBD | Not started | - |
 
@@ -178,7 +178,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | TEC-03 | Phase 8 | Complete |
 | PAG-01 | Phase 9 | Pending |
 | PAG-02 | Phase 9 | Pending |
-| PAG-03 | Phase 9 | Pending |
+| PAG-03 | Phase 9 | Complete |
 | CAIXA-01 | Phase 10 | Pending |
 | CAIXA-02 | Phase 10 | Pending |
 | EXP-01 | Phase 11 | Pending |
