@@ -89,7 +89,7 @@ Plans:
 Plans:
 - [x] 08-01-PLAN.md — utils/fechamentoTecnicos.js: agrupamento por técnico + total do mês (criado_em) + testes Vitest (TEC-02)
 - [x] 08-02-PLAN.md — TecnicosTab: chave PIX + forma de pagamento no cadastro do técnico (TEC-01)
-- [ ] 08-03-PLAN.md — Firestore rule fechamentosTecnicos + deploy + aba "👷 Técnicos" (fechamento mensal por técnico, PIX copiável, status derivado) (TEC-02, TEC-03)
+- [x] 08-03-PLAN.md — Firestore rule fechamentosTecnicos + deploy + aba "👷 Técnicos" (fechamento mensal por técnico, PIX copiável, status derivado) (TEC-02, TEC-03)
 - [ ] 08-04-PLAN.md — Marcar fechamento como pago (snapshot imutável) + histórico consultável de pagamentos (TEC-03)
 **UI hint**: yes
 
