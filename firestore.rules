@@ -216,6 +216,12 @@ service cloud.firestore {
         allow read, write: if isUserOfEmpresa(empresaId) || isSuperAdmin();
       }
 
+      // ── /empresas/{empresaId}/fechamentosTecnicos/{id} ───
+      // Fechamento mensal de pagamento por técnico (aba Técnicos).
+      match /fechamentosTecnicos/{id} {
+        allow read, write: if isUserOfEmpresa(empresaId) || isSuperAdmin();
+      }
+
       // ── /empresas/{empresaId}/orcamentos/{orcamentoId} ───
       // Orçamentos gerados pelo admin, preenchidos pelo técnico,
       // aprovados/reprovados pelo cliente via link público.
