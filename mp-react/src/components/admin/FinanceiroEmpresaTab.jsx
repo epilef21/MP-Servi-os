@@ -18,7 +18,7 @@ import {
 } from '../../firebase.js'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { fmtBRL } from '../../utils/formatters.js'
-import { dataVencimentoDoMes } from '../../utils/contasPagar.js'
+import { dataVencimentoDoMes, statusDespesa, diasParaVencer } from '../../utils/contasPagar.js'
 import AbaFaturamento from './faturamento/AbaFaturamento.jsx'
 import AbaFechamentoTecnicos from './fechamento/AbaFechamentoTecnicos.jsx'
 
@@ -35,6 +35,11 @@ function fmtMes(mesRef) {
 function mesAtual() {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+function hojeISO() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 function navegarMes(mesRef, delta) {
@@ -329,6 +334,13 @@ export default function FinanceiroEmpresaTab() {
       await carregarDados()
     } catch (e) { showToast('Erro: ' + e.message, 'error') }
   }
+  async function pagarMensal(l) {
+    if (!window.confirm(`Marcar "${l.descricao}" como paga hoje?`)) return
+    try {
+      await updateDoc(doc(db, `empresas/${empresaId}/despesasMensais`, l.id), { data_pagamento: hojeISO() })
+      await carregarDados()
+    } catch (e) { showToast('Erro: ' + e.message, 'error') }
+  }
 
   // ── CRUD Serviços Particulares ───────────────────────────
   function abrirNovoParticular() {
@@ -526,6 +538,7 @@ export default function FinanceiroEmpresaTab() {
           onNovoMensal={abrirNovoMensal}
           onEditarMensal={abrirEditarMensal}
           onExcluirMensal={excluirMensal}
+          onPagarMensal={pagarMensal}
         />
       )}
 
@@ -855,7 +868,7 @@ function AbaDespesas({
   showAutoLancar, autoLancando,
   onAutoLancar, onDismissAuto,
   onNovaRecorrente, onEditarRecorrente, onExcluirRecorrente,
-  onNovoMensal, onEditarMensal, onExcluirMensal,
+  onNovoMensal, onEditarMensal, onExcluirMensal, onPagarMensal,
 }) {
   const fixas = despesasRecorrentes.filter(r => r.tipo === 'fixa' && r.ativa !== false)
 
@@ -949,8 +962,24 @@ function AbaDespesas({
         const recId  = l.despesa_recorrente_id
         const rec    = recId ? despesasRecorrentes.find(r => r.id === recId) : null
         const ehPend = rec && rec.tipo === 'variavel' && !l.valor
+        const st     = statusDespesa(l, hojeISO())
+        const dias   = diasParaVencer(l.data_vencimento, hojeISO())
+
+        let badge
+        if (ehPend) {
+          badge = <span className="despesa-status-pend">⚠️ Pendente</span>
+        } else if (st === 'pago') {
+          badge = <span className="despesa-status-ok">✅ Pago</span>
+        } else if (st === 'atrasado') {
+          badge = <span className="despesa-status-atrasado">⚠️ Atrasada há {Math.abs(dias)} dia{Math.abs(dias) > 1 ? 's' : ''}</span>
+        } else if (dias !== null) {
+          badge = <span className="despesa-status-pend">{dias === 0 ? 'Vence hoje' : `Vence em ${dias} dia${dias > 1 ? 's' : ''}`}</span>
+        } else {
+          badge = <span className="despesa-status-pend">⚠️ Pendente</span>
+        }
+
         return (
-          <div className={`despesa-item ${ehPend ? 'pendente' : 'lancado'}`} key={l.id}>
+          <div className={`despesa-item ${ehPend ? 'pendente' : 'lancado'}${st === 'atrasado' ? ' atrasado' : ''}`} key={l.id}>
             <div className="despesa-item-info">
               <div className="despesa-item-desc">{l.descricao}</div>
               <div className="despesa-item-sub">
@@ -960,10 +989,10 @@ function AbaDespesas({
             </div>
             <div className="despesa-item-right">
               <span style={{ fontWeight: 700 }}>{fmtBRL(l.valor)}</span>
-              {ehPend
-                ? <span className="despesa-status-pend">⚠️ Pendente</span>
-                : <span className="despesa-status-ok">✅</span>
-              }
+              {badge}
+              {st !== 'pago' && (
+                <button className="btn-sm btn-ok" onClick={() => onPagarMensal(l)}>✓ Pagar</button>
+              )}
               <button className="btn-sm btn-view" onClick={() => onEditarMensal(l)}>✏️</button>
               <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} onClick={() => onExcluirMensal(l)}>🗑️</button>
             </div>

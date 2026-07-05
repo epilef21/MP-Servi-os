@@ -1581,6 +1581,9 @@ body {
 .despesa-item.lancado {
   border-left: 4px solid var(--success);
 }
+.despesa-item.atrasado {
+  border-left: 3px solid var(--danger);
+}
 .despesa-item-info { flex: 1; min-width: 0; }
 .despesa-item-desc { font-weight: 600; font-size: .9rem; }
 .despesa-item-sub  { font-size: .75rem; color: var(--muted); margin-top: 2px; }
@@ -1596,6 +1599,7 @@ body {
 .despesa-badge-tipo.variavel { background: #fff3cd; color: #856404; }
 .despesa-status-ok  { font-size: .78rem; color: var(--success); font-weight: 700; }
 .despesa-status-pend{ font-size: .78rem; color: #f0a500;         font-weight: 700; }
+.despesa-status-atrasado { font-size: .78rem; color: var(--danger); font-weight: 700; }
 
 /* ── FINANCEIRO — Serviços particulares ── */
 .particular-item {
