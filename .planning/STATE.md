@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
 status: executing
-stopped_at: "Completado 08-01-PLAN.md (utils/fechamentoTecnicos.js + testes Vitest). Proximo: 08-02-PLAN.md (TecnicosTab: chave PIX)"
-last_updated: "2026-07-05T18:15:39.000Z"
-last_activity: 2026-07-05 -- Phase 8 Plan 1 completo
+stopped_at: "Completado 08-02-PLAN.md (TecnicosTab: chave PIX + forma de pagamento). Proximo: 08-03-PLAN.md (Firestore rule fechamentosTecnicos + aba Tecnicos)"
+last_updated: "2026-07-05T18:21:07.000Z"
+last_activity: 2026-07-05 -- Phase 8 Plan 2 completo
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 9
-  completed_plans: 6
-  percent: 67
+  completed_plans: 7
+  percent: 78
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-07-02)
 ## Current Position
 
 Phase: 8 (Fechamento de Técnicos) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Executing Phase 8
-Last activity: 2026-07-05 -- Phase 8 Plan 1 completo (utils/fechamentoTecnicos.js + testes)
+Last activity: 2026-07-05 -- Phase 8 Plan 2 completo (TecnicosTab: chave PIX + forma de pagamento)
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 78%
 
 ## Performance Metrics
 
@@ -65,6 +65,7 @@ Progress: [███████░░░] 67%
 | Phase 07 P04 | ~15min | 2 tasks | 2 files |
 | Phase 07 P05 | ~20min | 2 tasks | 2 files |
 | Phase 08 P01 | ~10min | 2 tasks | 2 files |
+| Phase 08 P02 | 6min | 2 tasks | 1 file |
 
 ## Accumulated Context
 
@@ -88,6 +89,7 @@ Progress: [███████░░░] 67%
 - [Phase 7]: 07-05: Nota grava snapshot imutavel dos itens (os_id, tipo, codigo, valor, num_assist, nome_segurado) em vez de referencia viva a OS, protegendo o historico contra edicoes futuras
 - [Phase 8]: 08-01: Criterio de "OS do mes" do fechamento de tecnicos replicado de calcularDRE (criado_em) para manter consistencia com o DRE
 - [Phase 8]: 08-01: Agrupamento usa normNome(tecnico_nome) como chave (nome sempre existe na OS); grupo carrega tecnicoId (primeiro nao vazio) para o consumidor casar por ID primeiro, com fallback por nome normalizado
+- [Phase 8]: 08-02: forma_pagamento restrita a select fixo (pix/dinheiro/transferencia) para evitar valor arbitrario no Firestore (mitigacao T-08-04); chave_pix e forma_pagamento sao opcionais, nao entram na validacao de campos obrigatorios
 
 ### Pending Todos
 
@@ -100,6 +102,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-05T18:15:39Z
-Stopped at: Completado 08-01-PLAN.md (utils/fechamentoTecnicos.js + testes Vitest). Proximo: 08-02-PLAN.md (TecnicosTab: chave PIX)
+Last session: 2026-07-05T18:21:07Z
+Stopped at: Completado 08-02-PLAN.md (TecnicosTab: chave PIX + forma de pagamento). Proximo: 08-03-PLAN.md (Firestore rule fechamentosTecnicos + aba Tecnicos)
 Resume file: None
