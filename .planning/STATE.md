@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
 status: executing
-stopped_at: "Completado 08-03-PLAN.md (Firestore rule fechamentosTecnicos + deploy + aba Tecnicos). Proximo: 08-04-PLAN.md (marcar pago + historico)"
-last_updated: "2026-07-05T18:28:58.000Z"
-last_activity: 2026-07-05 -- Phase 8 Plan 3 completo
+stopped_at: "Completado 08-04-PLAN.md (marcar pago + historico de pagamentos). Phase 8 100% concluida (4/4). Proximo: planejar Phase 9 (Contas a Pagar)"
+last_updated: "2026-07-05T18:36:40.000Z"
+last_activity: 2026-07-05 -- Phase 8 Plan 4 completo -- Phase 8 CONCLUIDA
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 8
-  percent: 89
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-02)
 
 **Core value:** Da OS finalizada até o dinheiro na conta — o admin controla faturamento, recebimento, pagamentos e caixa em um lugar só.
-**Current focus:** Phase 8 — Fechamento de Técnicos
+**Current focus:** Phase 9 — Contas a Pagar (planejamento pendente)
 
 ## Current Position
 
-Phase: 8 (Fechamento de Técnicos) — EXECUTING
+Phase: 8 (Fechamento de Técnicos) — COMPLETE
 Plan: 4 of 4
-Status: Executing Phase 8
-Last activity: 2026-07-05 -- Phase 8 Plan 3 completo (Firestore rule fechamentosTecnicos + deploy + aba Técnicos)
+Status: Phase 8 concluída — aguardando /gsd-plan-phase 9
+Last activity: 2026-07-05 -- Phase 8 Plan 4 completo (marcar pago + histórico de pagamentos) -- Phase 8 100% concluída
 
-Progress: [█████████░] 89%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 15 (2 v1.0 infra/base + 2 v1.0 auth/fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 5 v1.2 fase 7, arredondado — ver ROADMAP.md para detalhe por fase)
+- Total plans completed: 19 (2 v1.0 infra + 2 v1.0 base + 2 v1.0 auth + 2 v1.0 fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 5 v1.2 fase 7 + 4 v1.2 fase 8, arredondado — ver ROADMAP.md para detalhe por fase)
 - Average duration: ~7 min
 - Total execution time: ~1 hour
 
@@ -51,9 +51,10 @@ Progress: [█████████░] 89%
 | 5. Compressão de Imagens | 1 | 1 | ~4 min |
 | 6. Relatório Mensal em PDF | 2 | 2 | ~8 min |
 | 7. Faturamento e Contas a Receber | 5 | 5 | ~11 min |
-| 8-11. Financeiro Completo (restante) | TBD | 0 | - |
+| 8. Fechamento de Técnicos | 4 | 4 | ~7 min |
+| 9-11. Financeiro Completo (restante) | TBD | 0 | - |
 
-**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7 completa: Plan 1 (utils/faturamento.js + 27 testes Vitest), Plan 2 (DetalheOSModal: códigos MO+deslocamento), Plan 3 (ConfigTab: calendário de pagamento editável), Plan 4 (AbaFaturamento: fila por seguradora + checklist persistente) e Plan 5 (Fechar Nota + status/painel a receber + marcar paga) executados. Phase 7 (Faturamento e Contas a Receber) 100% concluída. Phase 8 em andamento: Plan 1 (utils/fechamentoTecnicos.js + 16 testes), Plan 2 (TecnicosTab: chave PIX + forma de pagamento) e Plan 3 (regra fechamentosTecnicos deployada + aba "👷 Técnicos" com fechamento mensal por técnico) executados — falta apenas Plan 4 (marcar pago + histórico).
+**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7 completa: Plan 1 (utils/faturamento.js + 27 testes Vitest), Plan 2 (DetalheOSModal: códigos MO+deslocamento), Plan 3 (ConfigTab: calendário de pagamento editável), Plan 4 (AbaFaturamento: fila por seguradora + checklist persistente) e Plan 5 (Fechar Nota + status/painel a receber + marcar paga) executados. Phase 7 (Faturamento e Contas a Receber) 100% concluída. Phase 8 (Fechamento de Técnicos) 100% concluída: Plan 1 (utils/fechamentoTecnicos.js + 16 testes), Plan 2 (TecnicosTab: chave PIX + forma de pagamento), Plan 3 (regra fechamentosTecnicos deployada + aba "👷 Técnicos" com fechamento mensal por técnico) e Plan 4 (marcar pago com snapshot imutável + histórico consultável de pagamentos) executados. Próximo: planejar Phase 9 (Contas a Pagar).
 
 **Per-Plan Metrics (v1.2):**
 
@@ -67,6 +68,7 @@ Progress: [█████████░] 89%
 | Phase 08 P01 | ~10min | 2 tasks | 2 files |
 | Phase 08 P02 | 6min | 2 tasks | 1 file |
 | Phase 08 P03 | ~6min | 3 tasks | 3 files |
+| Phase 08 P04 | ~8min | 2 tasks | 1 file |
 
 ## Accumulated Context
 
@@ -94,6 +96,9 @@ Progress: [█████████░] 89%
 - [Phase 8]: 08-03: regra fechamentosTecnicos deployada ANTES de qualquer getDocs na aba (aprendizado LOCKED da Fase 7 -- colecao sem regra derruba a aba em producao)
 - [Phase 8]: 08-03: join grupo (OS do mes) com cadastro de tecnico casa por tecnico_id primeiro, fallback por normNome(t.nome); total exibido usa snapshot do fechamento (fech.total) quando pago, total ao vivo (g.total) quando pendente
 - [Phase 8]: 08-03: TEC-03 permanece Pending em REQUIREMENTS.md -- a visao de leitura (status derivado PAGO/PENDENTE) foi entregue neste plano, mas a acao de "marcar como pago" + historico consultavel (escopo textual de TEC-03) e responsabilidade do plano 08-04
+- [Phase 8]: 08-04: marcarPago sempre le identidade do GRUPO (g.tecnicoNome/g.tecnicoNorm/g.osList), nunca da OS direta -- snapshot imutavel gravado em fechamentosTecnicos com status:'pago' (pendente e sempre derivado, nunca gravado)
+- [Phase 8]: 08-04: trava de pagamento duplo no mesmo mes e client-side apenas (acharFechamento) -- risco de corrida por 2 abas simultaneas aceito (T-08-12), mesmo precedente de notasFiscais na Fase 7
+- [Phase 8]: 08-04: Phase 8 (Fechamento de Tecnicos) 100% concluida (4/4 planos) -- TEC-01, TEC-02, TEC-03 completos
 
 ### Pending Todos
 
@@ -106,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-05T18:28:58Z
-Stopped at: Completado 08-03-PLAN.md (Firestore rule fechamentosTecnicos + deploy + aba Tecnicos). Proximo: 08-04-PLAN.md (marcar pago + historico consultavel)
+Last session: 2026-07-05T18:36:40Z
+Stopped at: Completado 08-04-PLAN.md (marcar pago + historico de pagamentos). Phase 8 100% concluida (4/4). Proximo: /gsd-plan-phase 9 (Contas a Pagar)
 Resume file: None

@@ -27,7 +27,7 @@
 
 - [x] **TEC-01**: Admin pode cadastrar chave PIX e forma de pagamento no cadastro do técnico
 - [x] **TEC-02**: Admin vê o fechamento mensal por técnico: lista das OS do mês com valor do prestador e total a pagar
-- [ ] **TEC-03**: Admin pode marcar o fechamento do técnico como pago (com data), mantendo histórico consultável de pagamentos
+- [x] **TEC-03**: Admin pode marcar o fechamento do técnico como pago (com data), mantendo histórico consultável de pagamentos
 
 ### Contas a Pagar (PAG)
 
@@ -77,7 +77,7 @@
 | FAT-10 | Phase 7 | Complete |
 | TEC-01 | Phase 8 | Complete |
 | TEC-02 | Phase 8 | Complete |
-| TEC-03 | Phase 8 | Pending |
+| TEC-03 | Phase 8 | Complete |
 | PAG-01 | Phase 9 | Pending |
 | PAG-02 | Phase 9 | Pending |
 | PAG-03 | Phase 9 | Pending |
