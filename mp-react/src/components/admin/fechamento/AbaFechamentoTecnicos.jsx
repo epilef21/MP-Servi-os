@@ -5,9 +5,9 @@
 // dos fechamentos já gravados. Marcar como pago + histórico: plano 08-04.
 // ============================================================
 import { useState, useEffect, useMemo } from 'react'
-import { db, collection, getDocs, query, orderBy } from '../../../firebase.js'
+import { db, collection, getDocs, query, orderBy, addDoc, serverTimestamp } from '../../../firebase.js'
 import { useAdminContext } from '../../../contexts/AdminContext.jsx'
-import { fmtBRL } from '../../../utils/formatters.js'
+import { fmtBRL, fmtDate } from '../../../utils/formatters.js'
 import { copyToClipboard } from '../../../utils/clipboard.js'
 import { agruparPorTecnico, acharFechamento, statusFechamento, normNome } from '../../../utils/fechamentoTecnicos.js'
 
@@ -30,6 +30,7 @@ const LABEL_FORMA = {
 export default function AbaFechamentoTecnicos({ mesRef }) {
   const { empresaId, tecnicos, reports, showToast } = useAdminContext()
   const [fechamentos, setFechamentos] = useState([])
+  const [pagando, setPagando] = useState(null)  // tecnicoNorm em processamento
 
   // Carrega os fechamentos já gravados da empresa ao trocar de empresa.
   useEffect(() => {
@@ -58,6 +59,37 @@ export default function AbaFechamentoTecnicos({ mesRef }) {
   async function copiarPix(pix) {
     await copyToClipboard(pix)
     showToast('📋 Chave PIX copiada!')
+  }
+
+  function hojeISO() {
+    const h = new Date()
+    return `${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, '0')}-${String(h.getDate()).padStart(2, '0')}`
+  }
+
+  // Marca o fechamento do técnico como pago: grava snapshot imutável
+  // (os_ids + total da época, vindos do GRUPO — nunca da OS direta) e
+  // bloqueia pagamento duplo no mesmo mês (T-08-09, client-side — T-08-12).
+  async function marcarPago(g) {
+    if (acharFechamento(fechamentos, g.tecnicoNorm, mesRef)) {
+      showToast('Este técnico já foi pago neste mês.', 'error'); return
+    }
+    const dataPagto = window.prompt('Data do pagamento (AAAA-MM-DD):', hojeISO())
+    if (!dataPagto) return
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dataPagto)) { showToast('Data inválida. Use AAAA-MM-DD.', 'error'); return }
+    if (!window.confirm(`Confirmar pagamento de ${g.tecnicoNome}: ${fmtBRL(g.total)} (${g.count} OS)?`)) return
+    setPagando(g.tecnicoNorm)
+    try {
+      const payload = {
+        tecnico: g.tecnicoNome, tecnico_norm: g.tecnicoNorm, mes_referencia: mesRef,
+        os_ids: g.osList.map(o => o.id), total: g.total, qtd_os: g.count,
+        status: 'pago', pago_em: dataPagto, criado_em: serverTimestamp(),
+      }
+      const ref = await addDoc(collection(db, `empresas/${empresaId}/fechamentosTecnicos`), payload)
+      // atualização local (evita novo fetch) — mesmo padrão de AbaFaturamento
+      setFechamentos(prev => [{ id: ref.id, ...payload }, ...prev])
+      showToast('💵 Fechamento pago e registrado!')
+    } catch (e) { showToast('Erro ao registrar pagamento: ' + e.message, 'error') }
+    finally { setPagando(null) }
   }
 
   return (
@@ -125,7 +157,20 @@ export default function AbaFechamentoTecnicos({ mesRef }) {
               ))}
             </div>
 
-            {/* marcar pago + histórico: plano 08-04 */}
+            <div style={{ marginTop: 12, textAlign: 'right' }}>
+              {pago ? (
+                <span style={{ fontSize: '.85rem', color: 'var(--muted)' }}>✅ Pago em {fmtDate(fech.pago_em)}</span>
+              ) : (
+                <button
+                  className="btn-sm btn-primary"
+                  disabled={pagando === g.tecnicoNorm || g.tecnicoNorm === ''}
+                  title={g.tecnicoNorm === '' ? 'OS sem técnico não podem ser pagas' : ''}
+                  onClick={() => marcarPago(g)}
+                >
+                  {pagando === g.tecnicoNorm ? '⏳ Registrando...' : '💵 Marcar como pago'}
+                </button>
+              )}
+            </div>
           </div>
         )
       })}
