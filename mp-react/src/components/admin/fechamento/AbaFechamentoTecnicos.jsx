@@ -1,8 +1,9 @@
 // ============================================================
 // ABA TÉCNICOS — fechamento mensal de pagamento por técnico
-// Visão de leitura (TEC-02): total a pagar por técnico, lista de OS
-// (valor_prestador), chave PIX copiável e selo PAGO/PENDENTE derivado
-// dos fechamentos já gravados. Marcar como pago + histórico: plano 08-04.
+// TEC-02: total a pagar por técnico, lista de OS (valor_prestador),
+// chave PIX copiável e selo PAGO/PENDENTE derivado dos fechamentos já
+// gravados. TEC-03: marcar fechamento como pago (snapshot imutável
+// os_ids/total/qtd_os) e histórico consultável de pagamentos.
 // ============================================================
 import { useState, useEffect, useMemo } from 'react'
 import { db, collection, getDocs, query, orderBy, addDoc, serverTimestamp } from '../../../firebase.js'
@@ -42,6 +43,14 @@ export default function AbaFechamentoTecnicos({ mesRef }) {
   }, [empresaId])
 
   const grupos = useMemo(() => agruparPorTecnico(reports, mesRef), [reports, mesRef])
+
+  // Histórico de TODOS os fechamentos já pagos (qualquer mês), para consulta
+  // posterior (TEC-03) — ordenado por mês desc, depois por nome do técnico.
+  const historico = useMemo(() =>
+    [...fechamentos].sort((a, b) =>
+      (b.mes_referencia || '').localeCompare(a.mes_referencia || '') ||
+      (a.tecnico || '').localeCompare(b.tecnico || '')
+    ), [fechamentos])
 
   // Join grupo (OS do mês) ↔ cadastro de técnicos: por tecnico_id primeiro
   // (grupos vindos de OS com técnico selecionado do cadastro têm tecnicoId),
@@ -175,7 +184,26 @@ export default function AbaFechamentoTecnicos({ mesRef }) {
         )
       })}
 
-      {/* marcar pago + histórico: plano 08-04 */}
+      <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', margin: '22px 0 12px' }}>
+        🗂️ Histórico de pagamentos
+      </h4>
+      {historico.length === 0 && (
+        <div className="empty-state" style={{ padding: 24 }}>
+          <p>Nenhum pagamento registrado ainda.</p>
+        </div>
+      )}
+      {historico.map(f => (
+        <div key={f.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 180 }}>
+            <div style={{ fontWeight: 600 }}>{f.tecnico}</div>
+            <div style={{ fontSize: '.8rem', color: 'var(--muted)' }}>
+              Ref. {f.mes_referencia} · {f.qtd_os} OS · Pago em {fmtDate(f.pago_em)}
+            </div>
+          </div>
+          <div style={{ fontWeight: 700 }}>{fmtBRL(f.total)}</div>
+          <span className="badge" style={{ background: '#e8f5e9', color: '#1e6e3e' }}>✅ Pago</span>
+        </div>
+      ))}
     </div>
   )
 }
