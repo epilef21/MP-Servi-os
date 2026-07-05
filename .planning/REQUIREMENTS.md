@@ -31,8 +31,8 @@
 
 ### Contas a Pagar (PAG)
 
-- [ ] **PAG-01**: Despesas mensais têm data de vencimento e status pendente / pago / atrasado
-- [ ] **PAG-02**: Admin vê alerta de contas a vencer nos próximos 7 dias e contas atrasadas
+- [x] **PAG-01**: Despesas mensais têm data de vencimento e status pendente / pago / atrasado
+- [x] **PAG-02**: Admin vê alerta de contas a vencer nos próximos 7 dias e contas atrasadas
 - [x] **PAG-03**: Despesas recorrentes fixas entram no mês já com dia de vencimento preenchido automaticamente
 
 ### Fluxo de Caixa e Evolução (CAIXA)
@@ -78,8 +78,8 @@
 | TEC-01 | Phase 8 | Complete |
 | TEC-02 | Phase 8 | Complete |
 | TEC-03 | Phase 8 | Complete |
-| PAG-01 | Phase 9 | Pending |
-| PAG-02 | Phase 9 | Pending |
+| PAG-01 | Phase 9 | Complete |
+| PAG-02 | Phase 9 | Complete |
 | PAG-03 | Phase 9 | Complete |
 | CAIXA-01 | Phase 10 | Pending |
 | CAIXA-02 | Phase 10 | Pending |

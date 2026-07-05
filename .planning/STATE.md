@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
 status: executing
-stopped_at: "Completado 09-02-PLAN.md (FinanceiroEmpresaTab: dia_vencimento + data_vencimento + auto-lancamento com vencimento). Phase 9 2/3 concluida. Proximo: 09-03-PLAN.md"
-last_updated: "2026-07-05T21:20:00Z"
-last_activity: 2026-07-05 -- Phase 9 Plan 2 completo
+stopped_at: "Completado 09-03-PLAN.md (FinanceiroEmpresaTab: badges de status + botao Pagar + banner de alertas). Phase 9 3/3 concluida (PAG-01/02/03 Complete). Proximo: Phase 10 (Fluxo de Caixa e Evolucao)."
+last_updated: "2026-07-05T22:05:00Z"
+last_activity: 2026-07-05 -- Phase 9 Plan 3 completo, Fase 9 100% concluida
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 13
-  completed_plans: 11
-  percent: 85
+  completed_plans: 12
+  percent: 92
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-02)
 
 **Core value:** Da OS finalizada até o dinheiro na conta — o admin controla faturamento, recebimento, pagamentos e caixa em um lugar só.
-**Current focus:** Phase 9 — Contas a Pagar
+**Current focus:** Phase 10 — Fluxo de Caixa e Evolução
 
 ## Current Position
 
-Phase: 9 (Contas a Pagar) — EXECUTING
+Phase: 9 (Contas a Pagar) — COMPLETE
 Plan: 3 of 3
-Status: Executing Phase 9 -- Plan 2 concluido
-Last activity: 2026-07-05 -- Phase 9 Plan 2 completo (FinanceiroEmpresaTab: dia_vencimento + data_vencimento + auto-lancamento com vencimento)
+Status: Phase 9 concluida (3/3 planos). Proximo: planejar Phase 10.
+Last activity: 2026-07-05 -- Phase 9 Plan 3 completo (FinanceiroEmpresaTab: badges de status + botao Pagar + banner de alertas)
 
-Progress: [████████▌░] 85%
+Progress: [█████████░] 92%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 21 (2 v1.0 infra + 2 v1.0 base + 2 v1.0 auth + 2 v1.0 fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 5 v1.2 fase 7 + 4 v1.2 fase 8 + 2 v1.2 fase 9, arredondado — ver ROADMAP.md para detalhe por fase)
+- Total plans completed: 22 (2 v1.0 infra + 2 v1.0 base + 2 v1.0 auth + 2 v1.0 fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 5 v1.2 fase 7 + 4 v1.2 fase 8 + 3 v1.2 fase 9, arredondado — ver ROADMAP.md para detalhe por fase)
 - Average duration: ~7 min
 - Total execution time: ~1 hour
 
@@ -52,7 +52,7 @@ Progress: [████████▌░] 85%
 | 6. Relatório Mensal em PDF | 2 | 2 | ~8 min |
 | 7. Faturamento e Contas a Receber | 5 | 5 | ~11 min |
 | 8. Fechamento de Técnicos | 4 | 4 | ~7 min |
-| 9. Contas a Pagar | 3 | 2 | ~9 min |
+| 9. Contas a Pagar | 3 | 3 | ~10 min |
 | 10-11. Financeiro Completo (restante) | TBD | 0 | - |
 
 **Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7 completa: Plan 1 (utils/faturamento.js + 27 testes Vitest), Plan 2 (DetalheOSModal: códigos MO+deslocamento), Plan 3 (ConfigTab: calendário de pagamento editável), Plan 4 (AbaFaturamento: fila por seguradora + checklist persistente) e Plan 5 (Fechar Nota + status/painel a receber + marcar paga) executados. Phase 7 (Faturamento e Contas a Receber) 100% concluída. Phase 8 (Fechamento de Técnicos) 100% concluída: Plan 1 (utils/fechamentoTecnicos.js + 16 testes), Plan 2 (TecnicosTab: chave PIX + forma de pagamento), Plan 3 (regra fechamentosTecnicos deployada + aba "👷 Técnicos" com fechamento mensal por técnico) e Plan 4 (marcar pago com snapshot imutável + histórico consultável de pagamentos) executados. Phase 9 (Contas a Pagar) em andamento: Plan 1 (utils/contasPagar.js: statusDespesa/diasParaVencer/dataVencimentoDoMes/resumoAlertas + 21 testes Vitest) e Plan 2 (FinanceiroEmpresaTab: dia_vencimento no cadastro recorrente, data_vencimento no lançamento mensal, auto-lançamento de fixas preenchendo vencimento — PAG-03 completo) executados — suite total 150 testes verdes. Próximo: 09-03-PLAN.md (badges de status + botão Pagar + banner de alertas).
@@ -72,6 +72,7 @@ Progress: [████████▌░] 85%
 | Phase 08 P04 | ~8min | 2 tasks | 1 file |
 | Phase 09 P01 | ~8min | 2 tasks | 2 files |
 | Phase 09 P02 | ~10min | 2 tasks | 1 file |
+| Phase 09 P03 | ~12min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,9 @@ Progress: [████████▌░] 85%
 - [Phase 9]: 09-01: PAG-01/02/03 permanecem Pending em REQUIREMENTS.md -- 09-01 entrega so a logica pura (sem UI); comportamento observavel pelo admin (data de vencimento visivel, alerta, auto-lancamento) e responsabilidade de 09-02/09-03
 - [Phase 9]: 09-02: dia_vencimento gravado como Number() ou null (nunca string vazia) no Firestore -- compat com o clamp de dataVencimentoDoMes
 - [Phase 9]: 09-02: PAG-03 marcado Complete em REQUIREMENTS.md -- auto-lancamento de fixas ja preenche data_vencimento do mes. PAG-01 permanece Pending: so a base de escrita foi entregue (data_vencimento gravavel), o status derivado pendente/pago/atrasado (leitura) e responsabilidade de 09-03
+- [Phase 9]: 09-03: resumoAlertas roda apenas sobre despesasMensais do mes corrente ja carregado (sem query extra) -- discricao aceita e documentada no threat model (T-09-08)
+- [Phase 9]: 09-03: badge "⚠️ Pendente" legado (despesa variavel sem valor lancado) mantido com prioridade visual sobre o status derivado statusDespesa, evitando dois conceitos de "pendente" na mesma tela
+- [Phase 9]: 09-03: PAG-01 e PAG-02 marcados Complete em REQUIREMENTS.md -- Phase 9 (Contas a Pagar) 100% concluida (3/3 planos)
 
 ### Pending Todos
 
@@ -120,6 +124,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-05T21:20:00Z
-Stopped at: Completado 09-02-PLAN.md (FinanceiroEmpresaTab: dia_vencimento + data_vencimento + auto-lancamento com vencimento). Phase 9 2/3 concluida. Proximo: 09-03-PLAN.md
+Last session: 2026-07-05T22:05:00Z
+Stopped at: Completado 09-03-PLAN.md (FinanceiroEmpresaTab: badges de status + botao Pagar + banner de alertas). Phase 9 3/3 concluida (PAG-01/02/03 Complete). Proximo: Phase 10 (Fluxo de Caixa e Evolucao).
 Resume file: None

@@ -109,10 +109,10 @@ Plans:
 Plans:
 - [x] 09-01-PLAN.md — utils/contasPagar.js: statusDespesa, diasParaVencer, dataVencimentoDoMes (clamp fim de mês), resumoAlertas + testes Vitest (PAG-01, PAG-02, PAG-03)
 - [x] 09-02-PLAN.md — FinanceiroEmpresaTab: dia_vencimento no cadastro recorrente + data_vencimento no lançamento mensal + auto-lançamento de fixas com vencimento (PAG-01, PAG-03)
-- [ ] 09-03-PLAN.md — FinanceiroEmpresaTab: badges de status + botão Pagar + banner de contas a vencer/atrasadas (PAG-01, PAG-02)
+- [x] 09-03-PLAN.md — FinanceiroEmpresaTab: badges de status + botão Pagar + banner de contas a vencer/atrasadas (PAG-01, PAG-02)
 **UI hint**: yes
 
-**Phase 9: 2/3 planos concluídos — 09-01, 09-02 (2026-07-05).**
+**Phase 9 concluída (3/3 planos) — 2026-07-05.**
 
 ---
 
@@ -176,8 +176,8 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | TEC-01 | Phase 8 | Complete |
 | TEC-02 | Phase 8 | Complete |
 | TEC-03 | Phase 8 | Complete |
-| PAG-01 | Phase 9 | Pending |
-| PAG-02 | Phase 9 | Pending |
+| PAG-01 | Phase 9 | Complete |
+| PAG-02 | Phase 9 | Complete |
 | PAG-03 | Phase 9 | Complete |
 | CAIXA-01 | Phase 10 | Pending |
 | CAIXA-02 | Phase 10 | Pending |
