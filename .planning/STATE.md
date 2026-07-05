@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
 status: executing
-stopped_at: "Completado 07-05-PLAN.md (Fechar Nota + status/painel a receber + marcar paga). Phase 7 completa (5/5). Proximo: Phase 8"
-last_updated: "2026-07-02T23:59:00Z"
-last_activity: 2026-07-02
+stopped_at: "Completado 08-01-PLAN.md (utils/fechamentoTecnicos.js + testes Vitest). Proximo: 08-02-PLAN.md (TecnicosTab: chave PIX)"
+last_updated: "2026-07-05T18:15:39.000Z"
+last_activity: 2026-07-05 -- Phase 8 Plan 1 completo
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 5
-  completed_plans: 5
-  percent: 100
+  total_plans: 9
+  completed_plans: 6
+  percent: 67
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-02)
 
 **Core value:** Da OS finalizada até o dinheiro na conta — o admin controla faturamento, recebimento, pagamentos e caixa em um lugar só.
-**Current focus:** Phase 7 — Faturamento e Contas a Receber (COMPLETA) — próximo: Phase 8 (Fechamento de Técnicos)
+**Current focus:** Phase 8 — Fechamento de Técnicos
 
 ## Current Position
 
-Phase: 7 (Faturamento e Contas a Receber) — COMPLETE (5/5 plans)
-Plan: 5 of 5
-Status: Phase concluída — aguardando /gsd-plan-phase 8
-Last activity: 2026-07-02
+Phase: 8 (Fechamento de Técnicos) — EXECUTING
+Plan: 2 of 4
+Status: Executing Phase 8
+Last activity: 2026-07-05 -- Phase 8 Plan 1 completo (utils/fechamentoTecnicos.js + testes)
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [██████████] 100%
 | Phase 07 P03 | 9min | 2 tasks | 1 file |
 | Phase 07 P04 | ~15min | 2 tasks | 2 files |
 | Phase 07 P05 | ~20min | 2 tasks | 2 files |
+| Phase 08 P01 | ~10min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,8 @@ Progress: [██████████] 100%
 - [Phase 7]: 07-05: statusNota deriva atrasada comparando data_prevista com hoje na leitura — nunca gravado no Firestore, sem job/cron
 - [Phase 7]: 07-05: Quitacao em massa das OS vinculadas usa Promise.all de atualizarOS (loop), nao writeBatch — firebase.js nao exporta essa funcao
 - [Phase 7]: 07-05: Nota grava snapshot imutavel dos itens (os_id, tipo, codigo, valor, num_assist, nome_segurado) em vez de referencia viva a OS, protegendo o historico contra edicoes futuras
+- [Phase 8]: 08-01: Criterio de "OS do mes" do fechamento de tecnicos replicado de calcularDRE (criado_em) para manter consistencia com o DRE
+- [Phase 8]: 08-01: Agrupamento usa normNome(tecnico_nome) como chave (nome sempre existe na OS); grupo carrega tecnicoId (primeiro nao vazio) para o consumidor casar por ID primeiro, com fallback por nome normalizado
 
 ### Pending Todos
 
@@ -97,6 +100,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-02T23:59:00Z
-Stopped at: Completado 07-05-PLAN.md (Fechar Nota + status/painel a receber + marcar paga). Phase 7 completa (5/5). Proximo: /gsd-plan-phase 8
+Last session: 2026-07-05T18:15:39Z
+Stopped at: Completado 08-01-PLAN.md (utils/fechamentoTecnicos.js + testes Vitest). Proximo: 08-02-PLAN.md (TecnicosTab: chave PIX)
 Resume file: None
