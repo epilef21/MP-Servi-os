@@ -125,10 +125,12 @@ Plans:
   2. Admin vê um gráfico de evolução dos últimos 12 meses com receita, lucro líquido e margem
 **Plans**: 3 plans (3 waves)
 Plans:
-- [ ] 10-01-PLAN.md — utils/fluxoCaixa.js: fluxoCaixaDoMes (entradas/saídas/saldo) + serieEvolucao12Meses (receita/lucro/margem) + testes Vitest (CAIXA-01, CAIXA-02)
+- [x] 10-01-PLAN.md — utils/fluxoCaixa.js: fluxoCaixaDoMes (entradas/saídas/saldo) + serieEvolucao12Meses (receita/lucro/margem) + testes Vitest (CAIXA-01, CAIXA-02)
 - [ ] 10-02-PLAN.md — Aba "💵 Caixa" no FinanceiroEmpresaTab: resumo do mês + detalhamento expansível + empty states (CAIXA-01)
 - [ ] 10-03-PLAN.md — Gráfico de evolução 12 meses com barras CSS (sem lib nova) + verificação final da fase (CAIXA-02)
 **UI hint**: yes
+
+**Phase 10 em andamento (1/3 planos) — 10-01 concluído 2026-07-06.**
 
 ---
 
@@ -139,7 +141,11 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Admin baixa o DRE do mês em PDF gerado direto no navegador (jsPDF, mesmo padrão já usado no relatório mensal)
   2. Admin fecha o mês e, a partir daí, qualquer tentativa de editar um lançamento financeiro daquele período é bloqueada
-**Plans**: TBD
+**Plans**: 3 plans (2 waves)
+Plans:
+- [ ] 11-01-PLAN.md — utils/drePdf.js: montagem pura do DRE + gerador jsPDF lazy + botão "Baixar DRE em PDF" na AbaDRE (EXP-01)
+- [ ] 11-02-PLAN.md — Regra Firestore fechamentosMes + deploy + utils/fechamentoMes.js (helpers puros) + testes (EXP-02)
+- [ ] 11-03-PLAN.md — Fechar/reabrir mês: estado + cadeado no cabeçalho + banner + guardas de escrita nas abas mensais (EXP-02)
 **UI hint**: yes
 
 ---
@@ -160,7 +166,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 7. Faturamento e Contas a Receber | v1.2 | 5/5 | Complete | 2026-07-02 |
 | 8. Fechamento de Técnicos | v1.2 | 4/4 | Complete | 2026-07-05 |
 | 9. Contas a Pagar | v1.2 | 3/3 | Complete | 2026-07-05 |
-| 10. Fluxo de Caixa e Evolução | v1.2 | 0/3 | Planned | - |
+| 10. Fluxo de Caixa e Evolução | v1.2 | 1/3 | In Progress | - |
 | 11. Exportação e Fechamento do Mês | v1.2 | 0/TBD | Not started | - |
 
 ## Requirement Traceability (v1.2)
