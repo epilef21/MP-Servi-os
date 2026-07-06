@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
 status: executing
-stopped_at: "Completado 10-03-PLAN.md (grafico de evolucao 12 meses na aba Caixa, barras CSS, sem lib nova). Fase 10 (Fluxo de Caixa e Evolucao) 100% concluida (3/3). Proxima: Fase 11 (Exportacao e Fechamento do Mes) precisa ser planejada via /gsd-plan-phase 11."
-last_updated: "2026-07-06T14:20:00Z"
-last_activity: 2026-07-06 -- Phase 10 Plan 3 completo (10-03-PLAN.md) -- Fase 10 concluida
+stopped_at: "Completado 11-01-PLAN.md (utils/drePdf.js: montarLinhasDre puro + gerarDrePdf com jsPDF lazy; botao Baixar DRE em PDF na AbaDRE; 9 testes novos, suite total 186 verdes, build sem erro, EXP-01 completo). Proximo: 11-02-PLAN.md (Regra Firestore fechamentosMes + utils/fechamentoMes.js)."
+last_updated: "2026-07-06T23:26:36.000Z"
+last_activity: 2026-07-06 -- Completado 11-01-PLAN.md (EXP-01)
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 15
-  completed_plans: 15
-  percent: 100
+  total_plans: 18
+  completed_plans: 16
+  percent: 89
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-02)
 
 **Core value:** Da OS finalizada até o dinheiro na conta — o admin controla faturamento, recebimento, pagamentos e caixa em um lugar só.
-**Current focus:** Phase 11 — Exportação e Fechamento do Mês (aguardando planejamento)
+**Current focus:** Phase 11 — Exportação e Fechamento do Mês
 
 ## Current Position
 
-Phase: 10 (Fluxo de Caixa e Evolução) — COMPLETE (3/3)
-Plan: 3 of 3
-Status: 10-03 concluido (grafico de evolucao 12 meses, barras CSS, CAIXA-02). Fase 10 100% concluida. Proxima: /gsd-plan-phase 11 (Exportacao e Fechamento do Mes).
-Last activity: 2026-07-06 -- Phase 10 Plan 3 completo (10-03-PLAN.md) -- Fase 10 concluida
+Phase: 11 (Exportação e Fechamento do Mês) — EXECUTING
+Plan: 2 of 3
+Status: Executing Phase 11
+Last activity: 2026-07-06 -- Completado 11-01-PLAN.md (EXP-01)
 
 Progress: [██████████] 100%
 
@@ -54,9 +54,9 @@ Progress: [██████████] 100%
 | 8. Fechamento de Técnicos | 4 | 4 | ~7 min |
 | 9. Contas a Pagar | 3 | 3 | ~10 min |
 | 10. Fluxo de Caixa e Evolução | 3 | 3 | ~12 min |
-| 11. Exportação e Fechamento do Mês | TBD | 0 | - |
+| 11. Exportação e Fechamento do Mês | 3 | 1 | ~12 min |
 
-**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7, Phase 8, Phase 9 e agora Phase 10 100% concluídas (ver histórico do git para detalhe). Phase 10 (Fluxo de Caixa e Evolução) concluída: Plan 1 (utils/fluxoCaixa.js), Plan 2 (aba "💵 Caixa" — cards Entradas/Saídas/Sobrou no caixa, explicação DRE×Caixa, empty state e detalhamento expansível) e Plan 3 (gráfico "📊 Evolução 12 meses" com barras CSS puras, sem lib nova) executados — suite total 177 testes verdes, build sem erro. Próximo: planejar Phase 11 (Exportação e Fechamento do Mês) via `/gsd-plan-phase 11`.
+**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7, Phase 8, Phase 9 e Phase 10 100% concluídas (ver histórico do git para detalhe). Phase 11 (Exportação e Fechamento do Mês) iniciada: Plan 1 (utils/drePdf.js — montarLinhasDre puro + gerarDrePdf com jsPDF lazy + botão "Baixar DRE em PDF" na AbaDRE) executado — EXP-01 completo, suite total 186 testes verdes, build sem erro. Próximo: 11-02-PLAN.md (Regra Firestore fechamentosMes + utils/fechamentoMes.js, EXP-02).
 
 **Per-Plan Metrics (v1.2):**
 
@@ -77,6 +77,7 @@ Progress: [██████████] 100%
 | Phase 10 P01 | ~15min | 2 tasks | 2 files |
 | Phase 10 P02 | ~10min | 2 tasks | 2 files |
 | Phase 10 P03 | ~15min | 2 tasks | 1 file |
+| Phase 11 P01 | ~12min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -124,6 +125,9 @@ Progress: [██████████] 100%
 - [Phase 10]: 10-03: Grafico de evolucao 12 meses feito 100% com divs + inline styles (sem lib nova) -- escala normalizada por maxVal com piso 1, altura minima 2px, label 'MMM/AA' via split local (sem new Date()/toISOString)
 - [Phase 10]: 10-03: recharts ja existia no package.json antes desta fase (usado por DashboardTab.jsx) -- confirmado via git diff que nenhuma dependencia nova foi adicionada por este plano; o verify script do plano nao distingue lib pre-existente de nova
 - [Phase 10]: 10-03: CAIXA-02 marcado Complete em REQUIREMENTS.md/ROADMAP.md -- Fase 10 (Fluxo de Caixa e Evolucao) 100% concluida (3/3 planos)
+- [Phase 11]: 11-01: montarLinhasDre nao recalcula nada -- so formata/oculta condicionalmente os campos ja prontos de calcularDRE, mesma cascata da tela AbaDRE
+- [Phase 11]: 11-01: nome do mes por extenso derivado de mesRef via split('-') local (nunca new Date()/toISOString), mesma cautela da Fase 7/10
+- [Phase 11]: 11-01: EXP-01 marcado Complete em REQUIREMENTS.md/ROADMAP.md -- botao de PDF do DRE desabilitado quando o mes nao tem dados, evitando PDF vazio
 
 ### Pending Todos
 
@@ -136,6 +140,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-06T14:20:00Z
-Stopped at: Completado 10-03-PLAN.md (grafico "Evolucao 12 meses" na aba Caixa: barras CSS puras de receita/lucro liquido + margem % por mes, sem lib nova; suite total 177 verdes, build sem erro). Fase 10 (Fluxo de Caixa e Evolucao) 100% concluida (3/3 planos). Proximo: /gsd-plan-phase 11 (Exportacao e Fechamento do Mes).
+Last session: 2026-07-06T23:26:36Z
+Stopped at: Completado 11-01-PLAN.md (utils/drePdf.js: montarLinhasDre puro + gerarDrePdf com jsPDF lazy; botao Baixar DRE em PDF na AbaDRE; 9 testes novos, suite total 186 verdes, build sem erro, EXP-01 completo). Proximo: 11-02-PLAN.md (Regra Firestore fechamentosMes + utils/fechamentoMes.js).
 Resume file: None

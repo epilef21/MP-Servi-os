@@ -143,7 +143,7 @@ Plans:
   2. Admin fecha o mês e, a partir daí, qualquer tentativa de editar um lançamento financeiro daquele período é bloqueada
 **Plans**: 3 plans (2 waves)
 Plans:
-- [ ] 11-01-PLAN.md — utils/drePdf.js: montagem pura do DRE + gerador jsPDF lazy + botão "Baixar DRE em PDF" na AbaDRE (EXP-01)
+- [x] 11-01-PLAN.md — utils/drePdf.js: montagem pura do DRE + gerador jsPDF lazy + botão "Baixar DRE em PDF" na AbaDRE (EXP-01)
 - [ ] 11-02-PLAN.md — Regra Firestore fechamentosMes + deploy + utils/fechamentoMes.js (helpers puros) + testes (EXP-02)
 - [ ] 11-03-PLAN.md — Fechar/reabrir mês: estado + cadeado no cabeçalho + banner + guardas de escrita nas abas mensais (EXP-02)
 **UI hint**: yes
@@ -167,7 +167,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 8. Fechamento de Técnicos | v1.2 | 4/4 | Complete | 2026-07-05 |
 | 9. Contas a Pagar | v1.2 | 3/3 | Complete | 2026-07-05 |
 | 10. Fluxo de Caixa e Evolução | v1.2 | 3/3 | Complete | 2026-07-06 |
-| 11. Exportação e Fechamento do Mês | v1.2 | 0/TBD | Not started | - |
+| 11. Exportação e Fechamento do Mês | v1.2 | 1/3 | In Progress | - |
 
 ## Requirement Traceability (v1.2)
 
@@ -191,7 +191,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | PAG-03 | Phase 9 | Complete |
 | CAIXA-01 | Phase 10 | Complete |
 | CAIXA-02 | Phase 10 | Complete |
-| EXP-01 | Phase 11 | Pending |
+| EXP-01 | Phase 11 | Complete |
 | EXP-02 | Phase 11 | Pending |
 
 **Coverage:** 20/20 v1.2 requirements mapped. No orphans.

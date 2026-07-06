@@ -42,7 +42,7 @@
 
 ### Exportação e Fechamento (EXP)
 
-- [ ] **EXP-01**: Admin pode baixar o DRE do mês em PDF gerado no browser (jsPDF, padrão existente)
+- [x] **EXP-01**: Admin pode baixar o DRE do mês em PDF gerado no browser (jsPDF, padrão existente)
 - [ ] **EXP-02**: Admin pode fechar o mês, travando os lançamentos financeiros do período contra alteração acidental
 
 ## Future Requirements (v1.3+)
@@ -83,7 +83,7 @@
 | PAG-03 | Phase 9 | Complete |
 | CAIXA-01 | Phase 10 | Complete |
 | CAIXA-02 | Phase 10 | Complete |
-| EXP-01 | Phase 11 | Pending |
+| EXP-01 | Phase 11 | Complete |
 | EXP-02 | Phase 11 | Pending |
 
 **Coverage:**
