@@ -9,20 +9,29 @@ import { useState, useEffect } from 'react'
 import { db, collection, getDocs } from '../../../firebase.js'
 import { useAdminContext } from '../../../contexts/AdminContext.jsx'
 import { fmtBRL, fmtDate } from '../../../utils/formatters.js'
-import { fluxoCaixaDoMes, dataEntradaNota } from '../../../utils/fluxoCaixa.js'
+import { fluxoCaixaDoMes, dataEntradaNota, serieEvolucao12Meses } from '../../../utils/fluxoCaixa.js'
 
 const MESES_NOMES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
   'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro',
 ]
 
+const MESES_ABREV = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez']
+
 function fmtMes(mesRef) {
   const [ano, mes] = mesRef.split('-').map(Number)
   return `${MESES_NOMES[mes - 1]} de ${ano}`
 }
 
+// Label curto 'MMM/AA' a partir de 'YYYY-MM' — split simples, sem new Date()/
+// toISOString (mesma cautela LOCKED do resto da Fase 10).
+function fmtMesAbrev(mes) {
+  const [ano, m] = mes.split('-')
+  return `${MESES_ABREV[Number(m) - 1]}/${ano.slice(2)}`
+}
+
 export default function AbaCaixa({ mesRef }) {
-  const { empresaId, showToast } = useAdminContext()
+  const { empresaId, reports, showToast } = useAdminContext()
 
   const [notas, setNotas] = useState([])
   const [fechamentos, setFechamentos] = useState([])
@@ -61,6 +70,10 @@ export default function AbaCaixa({ mesRef }) {
   // Recalcula a cada navegação de mês, sem refetch — dados já em memória.
   const caixa = fluxoCaixaDoMes({ notas, particulares, despesas, fechamentos }, mesRef)
   const semMovimentacao = caixa.entradas.total === 0 && caixa.saidas.total === 0
+
+  // Série de evolução 12 meses (CAIXA-02) — janela termina no mesRef, recalcula
+  // ao navegar de mês, sem refetch (mesmos dados já carregados acima).
+  const serie = serieEvolucao12Meses({ reports, particulares, despesas, deducoes, resultadoFinanceiro }, mesRef)
 
   return (
     <div>
@@ -114,10 +127,76 @@ export default function AbaCaixa({ mesRef }) {
               <DetalheSaidas saidas={caixa.saidas} />
             </>
           )}
+
+          <EvolucaoSection serie={serie} />
         </>
       )}
     </div>
   )
+}
+
+// ── Seção "📊 Evolução 12 meses" (CAIXA-02) — barras 100% CSS, LOCKED: zero
+// dependência nova de gráfico. Escala normalizada por maxVal (piso 1) para
+// nunca quebrar layout com valores extremos ou zerados (T-10-07/T-10-08).
+const ALTURA_BARRAS = 120
+
+function EvolucaoSection({ serie }) {
+  const semHistorico = serie.every((p) => p.receita === 0 && p.lucroLiquido === 0)
+
+  return (
+    <div style={{ marginTop: 28 }}>
+      <h5 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.9rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 12 }}>
+        📊 Evolução 12 meses
+      </h5>
+
+      {semHistorico ? (
+        <div className="empty-state" style={{ padding: 24 }}>
+          <p>Ainda não há histórico para montar a evolução — os meses vão aparecendo aqui conforme as OS e lançamentos forem registrados.</p>
+        </div>
+      ) : (
+        <>
+          <div style={{ fontSize: '.78rem', color: 'var(--muted)', marginBottom: 10 }}>
+            <span style={{ color: 'var(--primary)' }}>▪</span> Receita
+            <span style={{ marginLeft: 14, color: '#2e7d32' }}>▪</span> Lucro líquido
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
+            <BarrasEvolucao serie={serie} />
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+function BarrasEvolucao({ serie }) {
+  const maxVal = Math.max(...serie.map((p) => Math.max(p.receita, Math.abs(p.lucroLiquido))), 1)
+  const altura = (v) => {
+    const valor = Math.abs(v || 0)
+    if (valor <= 0) return 0
+    return Math.max((valor / maxVal) * ALTURA_BARRAS, 2)
+  }
+
+  return serie.map((p) => {
+    const corLucro = p.lucroLiquido >= 0 ? '#2e7d32' : 'var(--danger)'
+    return (
+      <div key={p.mes} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '0 0 auto', minWidth: 46 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: ALTURA_BARRAS }}>
+          <div
+            title={`Receita: ${fmtBRL(p.receita)}`}
+            style={{ width: 14, height: altura(p.receita), background: 'var(--primary)', borderRadius: '2px 2px 0 0' }}
+          />
+          <div
+            title={`Lucro: ${fmtBRL(p.lucroLiquido)}`}
+            style={{ width: 14, height: altura(p.lucroLiquido), background: corLucro, borderRadius: '2px 2px 0 0' }}
+          />
+        </div>
+        <div style={{ fontSize: '.68rem', color: 'var(--muted)', marginTop: 4, whiteSpace: 'nowrap' }}>{fmtMesAbrev(p.mes)}</div>
+        <div style={{ fontSize: '.68rem', fontWeight: 700, color: p.margem < 0 ? 'var(--danger)' : 'var(--text)' }}>
+          {p.margem.toFixed(0)}%
+        </div>
+      </div>
+    )
+  })
 }
 
 // ── Detalhamento expansível: entradas (notas pagas + particulares) ──
