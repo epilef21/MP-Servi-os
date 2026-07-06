@@ -37,7 +37,7 @@
 
 ### Fluxo de Caixa e Evolução (CAIXA)
 
-- [ ] **CAIXA-01**: Admin vê o fluxo de caixa do mês: entradas reais (notas pagas, particulares) e saídas reais (despesas pagas, técnicos pagos)
+- [x] **CAIXA-01**: Admin vê o fluxo de caixa do mês: entradas reais (notas pagas, particulares) e saídas reais (despesas pagas, técnicos pagos)
 - [ ] **CAIXA-02**: Admin vê gráfico de evolução dos últimos 12 meses com receita, lucro líquido e margem
 
 ### Exportação e Fechamento (EXP)
@@ -81,7 +81,7 @@
 | PAG-01 | Phase 9 | Complete |
 | PAG-02 | Phase 9 | Complete |
 | PAG-03 | Phase 9 | Complete |
-| CAIXA-01 | Phase 10 | Pending |
+| CAIXA-01 | Phase 10 | Complete |
 | CAIXA-02 | Phase 10 | Pending |
 | EXP-01 | Phase 11 | Pending |
 | EXP-02 | Phase 11 | Pending |

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
 status: executing
-stopped_at: "Completado 10-01-PLAN.md (utils/fluxoCaixa.js: fluxoCaixaDoMes + serieEvolucao12Meses + 27 testes Vitest). Proximo: 10-02-PLAN.md (aba Caixa no FinanceiroEmpresaTab)."
-last_updated: "2026-07-06T16:30:04Z"
-last_activity: 2026-07-06 -- Phase 10 Plan 1 completo (10-01-PLAN.md)
+stopped_at: "Completado 10-02-PLAN.md (aba 'Caixa' no FinanceiroEmpresaTab: resumo Entradas/Saidas/Saldo + detalhamento expansivel). Proximo: 10-03-PLAN.md (grafico de evolucao 12 meses)."
+last_updated: "2026-07-06T16:45:00Z"
+last_activity: 2026-07-06 -- Phase 10 Plan 2 completo (10-02-PLAN.md)
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 15
-  completed_plans: 13
-  percent: 87
+  completed_plans: 14
+  percent: 93
 ---
 
 # Project State
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-07-02)
 ## Current Position
 
 Phase: 10 (Fluxo de Caixa e Evolução) — EXECUTING
-Plan: 2 of 3
-Status: 10-01 concluido (utils/fluxoCaixa.js). Proximo: 10-02 (aba Caixa no FinanceiroEmpresaTab).
-Last activity: 2026-07-06 -- Phase 10 Plan 1 completo (10-01-PLAN.md)
+Plan: 3 of 3
+Status: 10-02 concluido (aba Caixa no FinanceiroEmpresaTab). Proximo: 10-03 (grafico de evolucao 12 meses).
+Last activity: 2026-07-06 -- Phase 10 Plan 2 completo (10-02-PLAN.md)
 
-Progress: [████████░░] 87%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 23 (2 v1.0 infra + 2 v1.0 base + 2 v1.0 auth + 2 v1.0 fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 5 v1.2 fase 7 + 4 v1.2 fase 8 + 3 v1.2 fase 9 + 1 v1.2 fase 10, arredondado — ver ROADMAP.md para detalhe por fase)
+- Total plans completed: 24 (2 v1.0 infra + 2 v1.0 base + 2 v1.0 auth + 2 v1.0 fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 5 v1.2 fase 7 + 4 v1.2 fase 8 + 3 v1.2 fase 9 + 2 v1.2 fase 10, arredondado — ver ROADMAP.md para detalhe por fase)
 - Average duration: ~7 min
 - Total execution time: ~1 hour
 
@@ -53,10 +53,10 @@ Progress: [████████░░] 87%
 | 7. Faturamento e Contas a Receber | 5 | 5 | ~11 min |
 | 8. Fechamento de Técnicos | 4 | 4 | ~7 min |
 | 9. Contas a Pagar | 3 | 3 | ~10 min |
-| 10. Fluxo de Caixa e Evolução | 3 | 1 | ~15 min |
+| 10. Fluxo de Caixa e Evolução | 3 | 2 | ~10 min |
 | 11. Exportação e Fechamento do Mês | TBD | 0 | - |
 
-**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7, Phase 8 e Phase 9 100% concluídas (ver histórico do git para detalhe). Phase 10 (Fluxo de Caixa e Evolução) em andamento: Plan 1 (utils/fluxoCaixa.js: fluxoCaixaDoMes entradas/saídas/saldo do mês + serieEvolucao12Meses receita/lucro/margem dos últimos 12 meses com paridade testada contra calcularDRE + 27 testes Vitest) executado — suite total 177 testes verdes. Próximo: 10-02-PLAN.md (aba "💵 Caixa" no FinanceiroEmpresaTab).
+**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7, Phase 8 e Phase 9 100% concluídas (ver histórico do git para detalhe). Phase 10 (Fluxo de Caixa e Evolução) em andamento: Plan 1 (utils/fluxoCaixa.js) e Plan 2 (aba "💵 Caixa" no FinanceiroEmpresaTab: cards Entradas/Saídas/Sobrou no caixa, explicação DRE×Caixa, empty state e detalhamento expansível de entradas/saídas) executados — suite total 177 testes verdes, build sem erro. Próximo: 10-03-PLAN.md (gráfico de evolução 12 meses).
 
 **Per-Plan Metrics (v1.2):**
 
@@ -75,6 +75,7 @@ Progress: [████████░░] 87%
 | Phase 09 P02 | ~10min | 2 tasks | 1 file |
 | Phase 09 P03 | ~12min | 2 tasks | 2 files |
 | Phase 10 P01 | ~15min | 2 tasks | 2 files |
+| Phase 10 P02 | ~10min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -117,6 +118,8 @@ Progress: [████████░░] 87%
 - [Phase 10]: 10-01: mesDeData valida formato via slice(0,7) apos checar partes numericas -- nunca new Date()/toISOString (mesma cautela de calcularDataPrevista da Fase 7)
 - [Phase 10]: 10-01: mesDaOS replica intencionalmente criado_em.toDate().toISOString().slice(0,7) do calcularDRE (uso de toISOString aqui e proposital, nao um bug) -- garante paridade de numeros entre o DRE mensal e a serie de evolucao (mesmo precedente da decisao 08-01)
 - [Phase 10]: 10-01: CAIXA-01/CAIXA-02 permanecem Pending em REQUIREMENTS.md -- 10-01 entrega so a logica pura (fluxoCaixaDoMes, serieEvolucao12Meses); comportamento observavel pelo admin (aba Caixa, grafico de evolucao) e responsabilidade de 10-02/10-03
+- [Phase 10]: 10-02: reaproveitado fmtDate (formatters.js) para exibir datas 'YYYY-MM-DD' como DD/MM/AAAA no detalhamento -- ja implementa split/join sem new Date(), evitando duplicar helper
+- [Phase 10]: 10-02: CAIXA-01 marcado Complete em REQUIREMENTS.md -- aba "Caixa" entrega o comportamento observavel completo (resumo do mes + detalhamento expansivel + empty state + explicacao DRE x Caixa); CAIXA-02 permanece Pending para 10-03 (grafico de evolucao)
 
 ### Pending Todos
 
@@ -129,6 +132,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-06T16:30:04Z
-Stopped at: Completado 10-01-PLAN.md (utils/fluxoCaixa.js: fluxoCaixaDoMes + serieEvolucao12Meses + 27 testes Vitest, suite total 177 verdes). Proximo: 10-02-PLAN.md (aba Caixa no FinanceiroEmpresaTab).
+Last session: 2026-07-06T16:45:00Z
+Stopped at: Completado 10-02-PLAN.md (aba 'Caixa' no FinanceiroEmpresaTab: resumo Entradas/Saidas/Saldo + detalhamento expansivel de notas/particulares/despesas/tecnicos + empty state; suite total 177 verdes, build sem erro). Proximo: 10-03-PLAN.md (grafico de evolucao 12 meses).
 Resume file: None
