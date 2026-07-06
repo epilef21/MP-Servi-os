@@ -1541,6 +1541,30 @@ body {
 }
 .fin-periodo-btn:hover { background: #e8f0fb; border-color: var(--primary); }
 
+/* ── FINANCEIRO — Fechar/Reabrir mês (EXP-02) ── */
+.fin-cadeado-btn {
+  margin-left: 8px;
+  color: var(--muted);
+}
+.fin-cadeado-btn.fechado {
+  background: #fdeaea;
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.fin-cadeado-btn.fechado:hover { background: #fbdada; }
+
+.fin-banner-fechado {
+  background: #fdeaea;
+  border: 1.5px solid var(--danger);
+  border-radius: var(--r-sm);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--danger);
+  text-align: center;
+}
+
 /* ── FINANCEIRO — Banner de contas a vencer/atrasadas (topo, qualquer aba) ── */
 .fin-alerta-contas {
   background: #fff8e6;

@@ -8,7 +8,9 @@ import {
   collection,
   addDoc,
   getDocs,
+  getDoc,
   updateDoc,
+  setDoc,
   deleteDoc,
   doc,
   query,
@@ -20,6 +22,7 @@ import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { fmtBRL } from '../../utils/formatters.js'
 import { dataVencimentoDoMes, statusDespesa, diasParaVencer, resumoAlertas } from '../../utils/contasPagar.js'
 import { gerarDrePdf } from '../../utils/drePdf.js'
+import { estaFechado, formatarFechadoEm } from '../../utils/fechamentoMes.js'
 import AbaFaturamento from './faturamento/AbaFaturamento.jsx'
 import AbaFechamentoTecnicos from './fechamento/AbaFechamentoTecnicos.jsx'
 import AbaCaixa from './caixa/AbaCaixa.jsx'
@@ -119,6 +122,10 @@ export default function FinanceiroEmpresaTab() {
   const [deducoes,            setDeducoes]            = useState([])
   const [resultFinanceiro,    setResultFinanceiro]    = useState([])
 
+  // ── Fechamento do mês (EXP-02: trava lançamentos do mês selecionado) ──
+  const [fechamentoMes, setFechamentoMes] = useState(null)
+  const mesFechado = estaFechado(fechamentoMes)
+
   // ── Estados dos modais ──────────────────────────────────
   const [showModalRecorrente, setShowModalRecorrente] = useState(false)
   const [editandoRecorrente,  setEditandoRecorrente]  = useState(null)
@@ -189,6 +196,10 @@ export default function FinanceiroEmpresaTab() {
       )
       setResultFinanceiro(rfSnap.docs.map(d => ({ id: d.id, ...d.data() })))
 
+      // Estado de fechamento do mês selecionado (EXP-02)
+      const fmSnap = await getDoc(doc(db, `empresas/${empresaId}/fechamentosMes/${mesRef}`))
+      setFechamentoMes(fmSnap.exists() ? fmSnap.data() : null)
+
     } catch (e) {
       console.error('Erro ao carregar financeiro:', e)
       showToast('Erro ao carregar dados financeiros: ' + e.message, 'error')
@@ -198,6 +209,30 @@ export default function FinanceiroEmpresaTab() {
   }, [empresaId, mesRef])
 
   useEffect(() => { carregarDados() }, [carregarDados])
+
+  // ── Fechar/Reabrir mês (EXP-02) ──────────────────────────
+  // Enforcement client-side (risco aceito, single-admin — T-11-04); grava
+  // fechado_em/reaberto_em via serverTimestamp para trilha de auditoria (T-11-05).
+  async function fecharMes() {
+    if (!window.confirm(`Fechar ${fmtMes(mesRef)}? Os lançamentos ficam protegidos contra alteração.`)) return
+    try {
+      await setDoc(doc(db, `empresas/${empresaId}/fechamentosMes/${mesRef}`), {
+        fechado: true,
+        fechado_em: serverTimestamp(),
+      })
+      await carregarDados()
+    } catch (e) { showToast('Erro ao fechar o mês: ' + e.message, 'error') }
+  }
+  async function reabrirMes() {
+    if (!window.confirm(`Reabrir ${fmtMes(mesRef)} para editar?`)) return
+    try {
+      await setDoc(doc(db, `empresas/${empresaId}/fechamentosMes/${mesRef}`), {
+        fechado: false,
+        reaberto_em: serverTimestamp(),
+      }, { merge: true })
+      await carregarDados()
+    } catch (e) { showToast('Erro ao reabrir o mês: ' + e.message, 'error') }
+  }
 
   // ── DRE calculado em memória ─────────────────────────────
   const dre = calcularDRE(reports, mesRef, particulares, despesasMensais, deducoes, resultFinanceiro)
@@ -492,8 +527,19 @@ export default function FinanceiroEmpresaTab() {
           <button className="fin-periodo-btn" onClick={() => setMesRef(m => navegarMes(m, -1))}>◄</button>
           <span className="fin-periodo-label">{fmtMes(mesRef)}</span>
           <button className="fin-periodo-btn" onClick={() => setMesRef(m => navegarMes(m, +1))}>►</button>
+          {mesFechado ? (
+            <button className="fin-periodo-btn fin-cadeado-btn fechado" onClick={reabrirMes}>🔓 Reabrir mês</button>
+          ) : (
+            <button className="fin-periodo-btn fin-cadeado-btn" onClick={fecharMes}>🔒 Fechar mês</button>
+          )}
         </div>
       </div>
+
+      {mesFechado && (
+        <div className="fin-banner-fechado">
+          🔒 Mês fechado em {formatarFechadoEm(fechamentoMes?.fechado_em)} — reabra para alterar.
+        </div>
+      )}
 
       {!carregando && alertas.total > 0 && (
         <div className="fin-alerta-contas">
