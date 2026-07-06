@@ -19,6 +19,7 @@ import {
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { fmtBRL } from '../../utils/formatters.js'
 import { dataVencimentoDoMes, statusDespesa, diasParaVencer, resumoAlertas } from '../../utils/contasPagar.js'
+import { gerarDrePdf } from '../../utils/drePdf.js'
 import AbaFaturamento from './faturamento/AbaFaturamento.jsx'
 import AbaFechamentoTecnicos from './fechamento/AbaFechamentoTecnicos.jsx'
 import AbaCaixa from './caixa/AbaCaixa.jsx'
@@ -536,6 +537,8 @@ export default function FinanceiroEmpresaTab() {
         <AbaDRE
           dre={dre}
           onIrImpostos={() => setAbaFin('impostos')}
+          mesRef={mesRef}
+          nomeEmpresa={nomeEmpresa}
         />
       )}
 
@@ -716,15 +719,26 @@ function calcularDRE(reports, mesRef, particulares, despesasMensais, deducoes, r
 }
 
 // ── ABA DRE ─────────────────────────────────────────────────
-function AbaDRE({ dre, onIrImpostos }) {
+function AbaDRE({ dre, onIrImpostos, mesRef, nomeEmpresa }) {
+  const semDados = dre.qtdOS === 0 && dre.receitaParticulares === 0
   return (
     <div>
-      {dre.qtdOS === 0 && dre.receitaParticulares === 0 && (
+      {semDados && (
         <div className="empty-state" style={{ marginBottom: 20 }}>
           <div className="e-icon">📊</div>
           <p>Nenhuma OS ou serviço particular neste mês ainda.</p>
         </div>
       )}
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+        <button
+          className="btn-primary"
+          disabled={semDados}
+          onClick={() => gerarDrePdf(dre, mesRef, nomeEmpresa)}
+        >
+          ⬇️ Baixar DRE em PDF
+        </button>
+      </div>
 
       <div className="dre-container">
 
