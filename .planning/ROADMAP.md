@@ -123,7 +123,11 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Admin vê o fluxo de caixa do mês com entradas reais (notas pagas + particulares) e saídas reais (despesas pagas + técnicos pagos)
   2. Admin vê um gráfico de evolução dos últimos 12 meses com receita, lucro líquido e margem
-**Plans**: TBD
+**Plans**: 3 plans (3 waves)
+Plans:
+- [ ] 10-01-PLAN.md — utils/fluxoCaixa.js: fluxoCaixaDoMes (entradas/saídas/saldo) + serieEvolucao12Meses (receita/lucro/margem) + testes Vitest (CAIXA-01, CAIXA-02)
+- [ ] 10-02-PLAN.md — Aba "💵 Caixa" no FinanceiroEmpresaTab: resumo do mês + detalhamento expansível + empty states (CAIXA-01)
+- [ ] 10-03-PLAN.md — Gráfico de evolução 12 meses com barras CSS (sem lib nova) + verificação final da fase (CAIXA-02)
 **UI hint**: yes
 
 ---
@@ -155,8 +159,8 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 6. Relatório Mensal em PDF | v1.1 | 2/2 | Complete | 2026-05-05 |
 | 7. Faturamento e Contas a Receber | v1.2 | 5/5 | Complete | 2026-07-02 |
 | 8. Fechamento de Técnicos | v1.2 | 4/4 | Complete | 2026-07-05 |
-| 9. Contas a Pagar | v1.2 | 3/3 | Complete | - |
-| 10. Fluxo de Caixa e Evolução | v1.2 | 0/TBD | Not started | - |
+| 9. Contas a Pagar | v1.2 | 3/3 | Complete | 2026-07-05 |
+| 10. Fluxo de Caixa e Evolução | v1.2 | 0/3 | Planned | - |
 | 11. Exportação e Fechamento do Mês | v1.2 | 0/TBD | Not started | - |
 
 ## Requirement Traceability (v1.2)
