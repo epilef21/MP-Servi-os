@@ -21,6 +21,7 @@ import { fmtBRL } from '../../utils/formatters.js'
 import { dataVencimentoDoMes, statusDespesa, diasParaVencer, resumoAlertas } from '../../utils/contasPagar.js'
 import AbaFaturamento from './faturamento/AbaFaturamento.jsx'
 import AbaFechamentoTecnicos from './fechamento/AbaFechamentoTecnicos.jsx'
+import AbaCaixa from './caixa/AbaCaixa.jsx'
 
 const MESES_NOMES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
@@ -514,6 +515,7 @@ export default function FinanceiroEmpresaTab() {
           { id: 'impostos',     label: '🧾 Impostos e Fin.'     },
           { id: 'faturamento',  label: '📄 Faturamento'         },
           { id: 'tecnicos',     label: '👷 Técnicos'             },
+          { id: 'caixa',        label: '💵 Caixa'                },
         ].map(t => (
           <button
             key={t.id}
@@ -583,6 +585,8 @@ export default function FinanceiroEmpresaTab() {
       {!carregando && abaFin === 'faturamento' && <AbaFaturamento />}
 
       {!carregando && abaFin === 'tecnicos' && <AbaFechamentoTecnicos mesRef={mesRef} />}
+
+      {!carregando && abaFin === 'caixa' && <AbaCaixa mesRef={mesRef} />}
 
       {/* ══ MODAIS ══ */}
 

@@ -8,8 +8,8 @@
 import { useState, useEffect } from 'react'
 import { db, collection, getDocs } from '../../../firebase.js'
 import { useAdminContext } from '../../../contexts/AdminContext.jsx'
-import { fmtBRL } from '../../../utils/formatters.js'
-import { fluxoCaixaDoMes } from '../../../utils/fluxoCaixa.js'
+import { fmtBRL, fmtDate } from '../../../utils/formatters.js'
+import { fluxoCaixaDoMes, dataEntradaNota } from '../../../utils/fluxoCaixa.js'
 
 const MESES_NOMES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
@@ -107,8 +107,109 @@ export default function AbaCaixa({ mesRef }) {
               </p>
             </div>
           )}
+
+          {!semMovimentacao && (
+            <>
+              <DetalheEntradas entradas={caixa.entradas} />
+              <DetalheSaidas saidas={caixa.saidas} />
+            </>
+          )}
         </>
       )}
     </div>
+  )
+}
+
+// ── Detalhamento expansível: entradas (notas pagas + particulares) ──
+function DetalheEntradas({ entradas }) {
+  const n = entradas.notas.length + entradas.particulares.length
+  return (
+    <details style={{ marginBottom: 12 }}>
+      <summary style={{ cursor: 'pointer', fontWeight: 700, color: 'var(--primary)', padding: '8px 0' }}>
+        Ver entradas ({n})
+      </summary>
+      <div style={{ padding: '8px 0 0 8px' }}>
+        {entradas.notas.length === 0 ? (
+          <p style={{ fontSize: '.85rem', color: 'var(--muted)' }}>Nenhuma nota paga neste mês.</p>
+        ) : (
+          entradas.notas.map(nota => (
+            <div key={nota.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.85rem', padding: '6px 0', borderTop: '1px solid var(--border)' }}>
+              <span>Nota {nota.numero || '—'} · {nota.seguradora || '—'} · pago em {fmtDate(dataEntradaNota(nota))}</span>
+              <span>{fmtBRL(nota.total)}</span>
+            </div>
+          ))
+        )}
+        {entradas.notas.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.85rem', fontWeight: 700, padding: '6px 0' }}>
+            <span>Subtotal notas</span>
+            <span>{fmtBRL(entradas.totalNotas)}</span>
+          </div>
+        )}
+
+        {entradas.particulares.length === 0 ? (
+          <p style={{ fontSize: '.85rem', color: 'var(--muted)', marginTop: 8 }}>Nenhum serviço particular recebido neste mês.</p>
+        ) : (
+          entradas.particulares.map(p => (
+            <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.85rem', padding: '6px 0', borderTop: '1px solid var(--border)' }}>
+              <span>{p.descricao || '—'}</span>
+              <span>{fmtBRL(p.valor_recebido)}</span>
+            </div>
+          ))
+        )}
+        {entradas.particulares.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.85rem', fontWeight: 700, padding: '6px 0' }}>
+            <span>Subtotal particulares</span>
+            <span>{fmtBRL(entradas.totalParticulares)}</span>
+          </div>
+        )}
+      </div>
+    </details>
+  )
+}
+
+// ── Detalhamento expansível: saídas (despesas pagas + técnicos pagos) ──
+function DetalheSaidas({ saidas }) {
+  const n = saidas.despesas.length + saidas.tecnicos.length
+  return (
+    <details>
+      <summary style={{ cursor: 'pointer', fontWeight: 700, color: 'var(--primary)', padding: '8px 0' }}>
+        Ver saídas ({n})
+      </summary>
+      <div style={{ padding: '8px 0 0 8px' }}>
+        {saidas.despesas.length === 0 ? (
+          <p style={{ fontSize: '.85rem', color: 'var(--muted)' }}>Nenhuma despesa paga neste mês.</p>
+        ) : (
+          saidas.despesas.map(d => (
+            <div key={d.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.85rem', padding: '6px 0', borderTop: '1px solid var(--border)' }}>
+              <span>{d.descricao || '—'} · pago em {fmtDate(d.data_pagamento)}</span>
+              <span>{fmtBRL(d.valor)}</span>
+            </div>
+          ))
+        )}
+        {saidas.despesas.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.85rem', fontWeight: 700, padding: '6px 0' }}>
+            <span>Subtotal despesas</span>
+            <span>{fmtBRL(saidas.totalDespesas)}</span>
+          </div>
+        )}
+
+        {saidas.tecnicos.length === 0 ? (
+          <p style={{ fontSize: '.85rem', color: 'var(--muted)', marginTop: 8 }}>Nenhum técnico pago neste mês.</p>
+        ) : (
+          saidas.tecnicos.map(f => (
+            <div key={f.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.85rem', padding: '6px 0', borderTop: '1px solid var(--border)' }}>
+              <span>{f.tecnico || '—'} · ref. {f.mes_referencia || '—'} · pago em {fmtDate(f.pago_em)}</span>
+              <span>{fmtBRL(f.total)}</span>
+            </div>
+          ))
+        )}
+        {saidas.tecnicos.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.85rem', fontWeight: 700, padding: '6px 0' }}>
+            <span>Subtotal técnicos</span>
+            <span>{fmtBRL(saidas.totalTecnicos)}</span>
+          </div>
+        )}
+      </div>
+    </details>
   )
 }
