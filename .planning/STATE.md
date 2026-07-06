@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
 status: executing
-stopped_at: "Completado 10-02-PLAN.md (aba 'Caixa' no FinanceiroEmpresaTab: resumo Entradas/Saidas/Saldo + detalhamento expansivel). Proximo: 10-03-PLAN.md (grafico de evolucao 12 meses)."
-last_updated: "2026-07-06T16:45:00Z"
-last_activity: 2026-07-06 -- Phase 10 Plan 2 completo (10-02-PLAN.md)
+stopped_at: "Completado 10-03-PLAN.md (grafico de evolucao 12 meses na aba Caixa, barras CSS, sem lib nova). Fase 10 (Fluxo de Caixa e Evolucao) 100% concluida (3/3). Proxima: Fase 11 (Exportacao e Fechamento do Mes) precisa ser planejada via /gsd-plan-phase 11."
+last_updated: "2026-07-06T14:20:00Z"
+last_activity: 2026-07-06 -- Phase 10 Plan 3 completo (10-03-PLAN.md) -- Fase 10 concluida
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 15
-  completed_plans: 14
-  percent: 93
+  completed_plans: 15
+  percent: 100
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-02)
 
 **Core value:** Da OS finalizada até o dinheiro na conta — o admin controla faturamento, recebimento, pagamentos e caixa em um lugar só.
-**Current focus:** Phase 10 — Fluxo de Caixa e Evolução
+**Current focus:** Phase 11 — Exportação e Fechamento do Mês (aguardando planejamento)
 
 ## Current Position
 
-Phase: 10 (Fluxo de Caixa e Evolução) — EXECUTING
+Phase: 10 (Fluxo de Caixa e Evolução) — COMPLETE (3/3)
 Plan: 3 of 3
-Status: 10-02 concluido (aba Caixa no FinanceiroEmpresaTab). Proximo: 10-03 (grafico de evolucao 12 meses).
-Last activity: 2026-07-06 -- Phase 10 Plan 2 completo (10-02-PLAN.md)
+Status: 10-03 concluido (grafico de evolucao 12 meses, barras CSS, CAIXA-02). Fase 10 100% concluida. Proxima: /gsd-plan-phase 11 (Exportacao e Fechamento do Mes).
+Last activity: 2026-07-06 -- Phase 10 Plan 3 completo (10-03-PLAN.md) -- Fase 10 concluida
 
-Progress: [█████████░] 93%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 24 (2 v1.0 infra + 2 v1.0 base + 2 v1.0 auth + 2 v1.0 fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 5 v1.2 fase 7 + 4 v1.2 fase 8 + 3 v1.2 fase 9 + 2 v1.2 fase 10, arredondado — ver ROADMAP.md para detalhe por fase)
+- Total plans completed: 25 (2 v1.0 infra + 2 v1.0 base + 2 v1.0 auth + 2 v1.0 fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 5 v1.2 fase 7 + 4 v1.2 fase 8 + 3 v1.2 fase 9 + 3 v1.2 fase 10, arredondado — ver ROADMAP.md para detalhe por fase)
 - Average duration: ~7 min
-- Total execution time: ~1 hour
+- Total execution time: ~1h 15min
 
 **By Phase:**
 
@@ -53,10 +53,10 @@ Progress: [█████████░] 93%
 | 7. Faturamento e Contas a Receber | 5 | 5 | ~11 min |
 | 8. Fechamento de Técnicos | 4 | 4 | ~7 min |
 | 9. Contas a Pagar | 3 | 3 | ~10 min |
-| 10. Fluxo de Caixa e Evolução | 3 | 2 | ~10 min |
+| 10. Fluxo de Caixa e Evolução | 3 | 3 | ~12 min |
 | 11. Exportação e Fechamento do Mês | TBD | 0 | - |
 
-**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7, Phase 8 e Phase 9 100% concluídas (ver histórico do git para detalhe). Phase 10 (Fluxo de Caixa e Evolução) em andamento: Plan 1 (utils/fluxoCaixa.js) e Plan 2 (aba "💵 Caixa" no FinanceiroEmpresaTab: cards Entradas/Saídas/Sobrou no caixa, explicação DRE×Caixa, empty state e detalhamento expansível de entradas/saídas) executados — suite total 177 testes verdes, build sem erro. Próximo: 10-03-PLAN.md (gráfico de evolução 12 meses).
+**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7, Phase 8, Phase 9 e agora Phase 10 100% concluídas (ver histórico do git para detalhe). Phase 10 (Fluxo de Caixa e Evolução) concluída: Plan 1 (utils/fluxoCaixa.js), Plan 2 (aba "💵 Caixa" — cards Entradas/Saídas/Sobrou no caixa, explicação DRE×Caixa, empty state e detalhamento expansível) e Plan 3 (gráfico "📊 Evolução 12 meses" com barras CSS puras, sem lib nova) executados — suite total 177 testes verdes, build sem erro. Próximo: planejar Phase 11 (Exportação e Fechamento do Mês) via `/gsd-plan-phase 11`.
 
 **Per-Plan Metrics (v1.2):**
 
@@ -76,6 +76,7 @@ Progress: [█████████░] 93%
 | Phase 09 P03 | ~12min | 2 tasks | 2 files |
 | Phase 10 P01 | ~15min | 2 tasks | 2 files |
 | Phase 10 P02 | ~10min | 2 tasks | 2 files |
+| Phase 10 P03 | ~15min | 2 tasks | 1 file |
 
 ## Accumulated Context
 
@@ -120,6 +121,9 @@ Progress: [█████████░] 93%
 - [Phase 10]: 10-01: CAIXA-01/CAIXA-02 permanecem Pending em REQUIREMENTS.md -- 10-01 entrega so a logica pura (fluxoCaixaDoMes, serieEvolucao12Meses); comportamento observavel pelo admin (aba Caixa, grafico de evolucao) e responsabilidade de 10-02/10-03
 - [Phase 10]: 10-02: reaproveitado fmtDate (formatters.js) para exibir datas 'YYYY-MM-DD' como DD/MM/AAAA no detalhamento -- ja implementa split/join sem new Date(), evitando duplicar helper
 - [Phase 10]: 10-02: CAIXA-01 marcado Complete em REQUIREMENTS.md -- aba "Caixa" entrega o comportamento observavel completo (resumo do mes + detalhamento expansivel + empty state + explicacao DRE x Caixa); CAIXA-02 permanece Pending para 10-03 (grafico de evolucao)
+- [Phase 10]: 10-03: Grafico de evolucao 12 meses feito 100% com divs + inline styles (sem lib nova) -- escala normalizada por maxVal com piso 1, altura minima 2px, label 'MMM/AA' via split local (sem new Date()/toISOString)
+- [Phase 10]: 10-03: recharts ja existia no package.json antes desta fase (usado por DashboardTab.jsx) -- confirmado via git diff que nenhuma dependencia nova foi adicionada por este plano; o verify script do plano nao distingue lib pre-existente de nova
+- [Phase 10]: 10-03: CAIXA-02 marcado Complete em REQUIREMENTS.md/ROADMAP.md -- Fase 10 (Fluxo de Caixa e Evolucao) 100% concluida (3/3 planos)
 
 ### Pending Todos
 
@@ -132,6 +136,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-06T16:45:00Z
-Stopped at: Completado 10-02-PLAN.md (aba 'Caixa' no FinanceiroEmpresaTab: resumo Entradas/Saidas/Saldo + detalhamento expansivel de notas/particulares/despesas/tecnicos + empty state; suite total 177 verdes, build sem erro). Proximo: 10-03-PLAN.md (grafico de evolucao 12 meses).
+Last session: 2026-07-06T14:20:00Z
+Stopped at: Completado 10-03-PLAN.md (grafico "Evolucao 12 meses" na aba Caixa: barras CSS puras de receita/lucro liquido + margem % por mes, sem lib nova; suite total 177 verdes, build sem erro). Fase 10 (Fluxo de Caixa e Evolucao) 100% concluida (3/3 planos). Proximo: /gsd-plan-phase 11 (Exportacao e Fechamento do Mes).
 Resume file: None
