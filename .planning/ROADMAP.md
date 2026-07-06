@@ -144,7 +144,7 @@ Plans:
 **Plans**: 3 plans (2 waves)
 Plans:
 - [x] 11-01-PLAN.md — utils/drePdf.js: montagem pura do DRE + gerador jsPDF lazy + botão "Baixar DRE em PDF" na AbaDRE (EXP-01)
-- [ ] 11-02-PLAN.md — Regra Firestore fechamentosMes + deploy + utils/fechamentoMes.js (helpers puros) + testes (EXP-02)
+- [x] 11-02-PLAN.md — Regra Firestore fechamentosMes + deploy + utils/fechamentoMes.js (helpers puros) + testes (EXP-02)
 - [ ] 11-03-PLAN.md — Fechar/reabrir mês: estado + cadeado no cabeçalho + banner + guardas de escrita nas abas mensais (EXP-02)
 **UI hint**: yes
 
@@ -167,7 +167,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 8. Fechamento de Técnicos | v1.2 | 4/4 | Complete | 2026-07-05 |
 | 9. Contas a Pagar | v1.2 | 3/3 | Complete | 2026-07-05 |
 | 10. Fluxo de Caixa e Evolução | v1.2 | 3/3 | Complete | 2026-07-06 |
-| 11. Exportação e Fechamento do Mês | v1.2 | 1/3 | In Progress | - |
+| 11. Exportação e Fechamento do Mês | v1.2 | 2/3 | In Progress | - |
 
 ## Requirement Traceability (v1.2)
 

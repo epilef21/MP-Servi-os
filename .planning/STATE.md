@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
 status: executing
-stopped_at: "Completado 11-01-PLAN.md (utils/drePdf.js: montarLinhasDre puro + gerarDrePdf com jsPDF lazy; botao Baixar DRE em PDF na AbaDRE; 9 testes novos, suite total 186 verdes, build sem erro, EXP-01 completo). Proximo: 11-02-PLAN.md (Regra Firestore fechamentosMes + utils/fechamentoMes.js)."
-last_updated: "2026-07-06T23:26:36.000Z"
-last_activity: 2026-07-06 -- Completado 11-01-PLAN.md (EXP-01)
+stopped_at: "Completado 11-02-PLAN.md (regra fechamentosMes no firestore.rules deployada em checklist-53795; utils/fechamentoMes.js: estaFechado + formatarFechadoEm puros via TDD; 11 testes novos, suite total 197 verdes). EXP-02 permanece Pending -- infraestrutura pronta, falta a UI do Plano 03. Proximo: 11-03-PLAN.md (Fechar/reabrir mes: cadeado + banner + guardas de escrita)."
+last_updated: "2026-07-06T23:33:35.000Z"
+last_activity: 2026-07-06 -- Completado 11-02-PLAN.md (infra EXP-02)
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 18
-  completed_plans: 16
-  percent: 89
+  completed_plans: 17
+  percent: 94
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-07-02)
 ## Current Position
 
 Phase: 11 (Exportação e Fechamento do Mês) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Executing Phase 11
-Last activity: 2026-07-06 -- Completado 11-01-PLAN.md (EXP-01)
+Last activity: 2026-07-06 -- Completado 11-02-PLAN.md (infra EXP-02)
 
 Progress: [██████████] 100%
 
@@ -54,9 +54,9 @@ Progress: [██████████] 100%
 | 8. Fechamento de Técnicos | 4 | 4 | ~7 min |
 | 9. Contas a Pagar | 3 | 3 | ~10 min |
 | 10. Fluxo de Caixa e Evolução | 3 | 3 | ~12 min |
-| 11. Exportação e Fechamento do Mês | 3 | 1 | ~12 min |
+| 11. Exportação e Fechamento do Mês | 3 | 2 | ~10 min |
 
-**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7, Phase 8, Phase 9 e Phase 10 100% concluídas (ver histórico do git para detalhe). Phase 11 (Exportação e Fechamento do Mês) iniciada: Plan 1 (utils/drePdf.js — montarLinhasDre puro + gerarDrePdf com jsPDF lazy + botão "Baixar DRE em PDF" na AbaDRE) executado — EXP-01 completo, suite total 186 testes verdes, build sem erro. Próximo: 11-02-PLAN.md (Regra Firestore fechamentosMes + utils/fechamentoMes.js, EXP-02).
+**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7, Phase 8, Phase 9 e Phase 10 100% concluídas (ver histórico do git para detalhe). Phase 11 (Exportação e Fechamento do Mês): Plan 1 (utils/drePdf.js, EXP-01 completo) e Plan 2 (regra fechamentosMes deployada + utils/fechamentoMes.js, infra do EXP-02) executados, suite total 197 testes verdes, build sem erro. EXP-02 permanece Pending até o Plano 03 entregar a UI observável. Próximo: 11-03-PLAN.md (Fechar/reabrir mês: cadeado + banner + guardas de escrita).
 
 **Per-Plan Metrics (v1.2):**
 
@@ -78,6 +78,7 @@ Progress: [██████████] 100%
 | Phase 10 P02 | ~10min | 2 tasks | 2 files |
 | Phase 10 P03 | ~15min | 2 tasks | 1 file |
 | Phase 11 P01 | ~12min | 2 tasks | 3 files |
+| Phase 11 P02 | ~8min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -128,6 +129,9 @@ Progress: [██████████] 100%
 - [Phase 11]: 11-01: montarLinhasDre nao recalcula nada -- so formata/oculta condicionalmente os campos ja prontos de calcularDRE, mesma cascata da tela AbaDRE
 - [Phase 11]: 11-01: nome do mes por extenso derivado de mesRef via split('-') local (nunca new Date()/toISOString), mesma cautela da Fase 7/10
 - [Phase 11]: 11-01: EXP-01 marcado Complete em REQUIREMENTS.md/ROADMAP.md -- botao de PDF do DRE desabilitado quando o mes nao tem dados, evitando PDF vazio
+- [Phase 11]: 11-02: regra fechamentosMes replica exatamente o padrao de fechamentosTecnicos (isUserOfEmpresa || isSuperAdmin) -- enforcement de edicao do mes fechado e client-side (risco aceito, single-admin, T-11-04), mesmo precedente de T-08-12
+- [Phase 11]: 11-02: formatarFechadoEm normaliza Timestamp/Date/string ISO para um Date antes de formatar, usando split local -- nunca new Date(string) nem toISOString, mesma cautela das Fases 7/9/10
+- [Phase 11]: 11-02: EXP-02 permanece Pending em REQUIREMENTS.md/ROADMAP.md -- este plano entrega so a infraestrutura (regra deployada + helpers puros); o comportamento observavel pelo admin (fechar/reabrir mes, bloqueio de edicao) e responsabilidade do Plano 03
 
 ### Pending Todos
 
@@ -140,6 +144,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-06T23:26:36Z
-Stopped at: Completado 11-01-PLAN.md (utils/drePdf.js: montarLinhasDre puro + gerarDrePdf com jsPDF lazy; botao Baixar DRE em PDF na AbaDRE; 9 testes novos, suite total 186 verdes, build sem erro, EXP-01 completo). Proximo: 11-02-PLAN.md (Regra Firestore fechamentosMes + utils/fechamentoMes.js).
+Last session: 2026-07-06T23:33:35Z
+Stopped at: Completado 11-02-PLAN.md (regra fechamentosMes no firestore.rules deployada em checklist-53795; utils/fechamentoMes.js: estaFechado + formatarFechadoEm puros via TDD; 11 testes novos, suite total 197 verdes). EXP-02 permanece Pending -- infraestrutura pronta, falta a UI do Plano 03. Proximo: 11-03-PLAN.md (Fechar/reabrir mes: cadeado + banner + guardas de escrita).
 Resume file: None
