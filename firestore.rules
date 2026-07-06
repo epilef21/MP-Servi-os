@@ -222,6 +222,14 @@ service cloud.firestore {
         allow read, write: if isUserOfEmpresa(empresaId) || isSuperAdmin();
       }
 
+      // ── /empresas/{empresaId}/fechamentosMes/{mesRef} ────
+      // Trava de "mês fechado" (id = YYYY-MM). Enforcement de edição é client-side
+      // (risco aceito, single-admin — ver threat model T-11-04); a regra só garante
+      // isolamento multi-tenant da coleção.
+      match /fechamentosMes/{mesRef} {
+        allow read, write: if isUserOfEmpresa(empresaId) || isSuperAdmin();
+      }
+
       // ── /empresas/{empresaId}/orcamentos/{orcamentoId} ───
       // Orçamentos gerados pelo admin, preenchidos pelo técnico,
       // aprovados/reprovados pelo cliente via link público.
