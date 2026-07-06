@@ -127,10 +127,10 @@ Plans:
 Plans:
 - [x] 10-01-PLAN.md — utils/fluxoCaixa.js: fluxoCaixaDoMes (entradas/saídas/saldo) + serieEvolucao12Meses (receita/lucro/margem) + testes Vitest (CAIXA-01, CAIXA-02)
 - [x] 10-02-PLAN.md — Aba "💵 Caixa" no FinanceiroEmpresaTab: resumo do mês + detalhamento expansível + empty states (CAIXA-01)
-- [ ] 10-03-PLAN.md — Gráfico de evolução 12 meses com barras CSS (sem lib nova) + verificação final da fase (CAIXA-02)
+- [x] 10-03-PLAN.md — Gráfico de evolução 12 meses com barras CSS (sem lib nova) + verificação final da fase (CAIXA-02)
 **UI hint**: yes
 
-**Phase 10 em andamento (2/3 planos) — 10-02 concluído 2026-07-06.**
+**Phase 10 concluída (3/3 planos) — 2026-07-06.**
 
 ---
 
@@ -166,7 +166,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 7. Faturamento e Contas a Receber | v1.2 | 5/5 | Complete | 2026-07-02 |
 | 8. Fechamento de Técnicos | v1.2 | 4/4 | Complete | 2026-07-05 |
 | 9. Contas a Pagar | v1.2 | 3/3 | Complete | 2026-07-05 |
-| 10. Fluxo de Caixa e Evolução | v1.2 | 1/3 | In Progress | - |
+| 10. Fluxo de Caixa e Evolução | v1.2 | 3/3 | Complete | 2026-07-06 |
 | 11. Exportação e Fechamento do Mês | v1.2 | 0/TBD | Not started | - |
 
 ## Requirement Traceability (v1.2)
@@ -190,7 +190,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | PAG-02 | Phase 9 | Complete |
 | PAG-03 | Phase 9 | Complete |
 | CAIXA-01 | Phase 10 | Complete |
-| CAIXA-02 | Phase 10 | Pending |
+| CAIXA-02 | Phase 10 | Complete |
 | EXP-01 | Phase 11 | Pending |
 | EXP-02 | Phase 11 | Pending |
 
