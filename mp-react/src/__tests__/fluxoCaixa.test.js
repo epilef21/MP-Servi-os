@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  mesDeData, dataEntradaNota, fluxoCaixaDoMes,
+  mesDeData, dataEntradaNota, fluxoCaixaDoMes, ultimos12Meses, serieEvolucao12Meses,
 } from '../utils/fluxoCaixa'
 
 describe('mesDeData', () => {
@@ -147,5 +147,103 @@ describe('fluxoCaixaDoMes', () => {
     const notas = [{ numero: '1', status: 'paga', pago_em: '2026-07-10', total: '150.50' }]
     const resultado = fluxoCaixaDoMes({ notas, particulares: [], despesas: [], fechamentos: [] }, mesRef)
     expect(resultado.entradas.totalNotas).toBe(150.5)
+  })
+})
+
+describe('ultimos12Meses', () => {
+  it('retorna 12 meses terminando em mesRef, em ordem cronológica', () => {
+    const meses = ultimos12Meses('2026-07')
+    expect(meses).toHaveLength(12)
+    expect(meses[11]).toBe('2026-07')
+    expect(meses[0]).toBe('2025-08')
+  })
+
+  it('cruza a virada de ano corretamente', () => {
+    const meses = ultimos12Meses('2026-01')
+    expect(meses).toHaveLength(12)
+    expect(meses[11]).toBe('2026-01')
+    expect(meses[0]).toBe('2025-02')
+  })
+})
+
+function osComData(ano, mesIndex0, dia, campos) {
+  return {
+    criado_em: { toDate: () => new Date(Date.UTC(ano, mesIndex0, dia)) },
+    ...campos,
+  }
+}
+
+describe('serieEvolucao12Meses', () => {
+  it('retorna 12 objetos alinhados com ultimos12Meses', () => {
+    const serie = serieEvolucao12Meses({}, '2026-07')
+    expect(serie).toHaveLength(12)
+    expect(serie[11].mes).toBe('2026-07')
+    expect(serie.map((s) => s.mes)).toEqual(ultimos12Meses('2026-07'))
+  })
+
+  it('mês sem nenhum dado retorna receita/lucroLiquido/margem zerados, sem NaN', () => {
+    const serie = serieEvolucao12Meses({}, '2026-07')
+    for (const mesObj of serie) {
+      expect(mesObj.receita).toBe(0)
+      expect(mesObj.lucroLiquido).toBe(0)
+      expect(mesObj.margem).toBe(0)
+      expect(Number.isNaN(mesObj.margem)).toBe(false)
+    }
+  })
+
+  it('margem é 0 quando receita do mês é 0 (sem divisão por zero)', () => {
+    const despesas = [{ mes_referencia: '2026-07', valor: 500 }]
+    const serie = serieEvolucao12Meses({ despesas }, '2026-07')
+    const jul = serie.find((s) => s.mes === '2026-07')
+    expect(jul.receita).toBe(0)
+    expect(jul.margem).toBe(0)
+  })
+
+  it('paridade com a cascata do calcularDRE: OS + particular + dedução + despesa + resultado financeiro', () => {
+    const reports = [
+      osComData(2026, 6, 15, {
+        mo_seguradora: 100, valor_deslocamento: 20, material_cobrado_seguradora: 30,
+        valor_prestador: 40, material_custo_real: 10, margem_material: 5,
+      }),
+    ]
+    const particulares = [{ mes_referencia: '2026-07', valor_recebido: 200, valor_custo: 50 }]
+    const deducoes = [{ mes_referencia: '2026-07', valor: 15 }]
+    const despesas = [{ mes_referencia: '2026-07', valor: 60 }]
+    const resultadoFinanceiro = [
+      { tipo: 'receita', mes_referencia: '2026-07', valor: 25 },
+      { tipo: 'despesa', mes_referencia: '2026-07', valor: 5 },
+    ]
+
+    const serie = serieEvolucao12Meses(
+      { reports, particulares, despesas, deducoes, resultadoFinanceiro },
+      '2026-07'
+    )
+    const jul = serie.find((s) => s.mes === '2026-07')
+
+    // Cascata replicada manualmente (mesma fórmula do calcularDRE):
+    const receitaOS = 100 + 20 + 30
+    const receitaPart = 200
+    const receita = receitaOS + receitaPart // 350
+    const totalDeducoes = 15
+    const custoVariavel = (40 + 10) + 50 // 100
+    const saldoFinanceiro = 25 - 5 // 20
+    const totalDespesas = 60
+    const lucroLiquidoEsperado = receita - totalDeducoes - custoVariavel + saldoFinanceiro - totalDespesas
+    const margemEsperada = (lucroLiquidoEsperado / receita) * 100
+
+    expect(jul.receita).toBe(receita)
+    expect(jul.lucroLiquido).toBe(lucroLiquidoEsperado)
+    expect(jul.margem).toBeCloseTo(margemEsperada, 6)
+  })
+
+  it('OS fora do mês (criado_em em outro mês) não entra na receita do mês', () => {
+    const reports = [
+      osComData(2026, 5, 20, { mo_seguradora: 999, valor_deslocamento: 0, material_cobrado_seguradora: 0 }),
+    ]
+    const serie = serieEvolucao12Meses({ reports }, '2026-07')
+    const jul = serie.find((s) => s.mes === '2026-07')
+    const jun = serie.find((s) => s.mes === '2026-06')
+    expect(jul.receita).toBe(0)
+    expect(jun.receita).toBe(999)
   })
 })
