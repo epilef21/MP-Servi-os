@@ -155,7 +155,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 6. Relatório Mensal em PDF | v1.1 | 2/2 | Complete | 2026-05-05 |
 | 7. Faturamento e Contas a Receber | v1.2 | 5/5 | Complete | 2026-07-02 |
 | 8. Fechamento de Técnicos | v1.2 | 4/4 | Complete | 2026-07-05 |
-| 9. Contas a Pagar | v1.2 | 2/3 | In Progress | - |
+| 9. Contas a Pagar | v1.2 | 3/3 | Complete | - |
 | 10. Fluxo de Caixa e Evolução | v1.2 | 0/TBD | Not started | - |
 | 11. Exportação e Fechamento do Mês | v1.2 | 0/TBD | Not started | - |
 
