@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Financeiro Completo
-status: executing
-stopped_at: "Completado 11-02-PLAN.md (regra fechamentosMes no firestore.rules deployada em checklist-53795; utils/fechamentoMes.js: estaFechado + formatarFechadoEm puros via TDD; 11 testes novos, suite total 197 verdes). EXP-02 permanece Pending -- infraestrutura pronta, falta a UI do Plano 03. Proximo: 11-03-PLAN.md (Fechar/reabrir mes: cadeado + banner + guardas de escrita)."
-last_updated: "2026-07-06T23:33:35.000Z"
-last_activity: 2026-07-06 -- Completado 11-02-PLAN.md (infra EXP-02)
+status: complete
+stopped_at: "Completado 11-03-PLAN.md (ultimo plano da Phase 11 e do milestone v1.2): estado mesFechado + botao cadeado no cabecalho do Financeiro + banner + guardas de escrita (if (mesFechado) early-return) em todos os handlers de Despesas/Particulares/Impostos/Financeiro + prop mesFechado desabilitando 'Marcar como pago' em AbaFechamentoTecnicos. Faturamento nao bloqueado (fatura por seguradora). EXP-02 Complete. Phase 11 100% (3/3). Milestone v1.2 Financeiro Completo 100% concluido (20/20 requisitos)."
+last_updated: "2026-07-06T21:05:00.000Z"
+last_activity: 2026-07-06 -- Completado 11-03-PLAN.md (EXP-02 Complete, Phase 11 e milestone v1.2 concluidos)
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 18
-  completed_plans: 17
-  percent: 94
+  completed_plans: 18
+  percent: 100
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-07-02)
 
 ## Current Position
 
-Phase: 11 (Exportação e Fechamento do Mês) — EXECUTING
-Plan: 3 of 3
-Status: Executing Phase 11
-Last activity: 2026-07-06 -- Completado 11-02-PLAN.md (infra EXP-02)
+Phase: 11 (Exportação e Fechamento do Mês) — COMPLETE
+Plan: 3 of 3 (todos completos)
+Status: Milestone v1.2 Financeiro Completo — COMPLETE
+Last activity: 2026-07-06 -- Completado 11-03-PLAN.md (EXP-02 Complete, Phase 11 e milestone v1.2 concluidos)
 
 Progress: [██████████] 100%
 
@@ -36,9 +36,9 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 25 (2 v1.0 infra + 2 v1.0 base + 2 v1.0 auth + 2 v1.0 fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 5 v1.2 fase 7 + 4 v1.2 fase 8 + 3 v1.2 fase 9 + 3 v1.2 fase 10, arredondado — ver ROADMAP.md para detalhe por fase)
+- Total plans completed: 26 (2 v1.0 infra + 2 v1.0 base + 2 v1.0 auth + 2 v1.0 fluxos + 1 v1.1 imagens + 2 v1.1 relatório + 5 v1.2 fase 7 + 4 v1.2 fase 8 + 3 v1.2 fase 9 + 3 v1.2 fase 10 + 3 v1.2 fase 11 — milestone v1.2 completo, ver ROADMAP.md para detalhe por fase)
 - Average duration: ~7 min
-- Total execution time: ~1h 15min
+- Total execution time: ~1h 25min
 
 **By Phase:**
 
@@ -54,9 +54,9 @@ Progress: [██████████] 100%
 | 8. Fechamento de Técnicos | 4 | 4 | ~7 min |
 | 9. Contas a Pagar | 3 | 3 | ~10 min |
 | 10. Fluxo de Caixa e Evolução | 3 | 3 | ~12 min |
-| 11. Exportação e Fechamento do Mês | 3 | 2 | ~10 min |
+| 11. Exportação e Fechamento do Mês | 3 | 3 | ~10 min |
 
-**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7, Phase 8, Phase 9 e Phase 10 100% concluídas (ver histórico do git para detalhe). Phase 11 (Exportação e Fechamento do Mês): Plan 1 (utils/drePdf.js, EXP-01 completo) e Plan 2 (regra fechamentosMes deployada + utils/fechamentoMes.js, infra do EXP-02) executados, suite total 197 testes verdes, build sem erro. EXP-02 permanece Pending até o Plano 03 entregar a UI observável. Próximo: 11-03-PLAN.md (Fechar/reabrir mês: cadeado + banner + guardas de escrita).
+**Recent Trend:** Milestone v1.1 completo (2026-05-05). Milestone v1.2 iniciado 2026-07-02 — Phase 7, Phase 8, Phase 9, Phase 10 e Phase 11 100% concluídas (ver histórico do git para detalhe). Phase 11 (Exportação e Fechamento do Mês) concluída com o Plano 03: estado mesFechado + cadeado no cabeçalho + banner + guardas de escrita em todas as abas mensais (EXP-02 Complete), suite total 197 testes verdes, build sem erro. **Milestone v1.2 Financeiro Completo 100% concluído (20/20 requisitos, 18/18 planos).**
 
 **Per-Plan Metrics (v1.2):**
 
@@ -79,6 +79,7 @@ Progress: [██████████] 100%
 | Phase 10 P03 | ~15min | 2 tasks | 1 file |
 | Phase 11 P01 | ~12min | 2 tasks | 3 files |
 | Phase 11 P02 | ~8min | 2 tasks | 3 files |
+| Phase 11 P03 | ~10min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -132,6 +133,9 @@ Progress: [██████████] 100%
 - [Phase 11]: 11-02: regra fechamentosMes replica exatamente o padrao de fechamentosTecnicos (isUserOfEmpresa || isSuperAdmin) -- enforcement de edicao do mes fechado e client-side (risco aceito, single-admin, T-11-04), mesmo precedente de T-08-12
 - [Phase 11]: 11-02: formatarFechadoEm normaliza Timestamp/Date/string ISO para um Date antes de formatar, usando split local -- nunca new Date(string) nem toISOString, mesma cautela das Fases 7/9/10
 - [Phase 11]: 11-02: EXP-02 permanece Pending em REQUIREMENTS.md/ROADMAP.md -- este plano entrega so a infraestrutura (regra deployada + helpers puros); o comportamento observavel pelo admin (fechar/reabrir mes, bloqueio de edicao) e responsabilidade do Plano 03
+- [Phase 11]: 11-03: guarda if (mesFechado) replicada no INICIO de todos os handlers de escrita (salvar*/excluir*/pagarMensal/autoLancarFixas/marcarPago) como defesa central -- mesma robustez das desabilitacoes visuais, mesmo que algum botao escape da UI
+- [Phase 11]: 11-03: Faturamento (AbaFaturamento) NAO recebe a prop mesFechado -- a nota e emitida por seguradora (calendario proprio), nao por mes de competencia; decisao documentada em comentario no codigo
+- [Phase 11]: 11-03: EXP-02 marcado Complete em REQUIREMENTS.md/ROADMAP.md -- Phase 11 (Exportacao e Fechamento do Mes) 100% concluida (3/3 planos). Milestone v1.2 Financeiro Completo 100% concluido (20/20 requisitos)
 
 ### Pending Todos
 
@@ -144,6 +148,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-07-06T23:33:35Z
-Stopped at: Completado 11-02-PLAN.md (regra fechamentosMes no firestore.rules deployada em checklist-53795; utils/fechamentoMes.js: estaFechado + formatarFechadoEm puros via TDD; 11 testes novos, suite total 197 verdes). EXP-02 permanece Pending -- infraestrutura pronta, falta a UI do Plano 03. Proximo: 11-03-PLAN.md (Fechar/reabrir mes: cadeado + banner + guardas de escrita).
+Last session: 2026-07-06T21:05:00Z
+Stopped at: Completado 11-03-PLAN.md -- ultimo plano da Phase 11 e do milestone v1.2. Estado mesFechado + cadeado no cabecalho + banner + guardas de escrita (if (mesFechado) early-return) em Despesas/Particulares/Impostos/Financeiro + prop mesFechado em AbaFechamentoTecnicos. Faturamento nao bloqueado (fatura por seguradora, documentado em comentario). Suite total 197 testes verdes, build sem erro. EXP-02 Complete. Milestone v1.2 Financeiro Completo 100% concluido (20/20 requisitos, 18/18 planos). Proximo: definir escopo do proximo milestone (v1.3?) via /gsd-plan-phase ou nova sessao de planejamento.
 Resume file: None

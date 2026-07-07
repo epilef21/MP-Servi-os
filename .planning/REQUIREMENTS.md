@@ -43,7 +43,7 @@
 ### Exportação e Fechamento (EXP)
 
 - [x] **EXP-01**: Admin pode baixar o DRE do mês em PDF gerado no browser (jsPDF, padrão existente)
-- [ ] **EXP-02**: Admin pode fechar o mês, travando os lançamentos financeiros do período contra alteração acidental
+- [x] **EXP-02**: Admin pode fechar o mês, travando os lançamentos financeiros do período contra alteração acidental
 
 ## Future Requirements (v1.3+)
 
@@ -84,13 +84,14 @@
 | CAIXA-01 | Phase 10 | Complete |
 | CAIXA-02 | Phase 10 | Complete |
 | EXP-01 | Phase 11 | Complete |
-| EXP-02 | Phase 11 | Pending |
+| EXP-02 | Phase 11 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 20 total
 - Mapped to phases: 20/20
 - Unmapped: 0
+- Complete: 20/20 — v1.2 Financeiro Completo 100% concluído
 
 ---
 *Requirements defined: 2026-07-02*
-*Last updated: 2026-07-02 após criação do roadmap v1.2 (Phases 7-11)*
+*Last updated: 2026-07-06 após conclusão da Phase 11 (Exportação e Fechamento do Mês) — milestone v1.2 completo*

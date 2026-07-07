@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 Test Coverage** - Phases 1-4 (concluído 2026-05-20)
 - ✅ **v1.1 Produto Core** - Phases 5-6 (concluído 2026-05-05)
-- 🚧 **v1.2 Financeiro Completo** - Phases 7-11 (em planejamento)
+- ✅ **v1.2 Financeiro Completo** - Phases 7-11 (concluído 2026-07-06)
 
 ## Phases
 
@@ -145,8 +145,10 @@ Plans:
 Plans:
 - [x] 11-01-PLAN.md — utils/drePdf.js: montagem pura do DRE + gerador jsPDF lazy + botão "Baixar DRE em PDF" na AbaDRE (EXP-01)
 - [x] 11-02-PLAN.md — Regra Firestore fechamentosMes + deploy + utils/fechamentoMes.js (helpers puros) + testes (EXP-02)
-- [ ] 11-03-PLAN.md — Fechar/reabrir mês: estado + cadeado no cabeçalho + banner + guardas de escrita nas abas mensais (EXP-02)
+- [x] 11-03-PLAN.md — Fechar/reabrir mês: estado + cadeado no cabeçalho + banner + guardas de escrita nas abas mensais (EXP-02)
 **UI hint**: yes
+
+**Phase 11 concluída (3/3 planos) — 2026-07-06. Milestone v1.2 Financeiro Completo 100% concluído.**
 
 ---
 
@@ -167,7 +169,7 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | 8. Fechamento de Técnicos | v1.2 | 4/4 | Complete | 2026-07-05 |
 | 9. Contas a Pagar | v1.2 | 3/3 | Complete | 2026-07-05 |
 | 10. Fluxo de Caixa e Evolução | v1.2 | 3/3 | Complete | 2026-07-06 |
-| 11. Exportação e Fechamento do Mês | v1.2 | 2/3 | In Progress | - |
+| 11. Exportação e Fechamento do Mês | v1.2 | 3/3 | Complete | 2026-07-06 |
 
 ## Requirement Traceability (v1.2)
 
@@ -192,8 +194,8 @@ Phases execute in numeric order: 7 → 8 → 9 → 10 → 11
 | CAIXA-01 | Phase 10 | Complete |
 | CAIXA-02 | Phase 10 | Complete |
 | EXP-01 | Phase 11 | Complete |
-| EXP-02 | Phase 11 | Pending |
+| EXP-02 | Phase 11 | Complete |
 
-**Coverage:** 20/20 v1.2 requirements mapped. No orphans.
+**Coverage:** 20/20 v1.2 requirements mapped. No orphans. Todos os 20 requisitos completos — v1.2 Financeiro Completo encerrado.
 
 Para a tabela de traceability completa de v1.0/v1.1 (45 requisitos), ver histórico do git deste arquivo.
