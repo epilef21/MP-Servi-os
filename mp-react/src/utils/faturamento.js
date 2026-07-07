@@ -44,12 +44,27 @@ export const REGRAS_FATURAMENTO_PADRAO = {
       { diaDe: 26, diaAte: 31, naoFaturavel: true         }, // 26–31 → NÃO faturada nem paga (FAT-08)
     ],
   },
+  // Tempo: tabela oficial é por período do SERVIÇO prestado e paga em dias úteis
+  // variáveis (22–24 e 27–31). Aproximação pela data de emissão da nota:
+  // early band fecha dia 09 em 10 dos 12 meses da tabela 2026 (jan/fev usam 10).
+  Tempo: {
+    faixas: [
+      { diaDe: 1,  diaAte: 9,  addMeses: 0, diaPagto: 30 }, // serviço 01–09 → paga no fim do mesmo mês (clampado)
+      { diaDe: 10, diaAte: 31, addMeses: 1, diaPagto: 24 }, // serviço 10–fim → paga ~dia 24 do mês seguinte
+    ],
+  },
+  Maxpar: {
+    faixas: [
+      { diaDe: 1,  diaAte: 15, addMeses: 0, diaPagto: 25 }, // nota 01–15 → paga dia 25 do mesmo mês
+      { diaDe: 16, diaAte: 31, addMeses: 1, diaPagto: 10 }, // nota 16–fim → paga dia 10 do mês seguinte
+    ],
+  },
 }
 // Mondial usa o mesmo calendário da Allianz
 REGRAS_FATURAMENTO_PADRAO.Mondial = REGRAS_FATURAMENTO_PADRAO.Allianz
 
 // Retorna as faixas de calendário customizadas do config (ConfigTab) com fallback
-// para o padrão; retorna null quando a seguradora não tem calendário (Tempo/Maxpar).
+// para o padrão; retorna null quando a seguradora não tem calendário cadastrado.
 export function getRegrasFaturamento(config, seguradora) {
   const custom = config?.calendarioFaturamento?.[seguradora]?.faixas
   if (Array.isArray(custom) && custom.length > 0) return custom
@@ -90,7 +105,9 @@ export function calcularDataPrevista(seguradora, dataEmissao, config) {
     return { data: null, naoFaturavel: true, semCalendario: false }
   }
 
-  const alvo = new Date(ano, (mes - 1) + faixa.addMeses, faixa.diaPagto)
+  // Clamp: diaPagto 30 em fevereiro vira 28/29 (senão o Date rolaria para março)
+  const ultimoDia = new Date(ano, (mes - 1) + faixa.addMeses + 1, 0).getDate()
+  const alvo = new Date(ano, (mes - 1) + faixa.addMeses, Math.min(faixa.diaPagto, ultimoDia))
   const ajustado = proximoDiaUtil(alvo)
   return { data: fmtISO(ajustado), naoFaturavel: false, semCalendario: false }
 }

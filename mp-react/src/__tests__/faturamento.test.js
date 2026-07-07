@@ -47,16 +47,32 @@ describe('calcularDataPrevista', () => {
     expect(r.data).toBeNull()
   })
 
-  it('seguradora sem calendário (Tempo) → semCalendario, data null', () => {
-    const r = calcularDataPrevista('Tempo', '2026-06-10', null)
+  it('seguradora sem calendário cadastrado (Chubb) → semCalendario, data null', () => {
+    const r = calcularDataPrevista('Chubb', '2026-06-10', null)
     expect(r.semCalendario).toBe(true)
     expect(r.data).toBeNull()
   })
 
-  it('seguradora sem calendário (Maxpar) → semCalendario, data null', () => {
-    const r = calcularDataPrevista('Maxpar', '2026-06-10', null)
-    expect(r.semCalendario).toBe(true)
-    expect(r.data).toBeNull()
+  // Tempo (calendário 2026 aproximado pela data de emissão — FAT-11)
+  it('Tempo: emissão 01–09 → paga no fim do mesmo mês (30/08 dom → segunda 31/08)', () => {
+    expect(calcularDataPrevista('Tempo', '2026-08-05', null).data).toBe('2026-08-31')
+  })
+
+  it('Tempo: emissão 10–fim → paga dia 24 do mês seguinte', () => {
+    expect(calcularDataPrevista('Tempo', '2026-08-15', null).data).toBe('2026-09-24')
+  })
+
+  it('Tempo: clamp de fevereiro — dia 30 vira 28/02 (sáb) → segunda 02/03', () => {
+    expect(calcularDataPrevista('Tempo', '2026-02-05', null).data).toBe('2026-03-02')
+  })
+
+  // Maxpar (regra oficial — FAT-11)
+  it('Maxpar: nota 01–15 → paga dia 25 do mesmo mês', () => {
+    expect(calcularDataPrevista('Maxpar', '2026-08-10', null).data).toBe('2026-08-25')
+  })
+
+  it('Maxpar: nota 16–fim → paga dia 10 do mês seguinte', () => {
+    expect(calcularDataPrevista('Maxpar', '2026-08-20', null).data).toBe('2026-09-10')
   })
 
   it('usa faixas customizadas do config quando presentes', () => {
@@ -124,8 +140,13 @@ describe('getRegrasFaturamento', () => {
     expect(getRegrasFaturamento(null, 'Mapfre')).toEqual(REGRAS_FATURAMENTO_PADRAO.Mapfre.faixas)
   })
 
-  it('retorna null para seguradora sem calendário (Tempo)', () => {
-    expect(getRegrasFaturamento(null, 'Tempo')).toBeNull()
+  it('retorna null para seguradora sem calendário cadastrado (Chubb)', () => {
+    expect(getRegrasFaturamento(null, 'Chubb')).toBeNull()
+  })
+
+  it('Tempo e Maxpar agora têm calendário padrão (FAT-11)', () => {
+    expect(getRegrasFaturamento(null, 'Tempo')).toEqual(REGRAS_FATURAMENTO_PADRAO.Tempo.faixas)
+    expect(getRegrasFaturamento(null, 'Maxpar')).toEqual(REGRAS_FATURAMENTO_PADRAO.Maxpar.faixas)
   })
 })
 

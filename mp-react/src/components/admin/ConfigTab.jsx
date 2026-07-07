@@ -158,7 +158,7 @@ export default function ConfigTab() {
   // para o calendário padrão (REGRAS_FATURAMENTO_PADRAO) quando o admin ainda não customizou
   useEffect(() => {
     const cf = {}
-    ;['Mapfre', 'Allianz'].forEach(seg => {
+    ;['Mapfre', 'Allianz', 'Tempo', 'Maxpar'].forEach(seg => {
       const saved = config?.calendarioFaturamento?.[seg]?.faixas
       const base  = (Array.isArray(saved) && saved.length) ? saved : REGRAS_FATURAMENTO_PADRAO[seg].faixas
       cf[seg] = { faixas: base.map(f => ({ ...f })) }
@@ -278,6 +278,8 @@ export default function ConfigTab() {
         ...atual,
         Mapfre:  { faixas: (calForm.Mapfre?.faixas  || []).map(f => normalizarFaixa(f)) },
         Allianz: { faixas: (calForm.Allianz?.faixas || []).map(f => normalizarFaixa(f)) },
+        Tempo:   { faixas: (calForm.Tempo?.faixas   || []).map(f => normalizarFaixa(f)) },
+        Maxpar:  { faixas: (calForm.Maxpar?.faixas  || []).map(f => normalizarFaixa(f)) },
       }
       calendarioFaturamento.Mondial = calendarioFaturamento.Allianz // Mondial usa o mesmo calendário da Allianz
       await updateDoc(refConfig(empresaId), { calendarioFaturamento })
