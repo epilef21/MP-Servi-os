@@ -4,10 +4,21 @@ import { fmtDate } from '../../utils/formatters.js'
 
 import { badgeLabel, badgeCls } from './statusMeta.js'
 
+// Quantidade de segurados renderizados por vez
+const TAMANHO_PAGINA = 30
+
 export default function SeguradosTab({ onSelectOS }) {
   const { reports } = useAdminContext()
 
   const [selectedSegurado, setSelectedSegurado] = useState(null)
+  const [busca,            setBusca]            = useState('')
+  const [visiveis,         setVisiveis]         = useState(TAMANHO_PAGINA)
+
+  // Mudou a busca → volta para a primeira "página"
+  function mudarBusca(valor) {
+    setBusca(valor)
+    setVisiveis(TAMANHO_PAGINA)
+  }
 
   const segurados = useMemo(() => {
     const map = {}
@@ -27,23 +38,42 @@ export default function SeguradosTab({ onSelectOS }) {
     return Object.values(map).sort((a, b) => b.os.length - a.os.length)
   }, [reports])
 
+  const filtrados = useMemo(() => {
+    const b = busca.toLowerCase()
+    if (!b) return segurados
+    return segurados.filter(s =>
+      `${s.nome} ${s.tel} ${s.cidade} ${s.endereco}`.toLowerCase().includes(b)
+    )
+  }, [segurados, busca])
+
   return (
     <>
       {/* ── Lista ── */}
       <div className="tab-content">
-        <div style={{ fontSize: '.82rem', color: 'var(--muted)', marginBottom: 16, fontWeight: 600 }}>
-          {segurados.length} segurado{segurados.length !== 1 ? 's' : ''} únicos
+        <div className="filter-bar" style={{ marginBottom: 16 }}>
+          <span className="filter-label">Filtrar:</span>
+          <input className="filter-input flex-1" placeholder="🔍 Nome, telefone, cidade..."
+            value={busca} onChange={e => mudarBusca(e.target.value)} />
+          {busca && (
+            <button className="btn-sm btn-view" onClick={() => mudarBusca('')}>✕ Limpar</button>
+          )}
         </div>
 
-        {segurados.length === 0 && (
+        <div style={{ fontSize: '.82rem', color: 'var(--muted)', marginBottom: 16, fontWeight: 600 }}>
+          {filtrados.length > visiveis
+            ? `Mostrando ${visiveis} de ${filtrados.length} segurados`
+            : `${filtrados.length} segurado${filtrados.length !== 1 ? 's' : ''} únicos`}
+        </div>
+
+        {filtrados.length === 0 && (
           <div className="empty-state">
             <div className="e-icon">👥</div>
-            <p>Nenhum segurado encontrado.</p>
+            <p>{busca ? `Nenhum segurado encontrado para "${busca}".` : 'Nenhum segurado encontrado.'}</p>
           </div>
         )}
 
         <div className="segurados-list">
-          {segurados.map((s, idx) => {
+          {filtrados.slice(0, visiveis).map((s, idx) => {
             const ultima  = s.os[0]
             const comNota = s.os.filter(o => o.avaliacao_nota)
             const media   = comNota.length
@@ -77,6 +107,15 @@ export default function SeguradosTab({ onSelectOS }) {
             )
           })}
         </div>
+
+        {filtrados.length > visiveis && (
+          <div style={{ textAlign: 'center', marginTop: 18 }}>
+            <button className="btn-sm btn-view" style={{ padding: '10px 24px' }}
+              onClick={() => setVisiveis(v => v + TAMANHO_PAGINA)}>
+              ▼ Mostrar mais {Math.min(TAMANHO_PAGINA, filtrados.length - visiveis)} ({filtrados.length - visiveis} restantes)
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Modal detalhe do segurado ── */}

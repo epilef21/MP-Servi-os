@@ -4,6 +4,9 @@ import { getLucro, fmtBRL, fmtDate } from '../../utils/formatters.js'
 
 import { badgeLabel, badgeCls } from './statusMeta.js'
 
+// Quantidade de cards renderizados por vez — evita desenhar centenas de uma vez
+const TAMANHO_PAGINA = 30
+
 export default function OrdensServicoTab() {
   const {
     reports, loading, error,
@@ -13,6 +16,13 @@ export default function OrdensServicoTab() {
   const [busca,      setBusca]      = useState('')
   const [filtStatus, setFiltStatus] = useState('')
   const [filtData,   setFiltData]   = useState('')
+  const [visiveis,   setVisiveis]   = useState(TAMANHO_PAGINA)
+
+  // Mudou o filtro/busca → volta para a primeira "página"
+  function mudarFiltro(setter, valor) {
+    setter(valor)
+    setVisiveis(TAMANHO_PAGINA)
+  }
 
   const filtered = useMemo(() => {
     const b = busca.toLowerCase()
@@ -29,8 +39,8 @@ export default function OrdensServicoTab() {
       <div className="filter-bar" style={{ marginBottom: 20 }}>
         <span className="filter-label">Filtrar:</span>
         <input className="filter-input flex-1" placeholder="🔍 Segurado, seguradora, cidade..."
-          value={busca} onChange={e => setBusca(e.target.value)} />
-        <select className="filter-input" value={filtStatus} onChange={e => setFiltStatus(e.target.value)}>
+          value={busca} onChange={e => mudarFiltro(setBusca, e.target.value)} />
+        <select className="filter-input" value={filtStatus} onChange={e => mudarFiltro(setFiltStatus, e.target.value)}>
           <option value="">Todos os status</option>
           <option value="aguardando_tecnico">🔔 Aguardando Técnico</option>
           <option value="pendente">⏳ Pendentes</option>
@@ -40,14 +50,16 @@ export default function OrdensServicoTab() {
           <option value="processado">📋 Processados</option>
           <option value="enviado">📤 Enviados</option>
         </select>
-        <input type="date" className="filter-input" value={filtData} onChange={e => setFiltData(e.target.value)} />
+        <input type="date" className="filter-input" value={filtData} onChange={e => mudarFiltro(setFiltData, e.target.value)} />
         {(busca || filtStatus || filtData) && (
-          <button className="btn-sm btn-view" onClick={() => { setBusca(''); setFiltStatus(''); setFiltData('') }}>✕ Limpar</button>
+          <button className="btn-sm btn-view" onClick={() => { setBusca(''); setFiltStatus(''); setFiltData(''); setVisiveis(TAMANHO_PAGINA) }}>✕ Limpar</button>
         )}
       </div>
 
       <div style={{ fontSize: '.82rem', color: 'var(--muted)', marginBottom: 16, fontWeight: 600 }}>
-        {filtered.length} ordem{filtered.length !== 1 ? 'ns' : ''} de serviço
+        {filtered.length > visiveis
+          ? `Mostrando ${visiveis} de ${filtered.length} ordens de serviço`
+          : `${filtered.length} ordem${filtered.length !== 1 ? 'ns' : ''} de serviço`}
       </div>
 
       {loading && <div className="loading-state"><div className="spinner" /><div className="loading-text">Carregando...</div></div>}
@@ -59,7 +71,7 @@ export default function OrdensServicoTab() {
 
       {!loading && !error && filtered.length > 0 && (
         <div className="os-cards-grid">
-          {filtered.map(r => {
+          {filtered.slice(0, visiveis).map(r => {
             const lucro = getLucro(r)
             return (
               <div key={r.id} className="os-card" onClick={() => setSelected(r)}>
@@ -105,6 +117,15 @@ export default function OrdensServicoTab() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {!loading && !error && filtered.length > visiveis && (
+        <div style={{ textAlign: 'center', marginTop: 18 }}>
+          <button className="btn-sm btn-view" style={{ padding: '10px 24px' }}
+            onClick={() => setVisiveis(v => v + TAMANHO_PAGINA)}>
+            ▼ Mostrar mais {Math.min(TAMANHO_PAGINA, filtered.length - visiveis)} ({filtered.length - visiveis} restantes)
+          </button>
         </div>
       )}
     </div>

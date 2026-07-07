@@ -34,7 +34,7 @@ function CustomBarTooltip({ active, payload, label }) {
 }
 
 export default function DashboardTab() {
-  const { reports, empresa, totalMes, limite, setAbaAtiva, setSelected } = useAdminContext()
+  const { reports, loading, empresa, totalMes, limite, setAbaAtiva, setSelected } = useAdminContext()
 
   const [filtMes, setFiltMes] = useState(() => new Date().toISOString().slice(0, 7))
 
@@ -117,6 +117,19 @@ export default function DashboardTab() {
       .filter(([, v]) => v > 0)
       .map(([key, value]) => ({ name: badgeLabel(key).replace(/\S+ /, ''), value, color: PIE_COLORS[key] }))
   }, [reports])
+
+  // Enquanto as OS não chegaram do Firestore, mostrar carregamento —
+  // sem isso o dashboard exibia "0" e "Sem dados" enganosos por alguns segundos
+  if (loading) {
+    return (
+      <div className="tab-content">
+        <div className="loading-state" style={{ padding: '60px 0' }}>
+          <div className="spinner" />
+          <div className="loading-text">Carregando o resumo do mês...</div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="tab-content">
