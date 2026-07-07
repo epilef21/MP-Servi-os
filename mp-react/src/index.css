@@ -26,6 +26,16 @@
   --r-lg:          16px;
   --sh:            0 2px 14px rgba(26,63,168,.10);
   --sh-lg:         0 8px 32px rgba(26,63,168,.18);
+
+  /* ── Tokens semânticos de status (redesign 2026-07) ──
+     Código de cores único do app: azul=informativo · verde=concluído/pago ·
+     laranja=andamento/atenção · vermelho=crítico/atrasado */
+  --st-info:     #1a3fa8;  --st-info-bg:     #eef2fc;
+  --st-done:     #2d8a4e;  --st-done-bg:     #e8f5ee;
+  --st-progress: #b45309;  --st-progress-bg: #fff4e5;
+  --st-critical: #c0392b;  --st-critical-bg: #fdecea;
+  --shadow-1: 0 1px 3px rgba(16,24,40,.07);
+  --shadow-2: 0 4px 12px rgba(16,24,40,.10);
 }
 
 html { scroll-behavior: smooth; }
