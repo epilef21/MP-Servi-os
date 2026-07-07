@@ -62,6 +62,11 @@ const LABEL_CATEGORIA = {
   agua_luz:            'Água e Luz',
   internet:            'Internet',
   contabilidade:       'Contabilidade',
+  // Operacional (gastos do dia a dia da equipe)
+  combustivel:         'Combustível',
+  alimentacao:         'Alimentação',
+  veiculo:             'Veículo / Manutenção',
+  ferramentas:         'Ferramentas e Equipamentos',
   // Mantidos (dados antigos)
   salario:   'Salários',
   estrutura: 'Estrutura / Escritório',
@@ -80,6 +85,11 @@ const GRUPOS_DESPESA = {
     label: '🏢 Estrutura',
     cls: 'estrutura',
     cats: ['aluguel', 'agua_luz', 'internet', 'estrutura'],
+  },
+  operacional: {
+    label: '🚗 Operacional',
+    cls: 'administrativo',
+    cats: ['combustivel', 'alimentacao', 'veiculo', 'ferramentas'],
   },
   administrativo: {
     label: '📋 Administrativo',
@@ -1315,6 +1325,12 @@ function ModalDespesaRecorrente({ form, setForm, salvando, editando, onSalvar, o
                   <option value="internet">Internet</option>
                   <option value="estrutura">Estrutura / Outros do Escritório</option>
                 </optgroup>
+                <optgroup label="Operacional (dia a dia)">
+                  <option value="combustivel">Combustível</option>
+                  <option value="alimentacao">Alimentação (pão, marmita, água...)</option>
+                  <option value="veiculo">Veículo / Manutenção</option>
+                  <option value="ferramentas">Ferramentas e Equipamentos</option>
+                </optgroup>
                 <optgroup label="Administrativo">
                   <option value="contabilidade">Contabilidade</option>
                   <option value="outro">Outro</option>
@@ -1394,6 +1410,12 @@ function ModalLancamentoMensal({ form, setForm, salvando, editando, mesRef, onSa
                   <option value="agua_luz">Água e Luz</option>
                   <option value="internet">Internet</option>
                   <option value="estrutura">Estrutura / Outros do Escritório</option>
+                </optgroup>
+                <optgroup label="Operacional (dia a dia)">
+                  <option value="combustivel">Combustível</option>
+                  <option value="alimentacao">Alimentação (pão, marmita, água...)</option>
+                  <option value="veiculo">Veículo / Manutenção</option>
+                  <option value="ferramentas">Ferramentas e Equipamentos</option>
                 </optgroup>
                 <optgroup label="Administrativo">
                   <option value="contabilidade">Contabilidade</option>
