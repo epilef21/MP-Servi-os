@@ -249,6 +249,7 @@ export default function FinanceiroEmpresaTab() {
 
   // ── Auto-lançamento de fixas ─────────────────────────────
   async function autoLancarFixas() {
+    if (mesFechado) { showToast('Mês fechado — reabra para alterar.', 'error'); return }
     setAutoLancando(true)
     try {
       const fixas = despesasRecorrentes.filter(r => r.tipo === 'fixa' && r.ativa !== false)
@@ -291,6 +292,7 @@ export default function FinanceiroEmpresaTab() {
     setShowModalRecorrente(true)
   }
   async function salvarRecorrente() {
+    if (mesFechado) { showToast('Mês fechado — reabra para alterar.', 'error'); return }
     if (!formRecorrente.descricao.trim()) { showToast('Informe a descrição.', 'error'); return }
     setSalvandoRecorrente(true)
     try {
@@ -313,6 +315,7 @@ export default function FinanceiroEmpresaTab() {
     finally { setSalvandoRecorrente(false) }
   }
   async function excluirRecorrente(r) {
+    if (mesFechado) { showToast('Mês fechado — reabra para alterar.', 'error'); return }
     if (!window.confirm(`Excluir "${r.descricao}"?\nLançamentos existentes não serão removidos.`)) return
     try {
       await deleteDoc(doc(db, `empresas/${empresaId}/despesasRecorrentes`, r.id))
@@ -345,6 +348,7 @@ export default function FinanceiroEmpresaTab() {
     setShowModalMensal(true)
   }
   async function salvarMensal() {
+    if (mesFechado) { showToast('Mês fechado — reabra para alterar.', 'error'); return }
     if (!formMensal.descricao.trim()) { showToast('Informe a descrição.', 'error'); return }
     setSalvandoMensal(true)
     try {
@@ -368,6 +372,7 @@ export default function FinanceiroEmpresaTab() {
     finally { setSalvandoMensal(false) }
   }
   async function excluirMensal(l) {
+    if (mesFechado) { showToast('Mês fechado — reabra para alterar.', 'error'); return }
     if (!window.confirm(`Excluir lançamento "${l.descricao}"?`)) return
     try {
       await deleteDoc(doc(db, `empresas/${empresaId}/despesasMensais`, l.id))
@@ -375,6 +380,7 @@ export default function FinanceiroEmpresaTab() {
     } catch (e) { showToast('Erro: ' + e.message, 'error') }
   }
   async function pagarMensal(l) {
+    if (mesFechado) { showToast('Mês fechado — reabra para alterar.', 'error'); return }
     if (!window.confirm(`Marcar "${l.descricao}" como paga hoje?`)) return
     try {
       await updateDoc(doc(db, `empresas/${empresaId}/despesasMensais`, l.id), { data_pagamento: hojeISO() })
@@ -401,6 +407,7 @@ export default function FinanceiroEmpresaTab() {
     setShowModalParticular(true)
   }
   async function salvarParticular() {
+    if (mesFechado) { showToast('Mês fechado — reabra para alterar.', 'error'); return }
     if (!formParticular.descricao.trim()) { showToast('Informe a descrição.', 'error'); return }
     setSalvandoParticular(true)
     try {
@@ -427,6 +434,7 @@ export default function FinanceiroEmpresaTab() {
     finally { setSalvandoParticular(false) }
   }
   async function excluirParticular(p) {
+    if (mesFechado) { showToast('Mês fechado — reabra para alterar.', 'error'); return }
     if (!window.confirm(`Excluir "${p.descricao}"?`)) return
     try {
       await deleteDoc(doc(db, `empresas/${empresaId}/servicosParticulares`, p.id))
@@ -446,6 +454,7 @@ export default function FinanceiroEmpresaTab() {
     setShowModalDeducao(true)
   }
   async function salvarDeducao() {
+    if (mesFechado) { showToast('Mês fechado — reabra para alterar.', 'error'); return }
     if (!formDeducao.descricao.trim()) { showToast('Informe a descrição.', 'error'); return }
     if (!formDeducao.valor)            { showToast('Informe o valor.', 'error'); return }
     setSalvandoDeducao(true)
@@ -468,6 +477,7 @@ export default function FinanceiroEmpresaTab() {
     finally { setSalvandoDeducao(false) }
   }
   async function excluirDeducao(d) {
+    if (mesFechado) { showToast('Mês fechado — reabra para alterar.', 'error'); return }
     if (!window.confirm(`Excluir "${d.descricao}"?`)) return
     try {
       await deleteDoc(doc(db, `empresas/${empresaId}/deducoesMensais`, d.id))
@@ -487,6 +497,7 @@ export default function FinanceiroEmpresaTab() {
     setShowModalResultFin(true)
   }
   async function salvarResultFin() {
+    if (mesFechado) { showToast('Mês fechado — reabra para alterar.', 'error'); return }
     if (!formResultFin.descricao.trim()) { showToast('Informe a descrição.', 'error'); return }
     if (!formResultFin.valor)            { showToast('Informe o valor.', 'error'); return }
     setSalvandoResultFin(true)
@@ -509,6 +520,7 @@ export default function FinanceiroEmpresaTab() {
     finally { setSalvandoResultFin(false) }
   }
   async function excluirResultFin(f) {
+    if (mesFechado) { showToast('Mês fechado — reabra para alterar.', 'error'); return }
     if (!window.confirm(`Excluir "${f.descricao}"?`)) return
     try {
       await deleteDoc(doc(db, `empresas/${empresaId}/resultadoFinanceiroMensal`, f.id))
@@ -594,6 +606,7 @@ export default function FinanceiroEmpresaTab() {
           despesasMensais={despesasMensais}
           pendentes={pendentes}
           mesRef={mesRef}
+          mesFechado={mesFechado}
           showAutoLancar={showAutoLancar}
           autoLancando={autoLancando}
           onAutoLancar={autoLancarFixas}
@@ -611,6 +624,7 @@ export default function FinanceiroEmpresaTab() {
       {!carregando && abaFin === 'particulares' && (
         <AbaParticulares
           particulares={particulares}
+          mesFechado={mesFechado}
           onNovo={abrirNovoParticular}
           onEditar={abrirEditarParticular}
           onExcluir={excluirParticular}
@@ -622,6 +636,7 @@ export default function FinanceiroEmpresaTab() {
           deducoes={deducoes}
           resultFinanceiro={resultFinanceiro}
           mesRef={mesRef}
+          mesFechado={mesFechado}
           onNovaDeducao={abrirNovaDeducao}
           onEditarDeducao={abrirEditarDeducao}
           onExcluirDeducao={excluirDeducao}
@@ -631,9 +646,12 @@ export default function FinanceiroEmpresaTab() {
         />
       )}
 
+      {/* Faturamento NÃO é bloqueado pelo fechamento do mês: a nota é emitida
+          por seguradora (calendário próprio), não por mês de competência —
+          por isso não recebe a prop mesFechado (EXP-02). */}
       {!carregando && abaFin === 'faturamento' && <AbaFaturamento />}
 
-      {!carregando && abaFin === 'tecnicos' && <AbaFechamentoTecnicos mesRef={mesRef} />}
+      {!carregando && abaFin === 'tecnicos' && <AbaFechamentoTecnicos mesRef={mesRef} mesFechado={mesFechado} />}
 
       {!carregando && abaFin === 'caixa' && <AbaCaixa mesRef={mesRef} />}
 
@@ -943,7 +961,7 @@ function AbaDRE({ dre, onIrImpostos, mesRef, nomeEmpresa }) {
 
 // ── ABA DESPESAS ─────────────────────────────────────────────
 function AbaDespesas({
-  despesasRecorrentes, despesasMensais, pendentes, mesRef,
+  despesasRecorrentes, despesasMensais, pendentes, mesRef, mesFechado,
   showAutoLancar, autoLancando,
   onAutoLancar, onDismissAuto,
   onNovaRecorrente, onEditarRecorrente, onExcluirRecorrente,
@@ -964,8 +982,8 @@ function AbaDespesas({
 
   return (
     <div>
-      {/* Banner auto-lançamento */}
-      {showAutoLancar && fixas.length > 0 && (
+      {/* Banner auto-lançamento — não renderiza com o mês fechado (levaria a gravar) */}
+      {!mesFechado && showAutoLancar && fixas.length > 0 && (
         <div className="fin-auto-lancamento">
           <h4>🗓️ Mês sem lançamentos</h4>
           <p>
@@ -983,14 +1001,14 @@ function AbaDespesas({
         </div>
       )}
 
-      {/* Alerta variáveis pendentes */}
+      {/* Alerta variáveis pendentes — botão de lançar some com o mês fechado */}
       {pendentes.length > 0 && (
         <div className="despesa-alerta">
           <div className="despesa-alerta-text">
             ⚠️ <strong>{pendentes.length} despesa{pendentes.length > 1 ? 's' : ''} variável{pendentes.length > 1 ? 'is' : ''}</strong> precisam de valor em {fmtMes(mesRef)}:{' '}
             {pendentes.map(p => p.descricao).join(', ')}
           </div>
-          <button className="btn-sm btn-view" onClick={() => onNovoMensal(null)}>+ Lançar</button>
+          {!mesFechado && <button className="btn-sm btn-view" onClick={() => onNovoMensal(null)}>+ Lançar</button>}
         </div>
       )}
 
@@ -999,7 +1017,7 @@ function AbaDespesas({
         <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase' }}>
           💰 Despesas Recorrentes (Cadastro)
         </h4>
-        <button className="btn-sm btn-view" onClick={onNovaRecorrente}>+ Nova</button>
+        {!mesFechado && <button className="btn-sm btn-view" onClick={onNovaRecorrente}>+ Nova</button>}
       </div>
 
       {despesasRecorrentes.length === 0 && (
@@ -1013,13 +1031,13 @@ function AbaDespesas({
         <div key={grupo}>
           <div className="despesa-grupo-titulo">{g.label}</div>
           {g.itens.map(r => (
-            <ItemRecorrente key={r.id} r={r} grupoCls={g.cls}
+            <ItemRecorrente key={r.id} r={r} grupoCls={g.cls} mesFechado={mesFechado}
               onEditar={onEditarRecorrente} onExcluir={onExcluirRecorrente} />
           ))}
         </div>
       ))}
       {semGrupo.map(r => (
-        <ItemRecorrente key={r.id} r={r} grupoCls="administrativo"
+        <ItemRecorrente key={r.id} r={r} grupoCls="administrativo" mesFechado={mesFechado}
           onEditar={onEditarRecorrente} onExcluir={onExcluirRecorrente} />
       ))}
 
@@ -1028,7 +1046,7 @@ function AbaDespesas({
         <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase' }}>
           📅 Lançamentos de {fmtMes(mesRef)}
         </h4>
-        <button className="btn-sm btn-view" onClick={() => onNovoMensal(null)}>+ Avulso</button>
+        {!mesFechado && <button className="btn-sm btn-view" onClick={() => onNovoMensal(null)}>+ Avulso</button>}
       </div>
 
       {despesasMensais.length === 0 && (
@@ -1070,16 +1088,16 @@ function AbaDespesas({
               <span style={{ fontWeight: 700 }}>{fmtBRL(l.valor)}</span>
               {badge}
               {st !== 'pago' && (
-                <button className="btn-sm btn-ok" onClick={() => onPagarMensal(l)}>✓ Pagar</button>
+                <button className="btn-sm btn-ok" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onPagarMensal(l)}>✓ Pagar</button>
               )}
-              <button className="btn-sm btn-view" onClick={() => onEditarMensal(l)}>✏️</button>
-              <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} onClick={() => onExcluirMensal(l)}>🗑️</button>
+              <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditarMensal(l)}>✏️</button>
+              <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluirMensal(l)}>🗑️</button>
             </div>
           </div>
         )
       })}
 
-      {pendentes.length > 0 && (
+      {!mesFechado && pendentes.length > 0 && (
         <div style={{ marginTop: 16 }}>
           <p style={{ fontSize: '.8rem', color: 'var(--muted)', marginBottom: 8 }}>Lançar rapidamente:</p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -1096,7 +1114,7 @@ function AbaDespesas({
 }
 
 // Card de despesa recorrente com badge de grupo
-function ItemRecorrente({ r, grupoCls, onEditar, onExcluir }) {
+function ItemRecorrente({ r, grupoCls, mesFechado, onEditar, onExcluir }) {
   return (
     <div className="despesa-item" key={r.id}>
       <div className="despesa-item-info">
@@ -1108,22 +1126,22 @@ function ItemRecorrente({ r, grupoCls, onEditar, onExcluir }) {
       </div>
       <div className="despesa-item-right">
         <span style={{ fontWeight: 700 }}>{fmtBRL(r.valor)}</span>
-        <button className="btn-sm btn-view" onClick={() => onEditar(r)}>✏️</button>
-        <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} onClick={() => onExcluir(r)}>🗑️</button>
+        <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditar(r)}>✏️</button>
+        <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluir(r)}>🗑️</button>
       </div>
     </div>
   )
 }
 
 // ── ABA SERVIÇOS PARTICULARES ────────────────────────────────
-function AbaParticulares({ particulares, onNovo, onEditar, onExcluir }) {
+function AbaParticulares({ particulares, mesFechado, onNovo, onEditar, onExcluir }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase' }}>
           🎨 Serviços Particulares
         </h4>
-        <button className="btn-sm btn-view" onClick={onNovo}>+ Novo Serviço</button>
+        {!mesFechado && <button className="btn-sm btn-view" onClick={onNovo}>+ Novo Serviço</button>}
       </div>
 
       {particulares.length === 0 && (
@@ -1149,8 +1167,8 @@ function AbaParticulares({ particulares, onNovo, onEditar, onExcluir }) {
               <span className="particular-lucro">Lucro: {fmtBRL(p.lucro)}</span>
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
-              <button className="btn-sm btn-view" onClick={() => onEditar(p)}>✏️ Editar</button>
-              <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} onClick={() => onExcluir(p)}>🗑️</button>
+              <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditar(p)}>✏️ Editar</button>
+              <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluir(p)}>🗑️</button>
             </div>
           </div>
           {p.observacoes && (
@@ -1166,7 +1184,7 @@ function AbaParticulares({ particulares, onNovo, onEditar, onExcluir }) {
 
 // ── ABA IMPOSTOS E FINANCEIRO ────────────────────────────────
 function AbaImpostosFinanceiro({
-  deducoes, resultFinanceiro, mesRef,
+  deducoes, resultFinanceiro, mesRef, mesFechado,
   onNovaDeducao, onEditarDeducao, onExcluirDeducao,
   onNovoResultFin, onEditarResultFin, onExcluirResultFin,
 }) {
@@ -1185,7 +1203,7 @@ function AbaImpostosFinanceiro({
         <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase' }}>
           🧾 Impostos e Deduções — {fmtMes(mesRef)}
         </h4>
-        <button className="btn-sm btn-view" onClick={onNovaDeducao}>+ Lançar Imposto</button>
+        {!mesFechado && <button className="btn-sm btn-view" onClick={onNovaDeducao}>+ Lançar Imposto</button>}
       </div>
 
       <div style={{ fontSize: '.8rem', color: 'var(--muted)', background: '#f5f7fa', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', padding: '10px 14px', marginBottom: 14 }}>
@@ -1209,8 +1227,8 @@ function AbaImpostosFinanceiro({
           </div>
           <div className="deducao-item-right">
             <span style={{ fontWeight: 700, color: 'var(--danger)' }}>{fmtBRL(d.valor)}</span>
-            <button className="btn-sm btn-view" onClick={() => onEditarDeducao(d)}>✏️</button>
-            <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} onClick={() => onExcluirDeducao(d)}>🗑️</button>
+            <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditarDeducao(d)}>✏️</button>
+            <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluirDeducao(d)}>🗑️</button>
           </div>
         </div>
       ))}
@@ -1226,7 +1244,7 @@ function AbaImpostosFinanceiro({
       <div className="subsecao-financeiro">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div className="subsecao-titulo">💳 Resultado Financeiro</div>
-          <button className="btn-sm btn-view" onClick={onNovoResultFin}>+ Lançar Taxa/Juro</button>
+          {!mesFechado && <button className="btn-sm btn-view" onClick={onNovoResultFin}>+ Lançar Taxa/Juro</button>}
         </div>
 
         {resultFinanceiro.length === 0 && (
@@ -1247,8 +1265,8 @@ function AbaImpostosFinanceiro({
               <span style={{ fontWeight: 700, color: f.tipo === 'despesa' ? 'var(--danger)' : 'var(--success)' }}>
                 {f.tipo === 'despesa' ? '- ' : '+ '}{fmtBRL(f.valor)}
               </span>
-              <button className="btn-sm btn-view" onClick={() => onEditarResultFin(f)}>✏️</button>
-              <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} onClick={() => onExcluirResultFin(f)}>🗑️</button>
+              <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditarResultFin(f)}>✏️</button>
+              <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluirResultFin(f)}>🗑️</button>
             </div>
           </div>
         ))}

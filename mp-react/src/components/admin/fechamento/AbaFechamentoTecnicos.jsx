@@ -28,7 +28,7 @@ const LABEL_FORMA = {
   transferencia: 'Transferência',
 }
 
-export default function AbaFechamentoTecnicos({ mesRef }) {
+export default function AbaFechamentoTecnicos({ mesRef, mesFechado }) {
   const { empresaId, tecnicos, reports, showToast } = useAdminContext()
   const [fechamentos, setFechamentos] = useState([])
   const [pagando, setPagando] = useState(null)  // tecnicoNorm em processamento
@@ -79,6 +79,7 @@ export default function AbaFechamentoTecnicos({ mesRef }) {
   // (os_ids + total da época, vindos do GRUPO — nunca da OS direta) e
   // bloqueia pagamento duplo no mesmo mês (T-08-09, client-side — T-08-12).
   async function marcarPago(g) {
+    if (mesFechado) { showToast('Mês fechado — reabra para alterar.', 'error'); return }
     if (acharFechamento(fechamentos, g.tecnicoNorm, mesRef)) {
       showToast('Este técnico já foi pago neste mês.', 'error'); return
     }
@@ -172,8 +173,8 @@ export default function AbaFechamentoTecnicos({ mesRef }) {
               ) : (
                 <button
                   className="btn-sm btn-primary"
-                  disabled={pagando === g.tecnicoNorm || g.tecnicoNorm === ''}
-                  title={g.tecnicoNorm === '' ? 'OS sem técnico não podem ser pagas' : ''}
+                  disabled={pagando === g.tecnicoNorm || g.tecnicoNorm === '' || mesFechado}
+                  title={mesFechado ? 'Mês fechado' : (g.tecnicoNorm === '' ? 'OS sem técnico não podem ser pagas' : '')}
                   onClick={() => marcarPago(g)}
                 >
                   {pagando === g.tecnicoNorm ? '⏳ Registrando...' : '💵 Marcar como pago'}
