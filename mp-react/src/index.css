@@ -315,6 +315,16 @@ body {
 .filter-input:focus { border-color:var(--primary); }
 .filter-input.flex-1 { flex:1; min-width:180px; }
 
+/* ── VIEW TOGGLE (cards ⇄ tabela) ── */
+.view-toggle { display:flex; gap:4px; }
+.view-toggle-btn {
+  width:34px; height:34px; display:flex; align-items:center; justify-content:center;
+  border:1.5px solid var(--border); border-radius:var(--r-sm); background:#fff;
+  color:var(--muted); cursor:pointer; transition:all .15s;
+}
+.view-toggle-btn:hover { border-color:#b0c0e8; color:var(--text); }
+.view-toggle-btn.active { background:var(--st-info-bg); color:var(--st-info); border-color:var(--st-info-bg); }
+
 /* ── TABLE ── */
 .table-wrap { background:var(--card); border-radius:var(--r); box-shadow:0 1px 6px rgba(26,63,168,.07); overflow:hidden; }
 .table-head { padding:13px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
@@ -665,6 +675,13 @@ body {
 .badge.pendente-y   { background:#fefce8; color:#92400e; border:1px solid #fde68a; }
 .badge.processado-g { background:var(--success-bg); color:var(--success); border:1px solid #b2dfc5; }
 .badge.enviado-b    { background:#e8f0fc; color:#1a3a8c; border:1px solid #b0c4f0; }
+
+/* Dot de status semântico — usado na visão tabela das OS */
+.st-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+.st-dot-info     { background:var(--st-info); }
+.st-dot-done     { background:var(--st-done); }
+.st-dot-progress { background:var(--st-progress); }
+.st-dot-critical { background:var(--st-critical); }
 
 /* ── SEGURADOS LIST ── */
 .segurados-list { display:flex; flex-direction:column; gap:10px; }
