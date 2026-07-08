@@ -26,6 +26,12 @@ import { estaFechado, formatarFechadoEm } from '../../utils/fechamentoMes.js'
 import AbaFaturamento from './faturamento/AbaFaturamento.jsx'
 import AbaFechamentoTecnicos from './fechamento/AbaFechamentoTecnicos.jsx'
 import AbaCaixa from './caixa/AbaCaixa.jsx'
+import {
+  User, Building2, Car, ClipboardList, ChevronLeft, ChevronRight, Lock, LockOpen,
+  Bell, TrendingUp, Receipt, HandCoins, ReceiptText, FileText, HardHat, Banknote,
+  BarChart3, Download, AlertTriangle, CalendarDays, Hourglass, CheckCircle2, Check,
+  Wallet, Pencil, Trash2, CreditCard, X, Save, Info,
+} from 'lucide-react'
 
 const MESES_NOMES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
@@ -77,22 +83,26 @@ const LABEL_CATEGORIA = {
 // Grupos de despesa para DRE e lista
 const GRUPOS_DESPESA = {
   pessoal: {
-    label: '👤 Pessoal',
+    label: 'Pessoal',
+    icon: User,
     cls: 'pessoal',
     cats: ['salario_funcionario', 'pro_labore_socio', 'salario'],
   },
   estrutura: {
-    label: '🏢 Estrutura',
+    label: 'Estrutura',
+    icon: Building2,
     cls: 'estrutura',
     cats: ['aluguel', 'agua_luz', 'internet', 'estrutura'],
   },
   operacional: {
-    label: '🚗 Operacional',
+    label: 'Operacional',
+    icon: Car,
     cls: 'administrativo',
     cats: ['combustivel', 'alimentacao', 'veiculo', 'ferramentas'],
   },
   administrativo: {
-    label: '📋 Administrativo',
+    label: 'Administrativo',
+    icon: ClipboardList,
     cls: 'administrativo',
     cats: ['contabilidade', 'material', 'outro'],
   },
@@ -546,27 +556,27 @@ export default function FinanceiroEmpresaTab() {
       <div style={{ marginBottom: 20 }}>
         <div style={{ fontSize: '.82rem', color: 'var(--muted)', marginBottom: 4 }}>{nomeEmpresa}</div>
         <div className="fin-periodo">
-          <button className="fin-periodo-btn" onClick={() => setMesRef(m => navegarMes(m, -1))}>◄</button>
+          <button className="fin-periodo-btn" onClick={() => setMesRef(m => navegarMes(m, -1))}><ChevronLeft size={16} strokeWidth={2.5} /></button>
           <span className="fin-periodo-label">{fmtMes(mesRef)}</span>
-          <button className="fin-periodo-btn" onClick={() => setMesRef(m => navegarMes(m, +1))}>►</button>
+          <button className="fin-periodo-btn" onClick={() => setMesRef(m => navegarMes(m, +1))}><ChevronRight size={16} strokeWidth={2.5} /></button>
           {mesFechado ? (
-            <button className="fin-periodo-btn fin-cadeado-btn fechado" onClick={reabrirMes}>🔓 Reabrir mês</button>
+            <button className="fin-periodo-btn fin-cadeado-btn fechado" onClick={reabrirMes}><LockOpen size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Reabrir mês</button>
           ) : (
-            <button className="fin-periodo-btn fin-cadeado-btn" onClick={fecharMes}>🔒 Fechar mês</button>
+            <button className="fin-periodo-btn fin-cadeado-btn" onClick={fecharMes}><Lock size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Fechar mês</button>
           )}
         </div>
       </div>
 
       {mesFechado && (
         <div className="fin-banner-fechado">
-          🔒 Mês fechado em {formatarFechadoEm(fechamentoMes?.fechado_em)} — reabra para alterar.
+          <Lock size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Mês fechado em {formatarFechadoEm(fechamentoMes?.fechado_em)} — reabra para alterar.
         </div>
       )}
 
       {!carregando && alertas.total > 0 && (
         <div className="fin-alerta-contas">
           <span>
-            🔔 {[
+            <Bell size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />{[
               alertas.aVencer > 0 ? `${alertas.aVencer} conta${alertas.aVencer > 1 ? 's' : ''} vence${alertas.aVencer > 1 ? 'm' : ''} esta semana` : null,
               alertas.atrasadas > 0 ? `${alertas.atrasadas} atrasada${alertas.atrasadas > 1 ? 's' : ''}` : null,
             ].filter(Boolean).join(' · ')}
@@ -578,19 +588,19 @@ export default function FinanceiroEmpresaTab() {
       {/* Abas internas */}
       <div className="fin-tabs">
         {[
-          { id: 'dre',          label: '📈 DRE Mensal'         },
-          { id: 'despesas',     label: '💸 Despesas'            },
-          { id: 'particulares', label: '🎨 Serv. Particulares'  },
-          { id: 'impostos',     label: '🧾 Impostos e Fin.'     },
-          { id: 'faturamento',  label: '📄 Faturamento'         },
-          { id: 'tecnicos',     label: '👷 Técnicos'             },
-          { id: 'caixa',        label: '💵 Caixa'                },
+          { id: 'dre',          icon: TrendingUp,  label: 'DRE Mensal'         },
+          { id: 'despesas',     icon: Receipt,     label: 'Despesas'           },
+          { id: 'particulares', icon: HandCoins,   label: 'Serv. Particulares' },
+          { id: 'impostos',     icon: ReceiptText, label: 'Impostos e Fin.'    },
+          { id: 'faturamento',  icon: FileText,    label: 'Faturamento'        },
+          { id: 'tecnicos',     icon: HardHat,     label: 'Técnicos'           },
+          { id: 'caixa',        icon: Banknote,    label: 'Caixa'              },
         ].map(t => (
           <button
             key={t.id}
             className={`fin-tab${abaFin === t.id ? ' active' : ''}`}
             onClick={() => setAbaFin(t.id)}
-          >{t.label}</button>
+          ><t.icon size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />{t.label}</button>
         ))}
       </div>
 
@@ -763,6 +773,7 @@ function calcularDRE(reports, mesRef, particulares, despesasMensais, deducoes, r
     if (itens.length > 0) {
       despesasPorGrupo[grupo] = {
         label: cfg.label,
+        icon: cfg.icon,
         itens: itens,
         subtotal: itens.reduce((acc, d) => acc + (parseFloat(d.valor) || 0), 0),
       }
@@ -799,7 +810,7 @@ function AbaDRE({ dre, onIrImpostos, mesRef, nomeEmpresa }) {
     <div>
       {semDados && (
         <div className="empty-state" style={{ marginBottom: 20 }}>
-          <div className="e-icon">📊</div>
+          <div className="e-icon"><BarChart3 size={40} strokeWidth={2} /></div>
           <p>Nenhuma OS ou serviço particular neste mês ainda.</p>
         </div>
       )}
@@ -810,7 +821,7 @@ function AbaDRE({ dre, onIrImpostos, mesRef, nomeEmpresa }) {
           disabled={semDados}
           onClick={() => gerarDrePdf(dre, mesRef, nomeEmpresa)}
         >
-          ⬇️ Baixar DRE em PDF
+          <Download size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Baixar DRE em PDF
         </button>
       </div>
 
@@ -843,7 +854,7 @@ function AbaDRE({ dre, onIrImpostos, mesRef, nomeEmpresa }) {
         <div className="dre-secao-titulo">(-) Deduções da Receita Bruta</div>
         {dre.deducoes.length === 0 ? (
           <div className="dre-aviso-vazio">
-            <span>⚠️ Nenhum imposto lançado este mês. A Receita Líquida está igual à Receita Bruta.</span>
+            <span><AlertTriangle size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Nenhum imposto lançado este mês. A Receita Líquida está igual à Receita Bruta.</span>
             <button className="btn-sm btn-view" onClick={onIrImpostos}>Lançar imposto</button>
           </div>
         ) : (
@@ -933,7 +944,7 @@ function AbaDRE({ dre, onIrImpostos, mesRef, nomeEmpresa }) {
           Object.entries(dre.despesasPorGrupo).map(([grupo, g]) => (
             <div key={grupo}>
               <div className="dre-secao-titulo" style={{ background: '#f5f7fa', color: 'var(--muted)', fontSize: '.75rem', paddingLeft: 28 }}>
-                {g.label}
+                <g.icon size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />{g.label}
               </div>
               {g.itens.map((d, i) => (
                 <div className="dre-linha" key={i} style={{ paddingLeft: 32 }}>
@@ -942,7 +953,7 @@ function AbaDRE({ dre, onIrImpostos, mesRef, nomeEmpresa }) {
                 </div>
               ))}
               <div className="dre-linha subtotal" style={{ paddingLeft: 32, fontSize: '.88rem' }}>
-                <span>Subtotal {g.label.split(' ').slice(1).join(' ')}</span>
+                <span>Subtotal {g.label}</span>
                 <span>{fmtBRL(g.subtotal)}</span>
               </div>
             </div>
@@ -983,7 +994,7 @@ function AbaDespesas({
   const recorrentesPorGrupo = {}
   for (const [grupo, cfg] of Object.entries(GRUPOS_DESPESA)) {
     const itens = despesasRecorrentes.filter(r => cfg.cats.includes(r.categoria))
-    if (itens.length > 0) recorrentesPorGrupo[grupo] = { label: cfg.label, cls: cfg.cls, itens }
+    if (itens.length > 0) recorrentesPorGrupo[grupo] = { label: cfg.label, icon: cfg.icon, cls: cfg.cls, itens }
   }
   // Sem grupo
   const semGrupo = despesasRecorrentes.filter(r =>
@@ -995,7 +1006,7 @@ function AbaDespesas({
       {/* Banner auto-lançamento — não renderiza com o mês fechado (levaria a gravar) */}
       {!mesFechado && showAutoLancar && fixas.length > 0 && (
         <div className="fin-auto-lancamento">
-          <h4>🗓️ Mês sem lançamentos</h4>
+          <h4><CalendarDays size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Mês sem lançamentos</h4>
           <p>
             Detectamos que ainda não há lançamentos para <strong>{fmtMes(mesRef)}</strong>.
             Deseja lançar automaticamente as despesas <strong>fixas</strong> recorrentes?<br />
@@ -1005,7 +1016,7 @@ function AbaDespesas({
             <button className="btn-sm" style={{ background: 'var(--light)', border: '1px solid var(--border)', color: 'var(--muted)' }}
               onClick={onDismissAuto}>Não, vou lançar manualmente</button>
             <button className="btn-sm btn-ok" disabled={autoLancando} onClick={onAutoLancar}>
-              {autoLancando ? '⏳ Lançando...' : '✅ Sim, lançar fixas'}
+              {autoLancando ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Lançando...</> : <><CheckCircle2 size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Sim, lançar fixas</>}
             </button>
           </div>
         </div>
@@ -1015,7 +1026,7 @@ function AbaDespesas({
       {pendentes.length > 0 && (
         <div className="despesa-alerta">
           <div className="despesa-alerta-text">
-            ⚠️ <strong>{pendentes.length} despesa{pendentes.length > 1 ? 's' : ''} variável{pendentes.length > 1 ? 'is' : ''}</strong> precisam de valor em {fmtMes(mesRef)}:{' '}
+            <AlertTriangle size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} /><strong>{pendentes.length} despesa{pendentes.length > 1 ? 's' : ''} variável{pendentes.length > 1 ? 'is' : ''}</strong> precisam de valor em {fmtMes(mesRef)}:{' '}
             {pendentes.map(p => p.descricao).join(', ')}
           </div>
           {!mesFechado && <button className="btn-sm btn-view" onClick={() => onNovoMensal(null)}>+ Lançar</button>}
@@ -1025,7 +1036,7 @@ function AbaDespesas({
       {/* Cadastro recorrente */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase' }}>
-          💰 Despesas Recorrentes (Cadastro)
+          <Wallet size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Despesas Recorrentes (Cadastro)
         </h4>
         {!mesFechado && <button className="btn-sm btn-view" onClick={onNovaRecorrente}>+ Nova</button>}
       </div>
@@ -1039,7 +1050,7 @@ function AbaDespesas({
       {/* Renderiza por grupo */}
       {Object.entries(recorrentesPorGrupo).map(([grupo, g]) => (
         <div key={grupo}>
-          <div className="despesa-grupo-titulo">{g.label}</div>
+          <div className="despesa-grupo-titulo"><g.icon size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />{g.label}</div>
           {g.itens.map(r => (
             <ItemRecorrente key={r.id} r={r} grupoCls={g.cls} mesFechado={mesFechado}
               onEditar={onEditarRecorrente} onExcluir={onExcluirRecorrente} />
@@ -1054,7 +1065,7 @@ function AbaDespesas({
       {/* Lançamentos do mês */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0 10px' }}>
         <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase' }}>
-          📅 Lançamentos de {fmtMes(mesRef)}
+          <CalendarDays size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Lançamentos de {fmtMes(mesRef)}
         </h4>
         {!mesFechado && <button className="btn-sm btn-view" onClick={() => onNovoMensal(null)}>+ Avulso</button>}
       </div>
@@ -1074,15 +1085,15 @@ function AbaDespesas({
 
         let badge
         if (ehPend) {
-          badge = <span className="despesa-status-pend">⚠️ Pendente</span>
+          badge = <span className="despesa-status-pend"><AlertTriangle size={12} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Pendente</span>
         } else if (st === 'pago') {
-          badge = <span className="despesa-status-ok">✅ Pago</span>
+          badge = <span className="despesa-status-ok"><CheckCircle2 size={12} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Pago</span>
         } else if (st === 'atrasado') {
-          badge = <span className="despesa-status-atrasado">⚠️ Atrasada há {Math.abs(dias)} dia{Math.abs(dias) > 1 ? 's' : ''}</span>
+          badge = <span className="despesa-status-atrasado"><AlertTriangle size={12} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Atrasada há {Math.abs(dias)} dia{Math.abs(dias) > 1 ? 's' : ''}</span>
         } else if (dias !== null) {
           badge = <span className="despesa-status-pend">{dias === 0 ? 'Vence hoje' : `Vence em ${dias} dia${dias > 1 ? 's' : ''}`}</span>
         } else {
-          badge = <span className="despesa-status-pend">⚠️ Pendente</span>
+          badge = <span className="despesa-status-pend"><AlertTriangle size={12} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Pendente</span>
         }
 
         return (
@@ -1098,10 +1109,10 @@ function AbaDespesas({
               <span style={{ fontWeight: 700 }}>{fmtBRL(l.valor)}</span>
               {badge}
               {st !== 'pago' && (
-                <button className="btn-sm btn-ok" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onPagarMensal(l)}>✓ Pagar</button>
+                <button className="btn-sm btn-ok" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onPagarMensal(l)}><Check size={13} strokeWidth={2.5} style={{ verticalAlign: '-2px', marginRight: 4 }} />Pagar</button>
               )}
-              <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditarMensal(l)}>✏️</button>
-              <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluirMensal(l)}>🗑️</button>
+              <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditarMensal(l)}><Pencil size={14} strokeWidth={2} /></button>
+              <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluirMensal(l)}><Trash2 size={14} strokeWidth={2} /></button>
             </div>
           </div>
         )
@@ -1136,8 +1147,8 @@ function ItemRecorrente({ r, grupoCls, mesFechado, onEditar, onExcluir }) {
       </div>
       <div className="despesa-item-right">
         <span style={{ fontWeight: 700 }}>{fmtBRL(r.valor)}</span>
-        <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditar(r)}>✏️</button>
-        <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluir(r)}>🗑️</button>
+        <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditar(r)}><Pencil size={14} strokeWidth={2} /></button>
+        <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluir(r)}><Trash2 size={14} strokeWidth={2} /></button>
       </div>
     </div>
   )
@@ -1149,14 +1160,14 @@ function AbaParticulares({ particulares, mesFechado, onNovo, onEditar, onExcluir
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase' }}>
-          🎨 Serviços Particulares
+          <HandCoins size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Serviços Particulares
         </h4>
         {!mesFechado && <button className="btn-sm btn-view" onClick={onNovo}>+ Novo Serviço</button>}
       </div>
 
       {particulares.length === 0 && (
         <div className="empty-state">
-          <div className="e-icon">🎨</div>
+          <div className="e-icon"><HandCoins size={40} strokeWidth={2} /></div>
           <p>Nenhum serviço particular neste mês.</p>
         </div>
       )}
@@ -1177,8 +1188,8 @@ function AbaParticulares({ particulares, mesFechado, onNovo, onEditar, onExcluir
               <span className="particular-lucro">Lucro: {fmtBRL(p.lucro)}</span>
             </div>
             <div style={{ display: 'flex', gap: 6 }}>
-              <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditar(p)}>✏️ Editar</button>
-              <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluir(p)}>🗑️</button>
+              <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditar(p)}><Pencil size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Editar</button>
+              <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluir(p)}><Trash2 size={14} strokeWidth={2} /></button>
             </div>
           </div>
           {p.observacoes && (
@@ -1211,13 +1222,13 @@ function AbaImpostosFinanceiro({
       {/* ── Seção: Impostos ── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase' }}>
-          🧾 Impostos e Deduções — {fmtMes(mesRef)}
+          <ReceiptText size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Impostos e Deduções — {fmtMes(mesRef)}
         </h4>
         {!mesFechado && <button className="btn-sm btn-view" onClick={onNovaDeducao}>+ Lançar Imposto</button>}
       </div>
 
       <div style={{ fontSize: '.8rem', color: 'var(--muted)', background: '#f5f7fa', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', padding: '10px 14px', marginBottom: 14 }}>
-        ℹ️ Valores informados manualmente pelo contador. Lance aqui todo mês para o DRE refletir o resultado real.
+        <Info size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Valores informados manualmente pelo contador. Lance aqui todo mês para o DRE refletir o resultado real.
       </div>
 
       {deducoes.length === 0 && (
@@ -1237,8 +1248,8 @@ function AbaImpostosFinanceiro({
           </div>
           <div className="deducao-item-right">
             <span style={{ fontWeight: 700, color: 'var(--danger)' }}>{fmtBRL(d.valor)}</span>
-            <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditarDeducao(d)}>✏️</button>
-            <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluirDeducao(d)}>🗑️</button>
+            <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditarDeducao(d)}><Pencil size={14} strokeWidth={2} /></button>
+            <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluirDeducao(d)}><Trash2 size={14} strokeWidth={2} /></button>
           </div>
         </div>
       ))}
@@ -1253,7 +1264,7 @@ function AbaImpostosFinanceiro({
       {/* ── Seção: Resultado Financeiro ── */}
       <div className="subsecao-financeiro">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <div className="subsecao-titulo">💳 Resultado Financeiro</div>
+          <div className="subsecao-titulo"><CreditCard size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Resultado Financeiro</div>
           {!mesFechado && <button className="btn-sm btn-view" onClick={onNovoResultFin}>+ Lançar Taxa/Juro</button>}
         </div>
 
@@ -1275,8 +1286,8 @@ function AbaImpostosFinanceiro({
               <span style={{ fontWeight: 700, color: f.tipo === 'despesa' ? 'var(--danger)' : 'var(--success)' }}>
                 {f.tipo === 'despesa' ? '- ' : '+ '}{fmtBRL(f.valor)}
               </span>
-              <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditarResultFin(f)}>✏️</button>
-              <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluirResultFin(f)}>🗑️</button>
+              <button className="btn-sm btn-view" disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onEditarResultFin(f)}><Pencil size={14} strokeWidth={2} /></button>
+              <button className="btn-sm" style={{ background: 'var(--danger)', color: '#fff' }} disabled={mesFechado} title={mesFechado ? 'Mês fechado' : ''} onClick={() => onExcluirResultFin(f)}><Trash2 size={14} strokeWidth={2} /></button>
             </div>
           </div>
         ))}
@@ -1300,8 +1311,8 @@ function ModalDespesaRecorrente({ form, setForm, salvando, editando, onSalvar, o
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onFechar()}>
       <div className="modal-box" style={{ maxWidth: 480 }}>
         <div className="modal-header">
-          <h2>{editando ? '✏️ Editar Despesa Recorrente' : '+ Nova Despesa Recorrente'}</h2>
-          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onFechar}>✕</button>
+          <h2>{editando ? <><Pencil size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Editar Despesa Recorrente</> : '+ Nova Despesa Recorrente'}</h2>
+          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onFechar}><X size={16} strokeWidth={2} /></button>
         </div>
         <div className="modal-body">
           <div className="field" style={{ marginBottom: 12 }}>
@@ -1372,7 +1383,7 @@ function ModalDespesaRecorrente({ form, setForm, salvando, editando, onSalvar, o
         <div className="modal-footer">
           <button className="btn-sm" style={{ background: 'var(--light)', color: 'var(--muted)', border: '1px solid var(--border)' }} onClick={onFechar}>Cancelar</button>
           <button className="btn-primary" style={{ padding: '9px 22px', fontSize: '.9rem' }} disabled={salvando} onClick={onSalvar}>
-            {salvando ? '⏳ Salvando...' : '💾 Salvar'}
+            {salvando ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvar</>}
           </button>
         </div>
       </div>
@@ -1386,8 +1397,8 @@ function ModalLancamentoMensal({ form, setForm, salvando, editando, mesRef, onSa
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onFechar()}>
       <div className="modal-box" style={{ maxWidth: 480 }}>
         <div className="modal-header">
-          <h2>{editando ? '✏️ Editar Lançamento' : `+ Lançamento de ${fmtMes(mesRef)}`}</h2>
-          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onFechar}>✕</button>
+          <h2>{editando ? <><Pencil size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Editar Lançamento</> : `+ Lançamento de ${fmtMes(mesRef)}`}</h2>
+          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onFechar}><X size={16} strokeWidth={2} /></button>
         </div>
         <div className="modal-body">
           <div className="field" style={{ marginBottom: 12 }}>
@@ -1448,7 +1459,7 @@ function ModalLancamentoMensal({ form, setForm, salvando, editando, mesRef, onSa
         <div className="modal-footer">
           <button className="btn-sm" style={{ background: 'var(--light)', color: 'var(--muted)', border: '1px solid var(--border)' }} onClick={onFechar}>Cancelar</button>
           <button className="btn-primary" style={{ padding: '9px 22px', fontSize: '.9rem' }} disabled={salvando} onClick={onSalvar}>
-            {salvando ? '⏳ Salvando...' : '💾 Salvar'}
+            {salvando ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvar</>}
           </button>
         </div>
       </div>
@@ -1466,8 +1477,8 @@ function ModalServicoParticular({ form, setForm, salvando, editando, onSalvar, o
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onFechar()}>
       <div className="modal-box" style={{ maxWidth: 500 }}>
         <div className="modal-header">
-          <h2>{editando ? '✏️ Editar Serviço Particular' : '+ Novo Serviço Particular'}</h2>
-          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onFechar}>✕</button>
+          <h2>{editando ? <><Pencil size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Editar Serviço Particular</> : '+ Novo Serviço Particular'}</h2>
+          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onFechar}><X size={16} strokeWidth={2} /></button>
         </div>
         <div className="modal-body">
           <div className="field" style={{ marginBottom: 12 }}>
@@ -1525,7 +1536,7 @@ function ModalServicoParticular({ form, setForm, salvando, editando, onSalvar, o
         <div className="modal-footer">
           <button className="btn-sm" style={{ background: 'var(--light)', color: 'var(--muted)', border: '1px solid var(--border)' }} onClick={onFechar}>Cancelar</button>
           <button className="btn-primary" style={{ padding: '9px 22px', fontSize: '.9rem' }} disabled={salvando} onClick={onSalvar}>
-            {salvando ? '⏳ Salvando...' : '💾 Salvar'}
+            {salvando ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvar</>}
           </button>
         </div>
       </div>
@@ -1539,8 +1550,8 @@ function ModalDeducao({ form, setForm, salvando, editando, mesRef, onSalvar, onF
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onFechar()}>
       <div className="modal-box" style={{ maxWidth: 460 }}>
         <div className="modal-header">
-          <h2>{editando ? '✏️ Editar Imposto' : `🧾 Lançar Imposto — ${fmtMes(mesRef)}`}</h2>
-          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onFechar}>✕</button>
+          <h2>{editando ? <><Pencil size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Editar Imposto</> : <><ReceiptText size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Lançar Imposto — {fmtMes(mesRef)}</>}</h2>
+          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onFechar}><X size={16} strokeWidth={2} /></button>
         </div>
         <div className="modal-body">
           <div className="field" style={{ marginBottom: 12 }}>
@@ -1578,7 +1589,7 @@ function ModalDeducao({ form, setForm, salvando, editando, mesRef, onSalvar, onF
         <div className="modal-footer">
           <button className="btn-sm" style={{ background: 'var(--light)', color: 'var(--muted)', border: '1px solid var(--border)' }} onClick={onFechar}>Cancelar</button>
           <button className="btn-primary" style={{ padding: '9px 22px', fontSize: '.9rem' }} disabled={salvando} onClick={onSalvar}>
-            {salvando ? '⏳ Salvando...' : '💾 Salvar'}
+            {salvando ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvar</>}
           </button>
         </div>
       </div>
@@ -1592,8 +1603,8 @@ function ModalResultFinanceiro({ form, setForm, salvando, editando, mesRef, onSa
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onFechar()}>
       <div className="modal-box" style={{ maxWidth: 460 }}>
         <div className="modal-header">
-          <h2>{editando ? '✏️ Editar Lançamento Financeiro' : `💳 Lançar Taxa/Juro — ${fmtMes(mesRef)}`}</h2>
-          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onFechar}>✕</button>
+          <h2>{editando ? <><Pencil size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Editar Lançamento Financeiro</> : <><CreditCard size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Lançar Taxa/Juro — {fmtMes(mesRef)}</>}</h2>
+          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onFechar}><X size={16} strokeWidth={2} /></button>
         </div>
         <div className="modal-body">
           <div className="field" style={{ marginBottom: 12 }}>
@@ -1639,7 +1650,7 @@ function ModalResultFinanceiro({ form, setForm, salvando, editando, mesRef, onSa
         <div className="modal-footer">
           <button className="btn-sm" style={{ background: 'var(--light)', color: 'var(--muted)', border: '1px solid var(--border)' }} onClick={onFechar}>Cancelar</button>
           <button className="btn-primary" style={{ padding: '9px 22px', fontSize: '.9rem' }} disabled={salvando} onClick={onSalvar}>
-            {salvando ? '⏳ Salvando...' : '💾 Salvar'}
+            {salvando ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvar</>}
           </button>
         </div>
       </div>

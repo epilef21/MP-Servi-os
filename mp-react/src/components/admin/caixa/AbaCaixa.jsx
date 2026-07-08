@@ -10,6 +10,7 @@ import { db, collection, getDocs } from '../../../firebase.js'
 import { useAdminContext } from '../../../contexts/AdminContext.jsx'
 import { fmtBRL, fmtDate } from '../../../utils/formatters.js'
 import { fluxoCaixaDoMes, dataEntradaNota, serieEvolucao12Meses } from '../../../utils/fluxoCaixa.js'
+import { Banknote, Info, Wallet, Receipt, Landmark, BarChart3 } from 'lucide-react'
 
 const MESES_NOMES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
@@ -78,11 +79,11 @@ export default function AbaCaixa({ mesRef }) {
   return (
     <div>
       <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 12 }}>
-        💵 Caixa — {fmtMes(mesRef)}
+        <Banknote size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Caixa — {fmtMes(mesRef)}
       </h4>
 
       <div style={{ fontSize: '.8rem', color: 'var(--muted)', background: '#f5f7fa', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', padding: '10px 14px', marginBottom: 16 }}>
-        ℹ️ O DRE responde "o mês deu lucro?". O Caixa responde "quanto dinheiro entrou e saiu de verdade?" — aqui só contam notas, despesas e técnicos já PAGOS.
+        <Info size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />O DRE responde "o mês deu lucro?". O Caixa responde "quanto dinheiro entrou e saiu de verdade?" — aqui só contam notas, despesas e técnicos já PAGOS.
       </div>
 
       {carregando && (
@@ -96,15 +97,15 @@ export default function AbaCaixa({ mesRef }) {
         <>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
             <div style={{ flex: '1 1 200px', border: '1px solid var(--border)', borderRadius: 8, padding: 14 }}>
-              <div style={{ fontSize: '.8rem', color: 'var(--muted)', marginBottom: 6 }}>💰 Entradas</div>
+              <div style={{ fontSize: '.8rem', color: 'var(--muted)', marginBottom: 6 }}><Wallet size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Entradas</div>
               <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--ok, green)' }}>{fmtBRL(caixa.entradas.total)}</div>
             </div>
             <div style={{ flex: '1 1 200px', border: '1px solid var(--border)', borderRadius: 8, padding: 14 }}>
-              <div style={{ fontSize: '.8rem', color: 'var(--muted)', marginBottom: 6 }}>💸 Saídas</div>
+              <div style={{ fontSize: '.8rem', color: 'var(--muted)', marginBottom: 6 }}><Receipt size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Saídas</div>
               <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--danger)' }}>{fmtBRL(caixa.saidas.total)}</div>
             </div>
             <div style={{ flex: '1 1 200px', border: '1px solid var(--border)', borderRadius: 8, padding: 14 }}>
-              <div style={{ fontSize: '.8rem', color: 'var(--muted)', marginBottom: 6 }}>🏦 Sobrou no caixa</div>
+              <div style={{ fontSize: '.8rem', color: 'var(--muted)', marginBottom: 6 }}><Landmark size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Sobrou no caixa</div>
               <div style={{ fontSize: '1.5rem', fontWeight: 800, color: caixa.saldo >= 0 ? 'var(--ok, green)' : 'var(--danger)' }}>
                 {fmtBRL(caixa.saldo)}
               </div>
@@ -115,8 +116,8 @@ export default function AbaCaixa({ mesRef }) {
             <div className="empty-state" style={{ padding: 24 }}>
               <p>Nenhuma movimentação de caixa em {fmtMes(mesRef)}.</p>
               <p style={{ fontSize: '.85rem', color: 'var(--muted)', marginTop: 8 }}>
-                Entradas aparecem quando você marca notas como pagas na aba 📄 Faturamento;
-                saídas quando paga despesas (💸 Despesas) e técnicos (👷 Técnicos).
+                Entradas aparecem quando você marca notas como pagas na aba Faturamento;
+                saídas quando paga despesas (Despesas) e técnicos (Técnicos).
               </p>
             </div>
           )}
@@ -135,7 +136,7 @@ export default function AbaCaixa({ mesRef }) {
   )
 }
 
-// ── Seção "📊 Evolução 12 meses" (CAIXA-02) — barras 100% CSS, LOCKED: zero
+// ── Seção "Evolução 12 meses" (CAIXA-02) — barras 100% CSS, LOCKED: zero
 // dependência nova de gráfico. Escala normalizada por maxVal (piso 1) para
 // nunca quebrar layout com valores extremos ou zerados (T-10-07/T-10-08).
 const ALTURA_BARRAS = 120
@@ -146,7 +147,7 @@ function EvolucaoSection({ serie }) {
   return (
     <div style={{ marginTop: 28 }}>
       <h5 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.9rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 12 }}>
-        📊 Evolução 12 meses
+        <BarChart3 size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Evolução 12 meses
       </h5>
 
       {semHistorico ? (

@@ -11,6 +11,7 @@ import { useAdminContext } from '../../../contexts/AdminContext.jsx'
 import { fmtBRL, fmtDate } from '../../../utils/formatters.js'
 import { copyToClipboard } from '../../../utils/clipboard.js'
 import { agruparPorTecnico, acharFechamento, statusFechamento, normNome } from '../../../utils/fechamentoTecnicos.js'
+import { HardHat, ChevronLeft, ChevronRight, CheckCircle2, Hourglass, ClipboardList, Banknote, FolderArchive } from 'lucide-react'
 
 const MESES_NOMES = [
   'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
@@ -105,14 +106,14 @@ export default function AbaFechamentoTecnicos({ mesRef, mesFechado }) {
   return (
     <div>
       <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 12 }}>
-        👷 Fechamento de Técnicos — {fmtMes(mesRef)}
+        <HardHat size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Fechamento de Técnicos — {fmtMes(mesRef)}
       </h4>
 
       {grupos.length === 0 && (
         <div className="empty-state" style={{ padding: '24px' }}>
           <p>Nenhuma OS com técnico neste mês.</p>
           <p style={{ fontSize: '.85rem', color: 'var(--muted)', marginTop: 8 }}>
-            As OS entram pelo mês de criação — navegue com ◄ ► para outro mês.
+            As OS entram pelo mês de criação — navegue com <ChevronLeft size={13} strokeWidth={2.5} style={{ verticalAlign: '-2px' }} /> <ChevronRight size={13} strokeWidth={2.5} style={{ verticalAlign: '-2px' }} /> para outro mês.
           </p>
         </div>
       )}
@@ -142,7 +143,7 @@ export default function AbaFechamentoTecnicos({ mesRef, mesFechado }) {
                   background: pago ? '#e8f5e9' : '#fff8e1',
                   color: pago ? '#1e6e3e' : '#b8860b',
                 }}>
-                  {pago ? '✅ PAGO' : '⏳ PENDENTE'}
+                  {pago ? <><CheckCircle2 size={12} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />PAGO</> : <><Hourglass size={12} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />PENDENTE</>}
                 </span>
               </div>
             </div>
@@ -150,7 +151,7 @@ export default function AbaFechamentoTecnicos({ mesRef, mesFechado }) {
             {info.pix && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
                 <span style={{ fontFamily: 'monospace', fontSize: '.85rem' }}>{info.pix}</span>
-                <button className="btn-sm btn-view" onClick={() => copiarPix(info.pix)}>📋 Copiar PIX</button>
+                <button className="btn-sm btn-view" onClick={() => copiarPix(info.pix)}><ClipboardList size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Copiar PIX</button>
                 <span style={{ fontSize: '.8rem', color: 'var(--muted)' }}>{LABEL_FORMA[info.forma] || info.forma}</span>
               </div>
             )}
@@ -169,7 +170,7 @@ export default function AbaFechamentoTecnicos({ mesRef, mesFechado }) {
 
             <div style={{ marginTop: 12, textAlign: 'right' }}>
               {pago ? (
-                <span style={{ fontSize: '.85rem', color: 'var(--muted)' }}>✅ Pago em {fmtDate(fech.pago_em)}</span>
+                <span style={{ fontSize: '.85rem', color: 'var(--muted)' }}><CheckCircle2 size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Pago em {fmtDate(fech.pago_em)}</span>
               ) : (
                 <button
                   className="btn-sm btn-primary"
@@ -177,7 +178,7 @@ export default function AbaFechamentoTecnicos({ mesRef, mesFechado }) {
                   title={mesFechado ? 'Mês fechado' : (g.tecnicoNorm === '' ? 'OS sem técnico não podem ser pagas' : '')}
                   onClick={() => marcarPago(g)}
                 >
-                  {pagando === g.tecnicoNorm ? '⏳ Registrando...' : '💵 Marcar como pago'}
+                  {pagando === g.tecnicoNorm ? <><Hourglass size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Registrando...</> : <><Banknote size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Marcar como pago</>}
                 </button>
               )}
             </div>
@@ -186,7 +187,7 @@ export default function AbaFechamentoTecnicos({ mesRef, mesFechado }) {
       })}
 
       <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', margin: '22px 0 12px' }}>
-        🗂️ Histórico de pagamentos
+        <FolderArchive size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Histórico de pagamentos
       </h4>
       {historico.length === 0 && (
         <div className="empty-state" style={{ padding: 24 }}>
@@ -202,7 +203,7 @@ export default function AbaFechamentoTecnicos({ mesRef, mesFechado }) {
             </div>
           </div>
           <div style={{ fontWeight: 700 }}>{fmtBRL(f.total)}</div>
-          <span className="badge" style={{ background: '#e8f5e9', color: '#1e6e3e' }}>✅ Pago</span>
+          <span className="badge" style={{ background: '#e8f5e9', color: '#1e6e3e' }}><CheckCircle2 size={12} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Pago</span>
         </div>
       ))}
     </div>

@@ -11,6 +11,10 @@ import { fmtBRL, fmtDate } from '../../../utils/formatters.js'
 import { copyToClipboard } from '../../../utils/clipboard.js'
 import { SEGS_COM_CODIGO, SEGS_AUTO_NUM_ASSIST, STATUS_FATURAVEIS, getDivergenciaFat, normSeguradora } from '../../../utils/faturamento.js'
 import ModalFecharNota from './ModalFecharNota.jsx'
+import {
+  Wallet, FileText, ClipboardList, ReceiptText, Banknote, Check,
+  AlertTriangle, Hourglass, CheckCircle2,
+} from 'lucide-react'
 
 // Status derivado da nota — 'atrasada' NUNCA é gravado, só calculado na leitura.
 function statusNota(nota) {
@@ -21,9 +25,9 @@ function statusNota(nota) {
   return 'aguardando'
 }
 const STATUS_NOTA_META = {
-  aguardando: { label: '⏳ Aguardando pagamento', cor: '#b8860b', bg: '#fff8e1' },
-  paga:       { label: '✅ Paga',                  cor: '#1e6e3e', bg: '#e8f5e9' },
-  atrasada:   { label: '🔴 Atrasada',              cor: '#c0392b', bg: '#fdecea' },
+  aguardando: { label: 'Aguardando pagamento', icon: Hourglass,     cor: '#b8860b', bg: '#fff8e1' },
+  paga:       { label: 'Paga',                 icon: CheckCircle2,  cor: '#1e6e3e', bg: '#e8f5e9' },
+  atrasada:   { label: 'Atrasada',             icon: AlertTriangle, cor: '#c0392b', bg: '#fdecea' },
 }
 
 export default function AbaFaturamento() {
@@ -242,7 +246,7 @@ export default function AbaFaturamento() {
           border: '1px solid var(--border)', borderRadius: 8, background: 'var(--light)',
         }}>
           <div style={{ fontWeight: 800, fontFamily: 'Barlow Condensed,sans-serif', textTransform: 'uppercase', color: 'var(--primary)' }}>
-            💰 Total a receber por seguradora
+            <Wallet size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Total a receber por seguradora
           </div>
           {Object.entries(aReceber).map(([seg, info]) => (
             <div key={seg} style={{ fontSize: '.85rem' }}>
@@ -254,7 +258,7 @@ export default function AbaFaturamento() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 10 }}>
         <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase' }}>
-          📄 Fila de Faturamento
+          <FileText size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Fila de Faturamento
         </h4>
         <select className="filter-input" value={segSel} onChange={e => setSegSel(e.target.value)}>
           {seguradoras.map(s => <option key={s} value={s}>{s}</option>)}
@@ -263,15 +267,15 @@ export default function AbaFaturamento() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
         <div style={{ fontSize: '.85rem', color: 'var(--muted)' }}>
-          {lancadosCount} lançados ✓ · {totalItens - lancadosCount} faltando
+          {lancadosCount} lançados <Check size={13} strokeWidth={2.5} style={{ verticalAlign: '-2px' }} /> · {totalItens - lancadosCount} faltando
         </div>
         <div style={{ fontWeight: 700 }}>Total da fila: {fmtBRL(somaValores)}</div>
         <div style={{ display: 'flex', gap: 8 }}>
           {totalItens > 0 && (
-            <button className="btn-sm btn-view" onClick={copiarCodigos}>📋 Copiar todos os códigos</button>
+            <button className="btn-sm btn-view" onClick={copiarCodigos}><ClipboardList size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Copiar todos os códigos</button>
           )}
           <button className="btn-sm btn-primary" disabled={lancadosPendentes.length === 0} onClick={() => setShowFechar(true)}>
-            🧾 Fechar nota com os {lancadosPendentes.length} itens lançados
+            <ReceiptText size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Fechar nota com os {lancadosPendentes.length} itens lançados
           </button>
         </div>
       </div>
@@ -324,8 +328,8 @@ export default function AbaFaturamento() {
                   <div>{fmtBRL(item.valorCodigo)}</div>
                   <div style={{ fontSize: '.78rem', color: 'var(--muted)' }}>OS: {fmtBRL(item.valorOS)}</div>
                   {divergencia.bateu
-                    ? <span className="badge" style={{ background: '#d7f5df', color: '#1e6e3e' }}>✓ bate</span>
-                    : <span className="badge" style={{ background: '#ffe0e0', color: '#a30000' }}>⚠ difere {fmtBRL(Math.abs(divergencia.diff))}</span>}
+                    ? <span className="badge" style={{ background: '#d7f5df', color: '#1e6e3e' }}><Check size={12} strokeWidth={2.5} style={{ verticalAlign: '-2px', marginRight: 3 }} />bate</span>
+                    : <span className="badge" style={{ background: '#ffe0e0', color: '#a30000' }}><AlertTriangle size={12} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 3 }} />difere {fmtBRL(Math.abs(divergencia.diff))}</span>}
                 </>
               ) : (
                 <>
@@ -341,7 +345,7 @@ export default function AbaFaturamento() {
       })}
 
       <h4 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '.95rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', margin: '22px 0 12px' }}>
-        🧾 Notas — {segSel}
+        <ReceiptText size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Notas — {segSel}
       </h4>
       {notas.filter(n => n.seguradora === segSel).length === 0 && (
         <div className="empty-state" style={{ padding: '24px' }}>
@@ -363,9 +367,9 @@ export default function AbaFaturamento() {
               </div>
             </div>
             <div style={{ fontWeight: 700 }}>{fmtBRL(nota.total)}</div>
-            <span className="badge" style={{ background: meta.bg, color: meta.cor }}>{meta.label}</span>
+            <span className="badge" style={{ background: meta.bg, color: meta.cor }}><meta.icon size={12} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />{meta.label}</span>
             {st !== 'paga' && (
-              <button className="btn-sm btn-primary" onClick={() => marcarNotaPaga(nota)}>💵 Marcar como paga</button>
+              <button className="btn-sm btn-primary" onClick={() => marcarNotaPaga(nota)}><Banknote size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Marcar como paga</button>
             )}
           </div>
         )

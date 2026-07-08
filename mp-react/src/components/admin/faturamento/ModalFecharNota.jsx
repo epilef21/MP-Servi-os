@@ -8,6 +8,7 @@
 import { useState, useMemo } from 'react'
 import { calcularDataPrevista } from '../../../utils/faturamento.js'
 import { fmtBRL, fmtDate } from '../../../utils/formatters.js'
+import { ReceiptText, X, Ban, Wallet, Hourglass, CheckCircle2 } from 'lucide-react'
 
 function hojeISO() {
   const d = new Date()
@@ -38,8 +39,8 @@ export default function ModalFecharNota({ seguradora, itens, config, onConfirmar
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onFechar()}>
       <div className="modal-box" style={{ maxWidth: 520 }}>
         <div className="modal-header">
-          <h2>🧾 Fechar nota — {seguradora}</h2>
-          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onFechar}>✕</button>
+          <h2><ReceiptText size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Fechar nota — {seguradora}</h2>
+          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onFechar}><X size={16} strokeWidth={2} /></button>
         </div>
         <div className="modal-body">
           <div style={{ marginBottom: 14, fontWeight: 700 }}>
@@ -59,7 +60,7 @@ export default function ModalFecharNota({ seguradora, itens, config, onConfirmar
 
           {prev.naoFaturavel && (
             <div style={{ marginBottom: 14, padding: '10px 12px', borderRadius: 8, background: '#fdecea', color: '#c0392b', fontWeight: 600 }}>
-              🚫 A {seguradora} não fatura notas emitidas entre os dias 26 e 31 — escolha outra data de emissão.
+              <Ban size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />A {seguradora} não fatura notas emitidas entre os dias 26 e 31 — escolha outra data de emissão.
             </div>
           )}
 
@@ -77,7 +78,7 @@ export default function ModalFecharNota({ seguradora, itens, config, onConfirmar
 
           {!prev.naoFaturavel && !prev.semCalendario && (
             <div style={{ marginBottom: 14, padding: '10px 12px', borderRadius: 8, background: '#e8f5e9', color: '#1e6e3e', fontWeight: 600 }}>
-              💰 Pagamento previsto para {fmtDate(prev.data)}
+              <Wallet size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Pagamento previsto para {fmtDate(prev.data)}
             </div>
           )}
 
@@ -94,7 +95,7 @@ export default function ModalFecharNota({ seguradora, itens, config, onConfirmar
         <div className="modal-footer">
           <button className="btn-sm" style={{ background: 'var(--light)', color: 'var(--muted)', border: '1px solid var(--border)' }} onClick={onFechar}>Cancelar</button>
           <button className="btn-primary" style={{ padding: '9px 22px', fontSize: '.9rem' }} disabled={desabilitado} onClick={confirmar}>
-            {salvando ? '⏳ Fechando...' : '✅ Fechar nota'}
+            {salvando ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Fechando...</> : <><CheckCircle2 size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Fechar nota</>}
           </button>
         </div>
       </div>

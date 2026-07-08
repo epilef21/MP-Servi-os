@@ -16,6 +16,10 @@ import {
   listarContasGoogleCalendar,
   desconectarGoogleCalendar,
 } from '../../utils/googleCalendarApi.js'
+import {
+  Building2, ReceiptText, CalendarDays, User, Image, Hourglass, Check, Save,
+  CheckCircle2, Ban, AlertTriangle, Lightbulb, KeyRound,
+} from 'lucide-react'
 
 // Normaliza uma faixa de calendário de pagamento antes de gravar no Firestore:
 // converte campos numéricos com parseInt (com fallback seguro) e preserva naoFaturavel.
@@ -306,14 +310,14 @@ export default function ConfigTab() {
     <div className="tab-content">
       <div className="config-tabs-bar">
         {[
-          { id: 'empresa',    label: '🏢 Minha Empresa'  },
-          { id: 'tarifas',    label: '🧾 Tarifas'         },
-          { id: 'calendario', label: '📅 Calendário'      },
-          { id: 'conta',      label: '👤 Minha Conta'    },
+          { id: 'empresa',    icon: Building2,    label: 'Minha Empresa' },
+          { id: 'tarifas',    icon: ReceiptText,  label: 'Tarifas'       },
+          { id: 'calendario', icon: CalendarDays, label: 'Calendário'    },
+          { id: 'conta',      icon: User,         label: 'Minha Conta'   },
         ].map(t => (
           <button key={t.id} className={`config-tab-btn${configAba === t.id ? ' active' : ''}`}
             onClick={() => setConfigAba(t.id)}>
-            {t.label}
+            <t.icon size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />{t.label}
           </button>
         ))}
       </div>
@@ -337,11 +341,11 @@ export default function ConfigTab() {
             />
             {logoPreview
               ? <img src={logoPreview} alt="Logo atual" className="logo-preview" />
-              : <div className="logo-upload-icon">🖼️</div>
+              : <div className="logo-upload-icon"><Image size={32} strokeWidth={2} /></div>
             }
             <div className="logo-upload-text">
               {logoUploading
-                ? '⏳ Enviando...'
+                ? <><Hourglass size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Enviando...</>
                 : <><strong>Clique para enviar</strong> ou arraste a logo<br /><span style={{ fontSize: '.75rem' }}>JPG, PNG ou SVG • Máx. 2MB</span></>
               }
             </div>
@@ -411,7 +415,7 @@ export default function ConfigTab() {
                 onClick={() => toggleSeguradora(seg)}
               >
                 <div className="config-check-box">
-                  {configForm.seguradoras.includes(seg) && <span style={{ color: '#fff', fontSize: '.8rem', fontWeight: 700 }}>✓</span>}
+                  {configForm.seguradoras.includes(seg) && <Check size={13} strokeWidth={3} style={{ color: '#fff' }} />}
                 </div>
                 <span className="config-check-label">{seg}</span>
               </div>
@@ -419,7 +423,7 @@ export default function ConfigTab() {
           </div>
 
           <button className="btn-primary" onClick={saveConfig} disabled={savingConfig} style={{ padding: '10px 28px', fontSize: '.9rem' }}>
-            {savingConfig ? '⏳ Salvando...' : '💾 Salvar dados'}
+            {savingConfig ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvar dados</>}
           </button>
         </div>
       )}
@@ -446,7 +450,7 @@ export default function ConfigTab() {
                 }}>
                   <div style={{ fontFamily: 'Barlow Condensed,sans-serif', fontWeight: 800, fontSize: '1rem', color: temTabela ? '#1e6e3e' : '#888' }}>{seg}</div>
                   <div style={{ fontSize: '.78rem', color: temTabela ? '#2d8a4e' : '#aaa', marginTop: 2 }}>
-                    {temTabela ? `✅ ${TABELAS[seg].length} serviços` : '⏳ Pendente'}
+                    {temTabela ? <><CheckCircle2 size={12} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />{TABELAS[seg].length} serviços</> : <><Hourglass size={12} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Pendente</>}
                   </div>
                 </div>
               )
@@ -498,14 +502,14 @@ export default function ConfigTab() {
           {Object.keys(tarifaForm).length > 0 && (
             <div style={{ marginTop: 10, textAlign: 'right' }}>
               <button className="btn-primary" onClick={saveTarifas} disabled={savingTarifa} style={{ padding: '10px 28px', fontSize: '.9rem' }}>
-                {savingTarifa ? '⏳ Salvando...' : '💾 Salvar deslocamento'}
+                {savingTarifa ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvar deslocamento</>}
               </button>
             </div>
           )}
 
           {/* Calendário de pagamento por seguradora */}
           <h3 className="config-section-title" style={{ marginTop: 28, fontSize: '.8rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.6px', paddingBottom: 10, borderBottom: '1px solid var(--border)', marginBottom: 12 }}>
-            📅 Calendário de pagamento por seguradora
+            <CalendarDays size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Calendário de pagamento por seguradora
           </h3>
           <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginBottom: 12 }}>
             Quando você envia a nota fiscal, o sistema calcula sozinho a data prevista de pagamento usando estas regras. Ajuste aqui se a seguradora mudar o calendário. Allianz e Mondial usam o mesmo calendário.
@@ -527,7 +531,7 @@ export default function ConfigTab() {
                     onChange={e => setFaixa(seg, idx, 'diaAte', e.target.value)}
                     style={{ width: 56, padding: '5px 8px', border: '1px solid var(--border)', borderRadius: 5 }} />
                   {f.naoFaturavel
-                    ? <span style={{ color: '#c0392b', fontWeight: 700, fontSize: '.85rem' }}>🚫 Não faturável</span>
+                    ? <span style={{ color: '#c0392b', fontWeight: 700, fontSize: '.85rem' }}><Ban size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Não faturável</span>
                     : (
                       <>
                         <span style={{ fontSize: '.85rem' }}>→ paga em +</span>
@@ -547,7 +551,7 @@ export default function ConfigTab() {
 
           <div style={{ marginTop: 10, textAlign: 'right' }}>
             <button className="btn-primary" onClick={saveCalendario} disabled={savingCal} style={{ padding: '10px 28px', fontSize: '.9rem' }}>
-              {savingCal ? '⏳ Salvando...' : '💾 Salvar calendário'}
+              {savingCal ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvar calendário</>}
             </button>
           </div>
         </div>
@@ -557,7 +561,7 @@ export default function ConfigTab() {
       {configAba === 'calendario' && (
         <div style={{ maxWidth: 560 }}>
           <div className="config-section">
-            <h3>📅 Google Calendar</h3>
+            <h3><CalendarDays size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Google Calendar</h3>
             <p style={{ fontSize: '.85rem', color: 'var(--muted)', marginBottom: 14 }}>
               Conecte contas Google para que as OS agendadas apareçam automaticamente
               na agenda — a sua e/ou a do proprietário. Cada conta conectada recebe
@@ -575,7 +579,7 @@ export default function ConfigTab() {
                 )}
                 {contasGoogle.map(conta => (
                   <div key={conta.id} className="calendar-conta-item">
-                    <span className="status-conectado">✅ {conta.label}</span>
+                    <span className="status-conectado"><CheckCircle2 size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />{conta.label}</span>
                     <button className="btn-outline-sm" onClick={() => handleDesconectar(conta.id)}>
                       Desconectar
                     </button>
@@ -591,7 +595,7 @@ export default function ConfigTab() {
           </div>
 
           <div style={{ background: '#f0f5ff', border: '1px solid #b0c4f0', borderRadius: 'var(--r)', padding: '12px 16px', fontSize: '.8rem', color: '#1a3a8c' }}>
-            💡 Ao clicar em "Conectar", você será redirecionado para o Google para autorizar o acesso.
+            <Lightbulb size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Ao clicar em "Conectar", você será redirecionado para o Google para autorizar o acesso.
             Após autorizar, a conta aparece aqui e todos os agendamentos passam a criar eventos automaticamente.
           </div>
         </div>
@@ -619,7 +623,7 @@ export default function ConfigTab() {
                   style={{ flex: 1 }}
                 />
                 <button className="btn-sm btn-ok" onClick={saveNomeUsuario} disabled={savingNome} style={{ whiteSpace: 'nowrap' }}>
-                  {savingNome ? '⏳' : '💾 Salvar'}
+                  {savingNome ? <Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px' }} /> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvar</>}
                 </button>
               </div>
             </div>
@@ -674,8 +678,8 @@ export default function ConfigTab() {
                 {usagePct >= 80 && (
                   <div style={{ background: usagePct >= 100 ? '#fff5f5' : '#fff8ec', border: `1px solid ${usagePct >= 100 ? '#fcc' : '#fce4b0'}`, borderRadius: 8, padding: '10px 14px', fontSize: '.82rem', color: usagePct >= 100 ? 'var(--danger)' : 'var(--warn-text)', fontWeight: 600, marginTop: 10 }}>
                     {usagePct >= 100
-                      ? '🚫 Limite atingido — entre em contato para fazer upgrade do plano.'
-                      : `⚠️ Você usou ${usagePct}% do limite. Considere fazer upgrade do plano.`
+                      ? <><Ban size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Limite atingido — entre em contato para fazer upgrade do plano.</>
+                      : <><AlertTriangle size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Você usou {usagePct}% do limite. Considere fazer upgrade do plano.</>
                     }
                   </div>
                 )}
@@ -691,7 +695,7 @@ export default function ConfigTab() {
             {resetEmailEnviado
               ? (
                 <div style={{ background: 'var(--success-bg)', border: '1px solid #b2dfc5', borderRadius: 10, padding: '12px 16px', fontSize: '.88rem', color: 'var(--success)', fontWeight: 600 }}>
-                  ✅ E-mail enviado! Verifique sua caixa de entrada.
+                  <CheckCircle2 size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />E-mail enviado! Verifique sua caixa de entrada.
                 </div>
               ) : (
                 <div>
@@ -699,7 +703,7 @@ export default function ConfigTab() {
                     Um link de redefinição será enviado para <strong>{emailUsuario}</strong>.
                   </p>
                   <button className="btn-sm btn-view" onClick={sendResetEmail}>
-                    🔑 Enviar link de redefinição de senha
+                    <KeyRound size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Enviar link de redefinição de senha
                   </button>
                 </div>
               )
