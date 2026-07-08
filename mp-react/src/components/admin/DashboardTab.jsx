@@ -9,6 +9,7 @@ import { getLucro, fmtBRL, fmtDate } from '../../utils/formatters.js'
 import {
   ClipboardList, CalendarDays, Hourglass, Wallet, TrendingUp, Clock,
   PieChart as PieChartIcon, Package, Tag, AlertTriangle, Ban,
+  Timer, Award, Receipt, UserX, Star,
 } from 'lucide-react'
 
 const MESES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
@@ -48,8 +49,10 @@ export default function DashboardTab() {
   const usagePct   = planoInfo.limiteOS === -1 ? 0 : Math.min(100, Math.round((totalMes / planoInfo.limiteOS) * 100))
   const usageCls   = usagePct >= 90 ? 'danger' : usagePct >= 70 ? 'warn' : ''
 
-  const stats = useMemo(() => {
-    const mesReports = filtMes
+  // OS do mês selecionado no filtro de Lucro do Mês — reaproveitado pelos
+  // indicadores extras da Etapa B (mesmo recorte de mês)
+  const mesReports = useMemo(() => {
+    return filtMes
       ? reports.filter(r => {
           try {
             const d = r.criado_em?.toDate?.()
@@ -57,6 +60,9 @@ export default function DashboardTab() {
           } catch { return false }
         })
       : reports
+  }, [reports, filtMes])
+
+  const stats = useMemo(() => {
     const lucroTotal = mesReports.reduce((acc, r) => {
       const l = getLucro(r)
       return l !== null ? acc + l : acc
@@ -87,7 +93,85 @@ export default function DashboardTab() {
       hasLucro:  mesReports.some(r => getLucro(r) !== null),
       mesCount:  mesReports.length,
     }
-  }, [reports, filtMes, today])
+  }, [reports, mesReports, today])
+
+  // Indicadores extras da Etapa B — tudo calculado em memória a partir de
+  // mesReports (mesmo recorte de mês do seletor de Lucro do Mês)
+  const extraStats = useMemo(() => {
+    // Tempo médio de atendimento: diferença entre hora_saida e hora_chegada ('HH:MM')
+    const parseHM = v => {
+      if (!v || typeof v !== 'string') return null
+      const m = v.trim().match(/^(\d{1,2}):(\d{2})$/)
+      if (!m) return null
+      const h   = parseInt(m[1], 10)
+      const min = parseInt(m[2], 10)
+      if (Number.isNaN(h) || Number.isNaN(min) || h > 23 || min > 59) return null
+      return h * 60 + min
+    }
+    let somaMin = 0
+    let countTempo = 0
+    mesReports.forEach(r => {
+      try {
+        const ini = parseHM(r.hora_chegada)
+        const fim = parseHM(r.hora_saida)
+        if (ini === null || fim === null) return
+        let diff = fim - ini
+        if (diff < 0) diff += 24 * 60 // atendimento que passou da meia-noite
+        if (diff <= 0) return
+        somaMin += diff
+        countTempo++
+      } catch { /* ignora registro malformado */ }
+    })
+    let tempoMedioLabel = '—'
+    if (countTempo > 0) {
+      const media = Math.round(somaMin / countTempo)
+      const h = Math.floor(media / 60)
+      const m = media % 60
+      tempoMedioLabel = h > 0 ? `${h}h ${m}min` : `${m}min`
+    }
+
+    // Melhor técnico do mês: mais OS concluídas/processadas/enviadas
+    const STATUS_FINALIZADOS = ['concluido', 'processado', 'enviado']
+    const contagemTec = {}
+    mesReports.forEach(r => {
+      if (!STATUS_FINALIZADOS.includes(r.status)) return
+      const nome = r.tecnico_nome
+      if (!nome) return
+      contagemTec[nome] = (contagemTec[nome] || 0) + 1
+    })
+    let melhorTecnico = null
+    let melhorTecnicoCount = 0
+    Object.entries(contagemTec).forEach(([nome, c]) => {
+      if (c > melhorTecnicoCount) { melhorTecnico = nome; melhorTecnicoCount = c }
+    })
+
+    // Ticket médio do mês: lucro total do mês ÷ nº de OS com financeiro no mês
+    const mesComFinanceiro = mesReports.filter(r => getLucro(r) !== null).length
+    const ticketMedio = mesComFinanceiro > 0 ? stats.lucroTotal / mesComFinanceiro : null
+
+    // Cliente ausente no mês (não existe status "cancelado" no fluxo)
+    const clienteAusente = mesReports.filter(r => r.status === 'cliente_ausente').length
+
+    // Avaliação média do mês
+    let somaAval = 0
+    let countAval = 0
+    mesReports.forEach(r => {
+      const n = parseFloat(r.avaliacao_nota)
+      if (!Number.isNaN(n) && n > 0) { somaAval += n; countAval++ }
+    })
+    const avaliacaoMedia = countAval > 0 ? (somaAval / countAval) : null
+
+    return {
+      tempoMedioLabel,
+      melhorTecnico,
+      melhorTecnicoCount,
+      ticketMedio,
+      mesComFinanceiro,
+      clienteAusente,
+      avaliacaoMedia,
+      countAval,
+    }
+  }, [mesReports, stats.lucroTotal])
 
   const chartData = useMemo(() => {
     const now   = new Date()
@@ -138,26 +222,26 @@ export default function DashboardTab() {
   return (
     <div className="tab-content">
       <div className="metrics-grid">
-        <div className="metric-card blue">
-          <div className="metric-icon"><ClipboardList size={24} strokeWidth={2} /></div>
+        <div className="metric-card st-info">
+          <div className="metric-icon"><ClipboardList size={22} strokeWidth={2} /></div>
           <div className="metric-label">Total do Mês</div>
           <div className="metric-value">{stats.totalMesCount}</div>
           <div className="metric-sub">{stats.nomeMes}</div>
         </div>
-        <div className="metric-card orange">
-          <div className="metric-icon"><CalendarDays size={24} strokeWidth={2} /></div>
+        <div className="metric-card st-info">
+          <div className="metric-icon"><CalendarDays size={22} strokeWidth={2} /></div>
           <div className="metric-label">Hoje</div>
           <div className="metric-value">{stats.hoje}</div>
           <div className="metric-sub">registradas hoje</div>
         </div>
-        <div className="metric-card yellow">
-          <div className="metric-icon"><Hourglass size={24} strokeWidth={2} /></div>
+        <div className={`metric-card ${stats.pendentes > 0 ? 'st-progress' : 'st-done'}`}>
+          <div className="metric-icon"><Hourglass size={22} strokeWidth={2} /></div>
           <div className="metric-label">Pendentes</div>
           <div className="metric-value">{stats.pendentes}</div>
           <div className="metric-sub">aguardando revisão</div>
         </div>
-        <div className="metric-card green">
-          <div className="metric-icon"><Wallet size={24} strokeWidth={2} /></div>
+        <div className={`metric-card ${!stats.hasLucro ? '' : stats.lucroTotal >= 0 ? 'st-done' : 'st-critical'}`}>
+          <div className="metric-icon"><Wallet size={22} strokeWidth={2} /></div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div className="metric-label">Lucro do Mês</div>
             <input
@@ -171,6 +255,49 @@ export default function DashboardTab() {
             : <div className="metric-value" style={{ fontSize: '1.1rem', color: 'var(--muted)' }}>Sem dados</div>
           }
           <div className="metric-sub">{stats.mesCount} OS com financeiro</div>
+        </div>
+        <div className="metric-card st-info">
+          <div className="metric-icon"><Timer size={22} strokeWidth={2} /></div>
+          <div className="metric-label">Tempo Médio de Atendimento</div>
+          <div className="metric-value" style={extraStats.tempoMedioLabel === '—' ? { fontSize: '1.1rem', color: 'var(--muted)' } : undefined}>
+            {extraStats.tempoMedioLabel}
+          </div>
+          <div className="metric-sub">{stats.nomeMes}</div>
+        </div>
+        <div className="metric-card st-info">
+          <div className="metric-icon"><Award size={22} strokeWidth={2} /></div>
+          <div className="metric-label">Melhor Técnico do Mês</div>
+          <div
+            className="metric-value"
+            style={{ fontSize: extraStats.melhorTecnico ? '1.3rem' : '1.1rem', color: extraStats.melhorTecnico ? 'var(--text)' : 'var(--muted)' }}
+          >
+            {extraStats.melhorTecnico || '—'}
+          </div>
+          <div className="metric-sub">{extraStats.melhorTecnico ? `${extraStats.melhorTecnicoCount} OS` : 'sem dados'}</div>
+        </div>
+        <div className="metric-card st-info">
+          <div className="metric-icon"><Receipt size={22} strokeWidth={2} /></div>
+          <div className="metric-label">Ticket Médio</div>
+          {extraStats.ticketMedio !== null
+            ? <div className="metric-value">{fmtBRL(extraStats.ticketMedio)}</div>
+            : <div className="metric-value" style={{ fontSize: '1.1rem', color: 'var(--muted)' }}>Sem dados</div>
+          }
+          <div className="metric-sub">{extraStats.mesComFinanceiro} OS com financeiro</div>
+        </div>
+        <div className={`metric-card ${extraStats.clienteAusente > 0 ? 'st-critical' : 'st-done'}`}>
+          <div className="metric-icon"><UserX size={22} strokeWidth={2} /></div>
+          <div className="metric-label">Cliente Ausente</div>
+          <div className="metric-value">{extraStats.clienteAusente}</div>
+          <div className="metric-sub">no mês</div>
+        </div>
+        <div className={`metric-card ${extraStats.avaliacaoMedia !== null ? 'st-done' : ''}`}>
+          <div className="metric-icon"><Star size={22} strokeWidth={2} /></div>
+          <div className="metric-label">Avaliação Média</div>
+          {extraStats.avaliacaoMedia !== null
+            ? <div className="metric-value">{`★ ${extraStats.avaliacaoMedia.toFixed(1)}`}</div>
+            : <div className="metric-value" style={{ fontSize: '1.1rem', color: 'var(--muted)' }}>—</div>
+          }
+          <div className="metric-sub">{extraStats.countAval > 0 ? `${extraStats.countAval} avaliações` : 'sem avaliações'}</div>
         </div>
       </div>
 
@@ -186,7 +313,7 @@ export default function DashboardTab() {
                   <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#6b7c93' }} />
                   <YAxis tick={{ fontSize: 12, fill: '#6b7c93' }} allowDecimals={false} />
                   <Tooltip content={<CustomBarTooltip />} />
-                  <Legend wrapperStyle={{ fontSize: 12, paddingTop: 12 }} />
+                  <Legend iconType="square" wrapperStyle={{ fontSize: 13, fontWeight: 600, paddingTop: 12 }} />
                   <Bar dataKey="criadas"     name="OS Criadas"     fill="#1a3fa8" radius={[4,4,0,0]} />
                   <Bar dataKey="finalizadas" name="OS Finalizadas" fill="#f05a1a" radius={[4,4,0,0]} />
                 </BarChart>

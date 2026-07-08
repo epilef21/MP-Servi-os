@@ -567,25 +567,41 @@ body {
 /* ── CONTEÚDO DA ABA ── */
 .tab-content { padding:28px; flex:1; }
 
-/* ── MÉTRICAS (4 cards) ── */
+/* ── MÉTRICAS (grid denso de indicadores) ── */
 .metrics-grid {
-  display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px;
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:12px; margin-bottom:24px;
 }
 .metric-card {
-  background:#fff; border-radius:16px;
-  padding:20px 22px;
-  box-shadow:0 2px 12px rgba(26,63,168,.08);
+  background:#fff; border-radius:14px;
+  padding:14px 16px;
+  box-shadow:var(--shadow-1);
   border-left:4px solid var(--border);
   transition:transform .2s, box-shadow .2s;
 }
-.metric-card:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(26,63,168,.12); }
+.metric-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-2); }
 .metric-card.blue  { border-left-color:var(--primary); }
 .metric-card.orange{ border-left-color:var(--accent); }
 .metric-card.yellow{ border-left-color:#f59e0b; }
 .metric-card.green { border-left-color:var(--success); }
-.metric-icon { font-size:1.5rem; margin-bottom:10px; }
-.metric-label { font-size:.7rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; }
-.metric-value { font-family:'Barlow Condensed',sans-serif; font-size:2.2rem; font-weight:900; color:var(--text); line-height:1; }
+/* Cores semânticas (Etapa B — dashboard denso) */
+.metric-card.st-info     { border-left-color:var(--st-info); }
+.metric-card.st-done     { border-left-color:var(--st-done); }
+.metric-card.st-progress { border-left-color:var(--st-progress); }
+.metric-card.st-critical { border-left-color:var(--st-critical); }
+.metric-card.st-info     .metric-icon { color:var(--st-info);     background:var(--st-info-bg); }
+.metric-card.st-done     .metric-icon { color:var(--st-done);     background:var(--st-done-bg); }
+.metric-card.st-progress .metric-icon { color:var(--st-progress); background:var(--st-progress-bg); }
+.metric-card.st-critical .metric-icon { color:var(--st-critical); background:var(--st-critical-bg); }
+.metric-icon {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:32px; height:32px; border-radius:9px;
+  color:var(--muted); margin-bottom:8px;
+}
+.metric-label { font-size:.72rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.metric-value {
+  font-family:'Barlow Condensed',sans-serif; font-size:1.5rem; font-weight:900; color:var(--text); line-height:1.15;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
 .metric-value.green { color:var(--success); }
 .metric-value.red   { color:var(--danger); }
 .metric-sub { font-size:.72rem; color:var(--muted); margin-top:4px; }
@@ -739,7 +755,7 @@ body {
 }
 
 @media(max-width:900px) {
-  .metrics-grid { grid-template-columns:repeat(2,1fr); }
+  .metrics-grid { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
 }
 
 @media(max-width:768px) {
@@ -758,7 +774,7 @@ body {
 }
 
 @media(max-width:480px) {
-  .metrics-grid { grid-template-columns:repeat(2,1fr); }
+  .metrics-grid { grid-template-columns:1fr; }
   .segurado-item { flex-wrap:wrap; }
   .segurado-stats { width:100%; justify-content:flex-start; }
 }
