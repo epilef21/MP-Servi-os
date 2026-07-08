@@ -6,6 +6,7 @@ import { useState, useRef } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
 import { db, doc, updateDoc, serverTimestamp, arrayUnion } from '../../firebase.js'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
+import { CheckCircle2, X, Smartphone, PenLine, Hourglass, Save } from 'lucide-react'
 
 export default function PreencherOSModal({ os, empresaId, slug, onClose, onSaved }) {
   const { showToast } = useAdminContext()
@@ -75,15 +76,15 @@ export default function PreencherOSModal({ os, empresaId, slug, onClose, onSaved
       <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
         <div className="modal-box" style={{ maxWidth: 480 }}>
           <div className="modal-header">
-            <h2>✅ Formulário salvo!</h2>
+            <h2><CheckCircle2 size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Formulário salvo!</h2>
             <button
               className="btn-sm"
               style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }}
               onClick={onClose}
-            >✕</button>
+            ><X size={16} strokeWidth={2} /></button>
           </div>
           <div className="modal-body" style={{ textAlign: 'center', padding: '28px 24px' }}>
-            <div style={{ fontSize: 52, marginBottom: 12 }}>📱</div>
+            <div style={{ marginBottom: 12 }}><Smartphone size={52} strokeWidth={1.5} /></div>
             <h3 style={{ marginBottom: 8 }}>Envie o link para {os.nome_segurado || 'o cliente'} assinar</h3>
             <p style={{ color: 'var(--muted)', fontSize: '.88rem', marginBottom: 20 }}>
               O cliente abre o link, vê o resumo do atendimento e assina com o dedo.
@@ -105,7 +106,7 @@ export default function PreencherOSModal({ os, empresaId, slug, onClose, onSaved
               }}
               onClick={enviarWhatsApp}
             >
-              📱 Enviar via WhatsApp
+              <Smartphone size={18} strokeWidth={2} />Enviar via WhatsApp
             </button>
           </div>
         </div>
@@ -118,12 +119,12 @@ export default function PreencherOSModal({ os, empresaId, slug, onClose, onSaved
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box" style={{ maxWidth: 560 }}>
         <div className="modal-header">
-          <h2>✍️ Preencher e Enviar para Assinatura</h2>
+          <h2><PenLine size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Preencher e Enviar para Assinatura</h2>
           <button
             className="btn-sm"
             style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }}
             onClick={onClose}
-          >✕</button>
+          ><X size={16} strokeWidth={2} /></button>
         </div>
 
         <div className="modal-body">
@@ -179,7 +180,7 @@ export default function PreencherOSModal({ os, empresaId, slug, onClose, onSaved
               />
               {!hasSig && (
                 <div className="sig-placeholder">
-                  <span>✍️</span>
+                  <span><PenLine size={22} strokeWidth={2} /></span>
                   <span>Assine com o mouse</span>
                 </div>
               )}
@@ -187,7 +188,7 @@ export default function PreencherOSModal({ os, empresaId, slug, onClose, onSaved
                 <button
                   className="sig-clear-btn"
                   onClick={() => { sigRef.current.clear(); setHasSig(false) }}
-                >✕ Limpar</button>
+                ><X size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Limpar</button>
               )}
             </div>
             {errors.sig && (
@@ -205,7 +206,7 @@ export default function PreencherOSModal({ os, empresaId, slug, onClose, onSaved
             onClick={onClose}
           >Cancelar</button>
           <button className="btn-sm btn-ok" disabled={salvando} onClick={handleSalvar}>
-            {salvando ? '⏳ Salvando...' : '💾 Salvar e Gerar Link'}
+            {salvando ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvar e Gerar Link</>}
           </button>
         </div>
       </div>

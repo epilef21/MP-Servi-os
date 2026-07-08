@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ClipboardList, X, CheckCircle2, AlertTriangle, Search } from 'lucide-react'
 
 // ── Helpers compartilhados ──────────────────────────────────────────────────
 
@@ -482,11 +483,11 @@ export default function ImportarMapfreModal({ onClose, onImportar }) {
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box" style={{ maxWidth: 640 }}>
         <div className="modal-header">
-          <h2>📋 Importar OS por Texto</h2>
+          <h2><ClipboardList size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Importar OS por Texto</h2>
           <button className="btn-sm"
             style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }}
             onClick={onClose}>
-            ✕ Fechar
+            <X size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Fechar
           </button>
         </div>
 
@@ -526,8 +527,8 @@ export default function ImportarMapfreModal({ onClose, onImportar }) {
                 borderRadius: 8, padding: '10px 14px', marginBottom: 16, fontSize: '.85rem',
               }}>
                 {bom
-                  ? `✅ ${camposOk}/${total} campos reconhecidos — ${PORTAIS[portal].label}. Revise e ajuste se necessário.`
-                  : `⚠️ Só ${camposOk}/${total} campos — ${PORTAIS[portal].label}. Preencha os em branco antes de importar.`
+                  ? <><CheckCircle2 size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />{camposOk}/{total} campos reconhecidos — {PORTAIS[portal].label}. Revise e ajuste se necessário.</>
+                  : <><AlertTriangle size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Só {camposOk}/{total} campos — {PORTAIS[portal].label}. Preencha os em branco antes de importar.</>
                 }
               </div>
 
@@ -577,7 +578,7 @@ export default function ImportarMapfreModal({ onClose, onImportar }) {
               </button>
               <button className="btn-primary" onClick={analisar} disabled={!texto.trim()}
                 style={{ padding: '9px 22px', fontSize: '.9rem' }}>
-                🔍 Analisar Texto
+                <Search size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Analisar Texto
               </button>
             </>
           ) : (
@@ -589,7 +590,7 @@ export default function ImportarMapfreModal({ onClose, onImportar }) {
               </button>
               <button className="btn-primary" onClick={() => onImportar(editado)}
                 style={{ padding: '9px 22px', fontSize: '.9rem' }}>
-                📋 Abrir no formulário de OS
+                <ClipboardList size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Abrir no formulário de OS
               </button>
             </>
           )}

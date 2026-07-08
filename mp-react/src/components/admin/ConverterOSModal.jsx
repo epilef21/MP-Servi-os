@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { db, doc, updateDoc, criarOS } from '../../firebase.js'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { fmtDate } from '../../utils/formatters.js'
+import { Rocket, X, PartyPopper, CheckCircle2, Lightbulb, Hourglass } from 'lucide-react'
 
 export default function ConverterOSModal({ orc, onClose, onConverted }) {
   const {
@@ -55,12 +56,12 @@ export default function ConverterOSModal({ orc, onClose, onConverted }) {
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box" style={{ maxWidth:520 }}>
         <div className="modal-header" style={{ background:'#1e7040' }}>
-          <h2>🚀 Converter em OS</h2>
-          <button className="btn-sm" style={{ background:'rgba(255,255,255,.15)', color:'#fff' }} onClick={onClose}>✕</button>
+          <h2><Rocket size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Converter em OS</h2>
+          <button className="btn-sm" style={{ background:'rgba(255,255,255,.15)', color:'#fff' }} onClick={onClose}><X size={16} strokeWidth={2} /></button>
         </div>
         <div className="modal-body">
           <div className="orc-aprovado-banner" style={{ marginBottom:16 }}>
-            <h3>🎉 Orçamento aprovado por {orc.aprovado_por}!</h3>
+            <h3><PartyPopper size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Orçamento aprovado por {orc.aprovado_por}!</h3>
             <p>Assinado em: {fmtDate(orc.aprovado_em)}</p>
           </div>
           <p style={{ fontSize:'.88rem', color:'var(--muted)', marginBottom:16 }}>
@@ -79,7 +80,7 @@ export default function ConverterOSModal({ orc, onClose, onConverted }) {
             ].map((f,i) => (
               <div key={i} style={{ display:'flex', gap:12, padding:'8px 0', borderBottom:'1px solid var(--border)', fontSize:'.88rem' }}>
                 <span style={{ color:'var(--muted)', minWidth:80 }}>{f.l}</span>
-                <span style={{ fontWeight:600 }}>{f.v || '—'} ✅</span>
+                <span style={{ fontWeight:600 }}>{f.v || '—'} <CheckCircle2 size={13} strokeWidth={2} style={{ verticalAlign: '-2px', color: '#1e7040' }} /></span>
               </div>
             ))}
           </div>
@@ -98,14 +99,14 @@ export default function ConverterOSModal({ orc, onClose, onConverted }) {
           )}
 
           <div className="os-callout" style={{ marginTop:12 }}>
-            💡 A OS será criada como "Pendente" e ficará disponível no painel para acompanhamento.
+            <Lightbulb size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />A OS será criada como "Pendente" e ficará disponível no painel para acompanhamento.
           </div>
         </div>
         <div className="modal-footer">
           <button className="btn-sm" style={{ background:'var(--light)', color:'var(--muted)', border:'1px solid var(--border)' }}
             onClick={onClose}>Cancelar</button>
           <button className="btn-primary" onClick={converterEmOS} disabled={saving} style={{ padding:'9px 22px', fontSize:'.9rem' }}>
-            {saving ? '⏳ Criando...' : '🚀 Criar OS Agora'}
+            {saving ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Criando...</> : <><Rocket size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Criar OS Agora</>}
           </button>
         </div>
       </div>

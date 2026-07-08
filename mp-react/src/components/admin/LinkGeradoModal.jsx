@@ -4,6 +4,7 @@
 // ============================================================
 import { useState } from 'react'
 import { copyToClipboard } from '../../utils/clipboard.js'
+import { Link2, X, CheckCircle2, ClipboardList, Send, Lightbulb } from 'lucide-react'
 
 export default function LinkGeradoModal({ data, onClose }) {
   const [copied, setCopied] = useState(false)
@@ -18,8 +19,8 @@ export default function LinkGeradoModal({ data, onClose }) {
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box" style={{ maxWidth: 560 }}>
         <div className="modal-header" style={{ background: '#1e6e3e' }}>
-          <h2>🔗 Link Gerado!</h2>
-          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onClose}>✕</button>
+          <h2><Link2 size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Link Gerado!</h2>
+          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onClose}><X size={16} strokeWidth={2} /></button>
         </div>
         <div className="modal-body">
           <div className="link-info-cards">
@@ -31,15 +32,15 @@ export default function LinkGeradoModal({ data, onClose }) {
           <div className="link-box"><span className="link-text">{data.link}</span></div>
           <div style={{ display: 'flex', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
             <button className={`btn-copy${copied ? ' copied' : ''}`} onClick={() => copyLink(data.link)}>
-              {copied ? '✅ Copiado!' : '📋 Copiar Link'}
+              {copied ? <><CheckCircle2 size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Copiado!</> : <><ClipboardList size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Copiar Link</>}
             </button>
             <a className="btn-whatsapp"
               href={`https://wa.me/?text=${encodeURIComponent(`Olá! Segue o link para preencher o checklist da OS:\n\n🔗 ${data.link}\n\nAbra, confira os dados, preencha o serviço realizado e assine. Obrigado!`)}`}
               target="_blank" rel="noopener noreferrer">
-              📲 Enviar pelo WhatsApp
+              <Send size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Enviar pelo WhatsApp
             </a>
           </div>
-          <div className="link-tip">💡 Quando o técnico abrir esse link, o formulário já estará com os dados do cliente preenchidos. Ele só precisará descrever o serviço realizado e assinar.</div>
+          <div className="link-tip"><Lightbulb size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Quando o técnico abrir esse link, o formulário já estará com os dados do cliente preenchidos. Ele só precisará descrever o serviço realizado e assinar.</div>
         </div>
         <div className="modal-footer">
           <button className="btn-sm btn-view" onClick={onClose}>Fechar</button>

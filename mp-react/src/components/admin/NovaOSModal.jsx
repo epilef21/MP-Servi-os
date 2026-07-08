@@ -114,16 +114,16 @@ export default function NovaOSModal({ prefill, onClose }) {
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box">
         <div className="modal-header">
-          <h2>📞 Nova Ordem de Serviço</h2>
+          <h2><Phone size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Nova Ordem de Serviço</h2>
           <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }}
-            onClick={onClose}>✕ Fechar</button>
+            onClick={onClose}><X size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Fechar</button>
         </div>
         <div className="modal-body">
           <div className="os-callout">
-            📞 Preencha os dados recebidos por telefone. Após salvar, um link pré-preenchido será gerado para enviar ao técnico via WhatsApp.
+            <Phone size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Preencha os dados recebidos por telefone. Após salvar, um link pré-preenchido será gerado para enviar ao técnico via WhatsApp.
           </div>
           <div className="md-section">
-            <h3>📋 Dados do Atendimento</h3>
+            <h3><ClipboardList size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Dados do Atendimento</h3>
             <div className="os-grid">
               <div className="field">
                 <label>Seguradora <span className="req">*</span></label>
@@ -137,17 +137,17 @@ export default function NovaOSModal({ prefill, onClose }) {
                 <input value={osForm.num_assist} onChange={e => setOsField('num_assist', e.target.value)} className={osErrors.num_assist ? 'error' : ''} placeholder="Ex: 2024-00001" />
               </div>
               <div className="field">
-                <label>Data Agendada <span className="req" title="Usado na Agenda Visual">📅</span></label>
+                <label>Data Agendada <span className="req" title="Usado na Agenda Visual"><CalendarDays size={13} strokeWidth={2} style={{ verticalAlign: '-2px' }} /></span></label>
                 <input type="date" value={osForm.data_agendada} onChange={e => setOsField('data_agendada', e.target.value)} />
               </div>
               <div className="field">
                 <label>Faixa de Horário</label>
                 <select value={osForm.faixa_horario} onChange={e => setOsField('faixa_horario', e.target.value)}>
                   <option value="">Selecione...</option>
-                  <option value="manha">🌅 Manhã — 08:00 às 12:00</option>
-                  <option value="tarde">☀️ Tarde — 13:00 às 17:00</option>
-                  <option value="dia_todo">📅 Manhã e Tarde — 08:00 às 17:00</option>
-                  <option value="a_combinar">🤝 A Combinar</option>
+                  <option value="manha">Manhã — 08:00 às 12:00</option>
+                  <option value="tarde">Tarde — 13:00 às 17:00</option>
+                  <option value="dia_todo">Manhã e Tarde — 08:00 às 17:00</option>
+                  <option value="a_combinar">A Combinar</option>
                 </select>
               </div>
               {osForm.faixa_horario && (
@@ -164,7 +164,7 @@ export default function NovaOSModal({ prefill, onClose }) {
           </div>
 
           <div className="md-section">
-            <h3>👤 Dados do Segurado</h3>
+            <h3><User size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Dados do Segurado</h3>
             <div className="os-grid">
               <div className="field">
                 <label>Nome Completo <span className="req">*</span></label>
@@ -201,7 +201,7 @@ export default function NovaOSModal({ prefill, onClose }) {
           </div>
 
           <div className="md-section">
-            <h3>🔧 Serviço</h3>
+            <h3><Wrench size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Serviço</h3>
             <div className="field" style={{ marginBottom: 12 }}>
               <label>Tipo de Serviço <span className="req">*</span></label>
               <input value={osForm.servico} onChange={e => setOsField('servico', e.target.value)} className={osErrors.servico ? 'error' : ''} placeholder="Ex: Reparo hidráulico..." />
@@ -214,7 +214,7 @@ export default function NovaOSModal({ prefill, onClose }) {
 
           {/* Seleção de técnico */}
           <div className="md-section" style={{ marginBottom: 0 }}>
-            <h3>👷 Técnico Responsável</h3>
+            <h3><HardHat size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Técnico Responsável</h3>
             <div className="field">
               <label>Selecionar técnico</label>
               {osTecnicoMode === 'select'
@@ -256,7 +256,7 @@ export default function NovaOSModal({ prefill, onClose }) {
           <button className="btn-sm" style={{ background: 'var(--light)', color: 'var(--muted)', border: '1px solid var(--border)' }}
             onClick={onClose}>Cancelar</button>
           <button className="btn-primary" onClick={saveOs} disabled={savingOs} style={{ padding: '9px 22px', fontSize: '.9rem' }}>
-            {savingOs ? '⏳ Salvando...' : '💾 Salvar e Gerar Link'}
+            {savingOs ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvar e Gerar Link</>}
           </button>
         </div>
       </div>

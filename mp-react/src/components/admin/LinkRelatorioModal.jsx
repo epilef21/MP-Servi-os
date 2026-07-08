@@ -5,6 +5,7 @@
 import { useState } from 'react'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { copyToClipboard } from '../../utils/clipboard.js'
+import { Link2, X, CheckCircle2, ClipboardList, Send } from 'lucide-react'
 
 export default function LinkRelatorioModal({ os, onClose }) {
   const { buildLinkRelatorio } = useAdminContext()
@@ -22,8 +23,8 @@ export default function LinkRelatorioModal({ os, onClose }) {
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box" style={{ maxWidth: 520 }}>
         <div className="modal-header" style={{ background: '#1a5276' }}>
-          <h2>🔗 Link do Relatório</h2>
-          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onClose}>✕</button>
+          <h2><Link2 size={16} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />Link do Relatório</h2>
+          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onClose}><X size={16} strokeWidth={2} /></button>
         </div>
         <div className="modal-body">
           <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginBottom: 10 }}>
@@ -41,7 +42,7 @@ export default function LinkRelatorioModal({ os, onClose }) {
             <button
               className={`btn-copy${copied ? ' copied' : ''}`}
               onClick={copyLinkRel}>
-              {copied ? '✅ Copiado!' : '📋 Copiar Link'}
+              {copied ? <><CheckCircle2 size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Copiado!</> : <><ClipboardList size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Copiar Link</>}
             </button>
             <a className="btn-whatsapp"
               href={`https://wa.me/?text=${encodeURIComponent(
@@ -55,11 +56,11 @@ export default function LinkRelatorioModal({ os, onClose }) {
                 `O relatório contém fotos, checklist e assinaturas do prestador e do segurado.`
               )}`}
               target="_blank" rel="noopener noreferrer">
-              📲 Enviar no WhatsApp
+              <Send size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Enviar no WhatsApp
             </a>
             <button className="btn-sm" style={{ background: '#1a5276', color: '#fff', fontSize: '.85rem', padding: '8px 14px', width: '100%' }}
               onClick={() => window.open(link, '_blank')}>
-              🔗 Abrir Relatório
+              <Link2 size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Abrir Relatório
             </button>
           </div>
         </div>
