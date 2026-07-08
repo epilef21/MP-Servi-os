@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getFunctions, httpsCallable } from 'firebase/functions'
+import { Building2 } from 'lucide-react'
 import {
   db,
   listarTodasEmpresas,
@@ -311,7 +312,7 @@ export default function SuperAdminPage() {
             </div>
           ) : empresasFiltradas.length === 0 ? (
             <div className="empty-state">
-              <div className="e-icon">🏢</div>
+              <div className="e-icon"><Building2 size={40} strokeWidth={2} /></div>
               <p>Nenhuma empresa encontrada.</p>
             </div>
           ) : (

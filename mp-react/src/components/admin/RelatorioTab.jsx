@@ -1,4 +1,8 @@
 import { useState } from 'react'
+import {
+  BarChart3, ClipboardList, Briefcase, Wallet, TrendingUp,
+  Bell, Hourglass, CheckCircle2, Send, Building2, HardHat, Download, X,
+} from 'lucide-react'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { agregarRelatorio, gerarRelatorioMensalPdf } from '../../utils/relatorioMensalPdf.js'
 import { fmtBRL } from '../../utils/formatters.js'
@@ -48,14 +52,14 @@ export default function RelatorioTab() {
           })()}
         </select>
         <button className="btn-primary" onClick={gerarRelatorio} style={{ minWidth: 160 }}>
-          📊 Gerar Relatório
+          <BarChart3 size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Gerar Relatório
         </button>
       </div>
 
       {/* Estado vazio */}
       {!relDados && (
         <div className="empty-state">
-          <div className="e-icon">📊</div>
+          <div className="e-icon"><BarChart3 size={40} strokeWidth={2} /></div>
           <p>Selecione um período e clique em <strong>Gerar Relatório</strong> para ver os dados consolidados.</p>
         </div>
       )}
@@ -65,19 +69,19 @@ export default function RelatorioTab() {
         <>
           <div className="metrics-grid" style={{ marginBottom: 24 }}>
             <div className="metric-card blue">
-              <div className="metric-icon">📋</div>
+              <div className="metric-icon"><ClipboardList size={24} strokeWidth={2} /></div>
               <div className="metric-label">Total de OS</div>
               <div className="metric-value">{relDados.totalOS}</div>
               <div className="metric-sub">no período</div>
             </div>
             <div className="metric-card orange">
-              <div className="metric-icon">💼</div>
+              <div className="metric-icon"><Briefcase size={24} strokeWidth={2} /></div>
               <div className="metric-label">Com Financeiro</div>
               <div className="metric-value">{relDados.osComLucro}</div>
               <div className="metric-sub">OS com dados de lucro</div>
             </div>
             <div className="metric-card green">
-              <div className="metric-icon">💰</div>
+              <div className="metric-icon"><Wallet size={24} strokeWidth={2} /></div>
               <div className="metric-label">Lucro Total</div>
               <div className={`metric-value${relDados.lucroTotal >= 0 ? ' green' : ' red'}`}>
                 {fmtBRL(relDados.lucroTotal)}
@@ -85,7 +89,7 @@ export default function RelatorioTab() {
               <div className="metric-sub">no período</div>
             </div>
             <div className="metric-card yellow">
-              <div className="metric-icon">📈</div>
+              <div className="metric-icon"><TrendingUp size={24} strokeWidth={2} /></div>
               <div className="metric-label">Média por OS</div>
               <div className="metric-value">{fmtBRL(relDados.mediaPorOS)}</div>
               <div className="metric-sub">OS com financeiro</div>
@@ -94,7 +98,7 @@ export default function RelatorioTab() {
 
           {/* Por status */}
           <div style={{ marginBottom: 24 }}>
-            <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary)', marginBottom: 10 }}>📋 OS por Status</div>
+            <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary)', marginBottom: 10 }}><ClipboardList size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />OS por Status</div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.88rem' }}>
               <thead>
                 <tr style={{ background: 'var(--primary)', color: '#fff' }}>
@@ -106,7 +110,12 @@ export default function RelatorioTab() {
               <tbody>
                 {Object.entries(relDados.porStatus).map(([status, count], idx) => {
                   const pct    = relDados.totalOS > 0 ? ((count / relDados.totalOS) * 100).toFixed(1) : '0.0'
-                  const labels = { aguardando_tecnico: '🔔 Aguardando Técnico', pendente: '⏳ Pendente', processado: '✅ Processado', enviado: '📤 Enviado' }
+                  const labels = {
+                    aguardando_tecnico: <><Bell size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Aguardando Técnico</>,
+                    pendente:           <><Hourglass size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Pendente</>,
+                    processado:         <><CheckCircle2 size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Processado</>,
+                    enviado:            <><Send size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Enviado</>,
+                  }
                   return (
                     <tr key={status} style={{ background: idx % 2 === 0 ? 'var(--light)' : '#fff', borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: '7px 12px' }}>{labels[status] || status}</td>
@@ -121,7 +130,7 @@ export default function RelatorioTab() {
 
           {/* Por seguradora */}
           <div style={{ marginBottom: 24 }}>
-            <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary)', marginBottom: 10 }}>🏢 Por Seguradora</div>
+            <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary)', marginBottom: 10 }}><Building2 size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Por Seguradora</div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.88rem' }}>
               <thead>
                 <tr style={{ background: 'var(--primary)', color: '#fff' }}>
@@ -146,7 +155,7 @@ export default function RelatorioTab() {
 
           {/* Por técnico */}
           <div style={{ marginBottom: 24 }}>
-            <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary)', marginBottom: 10 }}>👷 Por Técnico</div>
+            <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--primary)', marginBottom: 10 }}><HardHat size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Por Técnico</div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.88rem' }}>
               <thead>
                 <tr style={{ background: 'var(--primary)', color: '#fff' }}>
@@ -174,10 +183,10 @@ export default function RelatorioTab() {
               className="btn-primary"
               onClick={() => gerarRelatorioMensalPdf(relDados, relMes, relAno, empresa?.nome)}
             >
-              ⬇️ Baixar PDF
+              <Download size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Baixar PDF
             </button>
             <button className="btn-sm btn-view" onClick={() => setRelDados(null)}>
-              ✕ Limpar
+              <X size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Limpar
             </button>
           </div>
         </>

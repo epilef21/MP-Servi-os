@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { HardHat, Pencil, X, Hourglass, Save } from 'lucide-react'
+import { HardHat, Pencil, X, Hourglass, Save, CheckCircle2, Ban } from 'lucide-react'
 import {
   db, updateDoc, doc, collection, addDoc, serverTimestamp,
 } from '../../firebase.js'
@@ -114,7 +114,7 @@ export default function TecnicosTab() {
 
         {!loadingTecnicos && tecnicos.length === 0 && (
           <div className="empty-state" style={{ paddingTop: 60 }}>
-            <div className="e-icon">👷</div>
+            <div className="e-icon"><HardHat size={40} strokeWidth={2} /></div>
             <p style={{ fontWeight: 600, fontSize: '1rem', marginBottom: 6 }}>Nenhum técnico cadastrado</p>
             <p style={{ fontSize: '.85rem' }}>Adicione seu primeiro técnico!</p>
             <button className="btn-new-os" style={{ marginTop: 16 }} onClick={() => openModal()}>
@@ -134,11 +134,13 @@ export default function TecnicosTab() {
                 <div className="tecnico-tel">{tec.telefone}</div>
                 {tec.especialidade && <div className="tecnico-esp">{tec.especialidade}</div>}
                 <span className={`tecnico-badge ${tec.ativo !== false ? 'ativo' : 'inativo'}`}>
-                  {tec.ativo !== false ? '🟢 Ativo' : '⚫ Inativo'}
+                  {tec.ativo !== false
+                    ? <><CheckCircle2 size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Ativo</>
+                    : <><Ban size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Inativo</>}
                 </span>
                 <div className="tecnico-card-actions">
                   <button className="btn-sm btn-view" onClick={() => openModal(tec)}>
-                    ✏️ Editar
+                    <Pencil size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Editar
                   </button>
                   <button
                     className="btn-sm"
@@ -162,9 +164,9 @@ export default function TecnicosTab() {
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowModal(false)}>
           <div className="modal-box" style={{ maxWidth: 520 }}>
             <div className="modal-header">
-              <h2>{editando ? '✏️ Editar Técnico' : '👷 Novo Técnico'}</h2>
+              <h2>{editando ? <><Pencil size={18} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Editar Técnico</> : <><HardHat size={18} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Novo Técnico</>}</h2>
               <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }}
-                onClick={() => setShowModal(false)}>✕</button>
+                onClick={() => setShowModal(false)}><X size={14} strokeWidth={2} /></button>
             </div>
 
             <div className="modal-body">
@@ -241,7 +243,9 @@ export default function TecnicosTab() {
                       <span className="toggle-slider" />
                     </label>
                     <span className="toggle-label">
-                      {formData.ativo ? '🟢 Ativo' : '⚫ Inativo'}
+                      {formData.ativo
+                        ? <><CheckCircle2 size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Ativo</>
+                        : <><Ban size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Inativo</>}
                     </span>
                   </div>
                 </div>
@@ -262,7 +266,9 @@ export default function TecnicosTab() {
                 disabled={saving}
                 style={{ padding: '9px 22px', fontSize: '.9rem' }}
               >
-                {saving ? '⏳ Salvando...' : '💾 Salvar'}
+                {saving
+                  ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvando...</>
+                  : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvar</>}
               </button>
             </div>
           </div>

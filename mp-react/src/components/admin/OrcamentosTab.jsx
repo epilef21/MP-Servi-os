@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { fmtBRL, fmtDate } from '../../utils/formatters.js'
 import {
-  Search, RefreshCw, FileText, CalendarDays, HardHat, Link2, Pencil, Eye, Send, ClipboardList, Rocket, Trash2,
+  RefreshCw, FileText, CalendarDays, HardHat, Link2, Pencil, Eye, Send, ClipboardList, Rocket, Trash2,
 } from 'lucide-react'
 
 export const STATUS_ORC_META = {
@@ -52,25 +52,25 @@ export default function OrcamentosTab() {
       <div className="filter-bar">
         <input
           className="filter-input flex-1"
-          placeholder="🔍 Buscar por nome, número..."
+          placeholder="Buscar por nome, número..."
           value={orcBusca}
           onChange={e => setOrcBusca(e.target.value)}
         />
         <select className="filter-input" value={orcFiltTipo} onChange={e => setOrcFiltTipo(e.target.value)}>
           <option value="">Todos os tipos</option>
-          <option value="linha_branca">🏠 Linha Branca</option>
-          <option value="emergencial">⚡ Emergencial</option>
-          <option value="particular">👤 Particular</option>
+          <option value="linha_branca">Linha Branca</option>
+          <option value="emergencial">Emergencial</option>
+          <option value="particular">Particular</option>
         </select>
         <select className="filter-input" value={orcFiltStatus} onChange={e => setOrcFiltStatus(e.target.value)}>
           <option value="">Todos os status</option>
-          <option value="aguardando_tecnico">🟠 Aguardando</option>
-          <option value="em_revisao">🟡 Em Revisão</option>
-          <option value="enviado_cliente">🔵 Enviado ao Cliente</option>
-          <option value="enviado_seguradora">🟣 Enviado à Seg.</option>
-          <option value="aprovado">🟢 Aprovado</option>
-          <option value="reprovado">🔴 Reprovado</option>
-          <option value="executado">⚫ Executado</option>
+          <option value="aguardando_tecnico">Aguardando</option>
+          <option value="em_revisao">Em Revisão</option>
+          <option value="enviado_cliente">Enviado ao Cliente</option>
+          <option value="enviado_seguradora">Enviado à Seg.</option>
+          <option value="aprovado">Aprovado</option>
+          <option value="reprovado">Reprovado</option>
+          <option value="executado">Executado</option>
         </select>
         <button
           className="btn-sm btn-view"
@@ -78,7 +78,7 @@ export default function OrcamentosTab() {
           disabled={loadingOrc}
           style={{ whiteSpace: 'nowrap' }}
         >
-          🔄 Atualizar
+          <RefreshCw size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Atualizar
         </button>
       </div>
 
@@ -88,7 +88,7 @@ export default function OrcamentosTab() {
 
       {!loadingOrc && orcFiltered.length === 0 && (
         <div className="empty-state">
-          <div className="e-icon">📄</div>
+          <div className="e-icon"><FileText size={40} strokeWidth={2} /></div>
           <p style={{ fontWeight: 600, fontSize: '1rem', marginBottom: 6 }}>
             {orcamentos.length === 0 ? 'Nenhum orçamento criado' : 'Nenhum orçamento encontrado'}
           </p>
@@ -119,42 +119,44 @@ export default function OrcamentosTab() {
                     : orc.cidade || ''}
                 </div>
                 <div className="orc-card-meta">
-                  <div className="orc-card-meta-item">📅 {fmtDate(orc.criado_em)}</div>
+                  <div className="orc-card-meta-item"><CalendarDays size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />{fmtDate(orc.criado_em)}</div>
                   {totalMostrar !== null && <div className="orc-card-meta-item"><strong>{fmtBRL(totalMostrar)}</strong></div>}
-                  {orc.tecnico_nome && <div className="orc-card-meta-item">👷 {orc.tecnico_nome}</div>}
+                  {orc.tecnico_nome && <div className="orc-card-meta-item"><HardHat size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />{orc.tecnico_nome}</div>}
                 </div>
                 {orc.status === 'aguardando_tecnico' && (
                   <div style={{ marginBottom: 6 }}>
-                    <span className="link-disponivel-badge">🔗 Link disponível</span>
+                    <span className="link-disponivel-badge"><Link2 size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Link disponível</span>
                   </div>
                 )}
                 <div className="orc-card-actions">
                   <button className="btn-sm btn-view" onClick={() => openRevisarOrcamento(orc)}>
-                    {orc.status === 'em_revisao' ? '✏️ Revisar' : '👁️ Ver'}
+                    {orc.status === 'em_revisao'
+                      ? <><Pencil size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Revisar</>
+                      : <><Eye size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Ver</>}
                   </button>
                   {orc.status === 'aguardando_tecnico' && (
                     <>
                       <a className="btn-sm btn-ok" style={{ textDecoration: 'none' }} target="_blank" rel="noopener noreferrer"
                         href={`https://wa.me/${orc.tecnico_tel ? '55'+orc.tecnico_tel.replace(/\D/g,'') : ''}?text=${encodeURIComponent(`Olá ${orc.tecnico_nome||'Técnico'}! 👷\nNovo orçamento para avaliar no local:\n🔗 ${buildLinkTecnicoOrc(orc.id)}`)}`}>
-                        📲 Enviar
+                        <Send size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Enviar
                       </a>
                       <button className="btn-sm" style={{ background: 'var(--light)', color: 'var(--primary)', border: '1px solid var(--border)' }}
                         onClick={() => copyOrcLink(buildLinkTecnicoOrc(orc.id))}>
-                        📋 Copiar
+                        <ClipboardList size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Copiar
                       </button>
                     </>
                   )}
                   {(orc.total_cliente > 0 || (orc.status === 'aprovado' && orc.total_geral > 0)) && (
-                    <button className="btn-sm btn-pdf" onClick={() => handlePDFCliente(orc)}>📄 PDF</button>
+                    <button className="btn-sm btn-pdf" onClick={() => handlePDFCliente(orc)}><FileText size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />PDF</button>
                   )}
                   {orc.total_seguradora > 0 && (
-                    <button className="btn-sm btn-pdf" style={{ background: '#6c3483' }} onClick={() => handlePDFSeguradora(orc)}>📋 Seg.</button>
+                    <button className="btn-sm btn-pdf" style={{ background: '#6c3483' }} onClick={() => handlePDFSeguradora(orc)}><ClipboardList size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Seg.</button>
                   )}
                   {orc.status === 'aprovado' && !orc.os_vinculada && (
-                    <button className="btn-sm btn-ok" onClick={() => abrirConverterOS(orc)}>🚀 OS</button>
+                    <button className="btn-sm btn-ok" onClick={() => abrirConverterOS(orc)}><Rocket size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />OS</button>
                   )}
                   <button className="btn-sm" style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', marginLeft: 'auto' }}
-                    title="Excluir orçamento" onClick={() => excluirOrcamento(orc)}>🗑️</button>
+                    title="Excluir orçamento" onClick={() => excluirOrcamento(orc)}><Trash2 size={14} strokeWidth={2} /></button>
                 </div>
               </div>
             )

@@ -3,6 +3,10 @@
 // Admin revisa itens, divisão seguradora/cliente e envia ao cliente.
 // ============================================================
 import { useState } from 'react'
+import {
+  Pencil, Eye, Rocket, FileText, ClipboardList, X, HardHat, CheckCircle2,
+  PartyPopper, User, Search, Wallet, StickyNote, Hourglass, Save, Send, Printer,
+} from 'lucide-react'
 import { db, doc, updateDoc } from '../../firebase.js'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { STATUS_ORC_META } from './OrcamentosTab.jsx'
@@ -110,21 +114,21 @@ export default function RevisarOrcamentoModal({ orc: initialOrc, onClose }) {
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box" style={{ maxWidth:760 }}>
         <div className="modal-header">
-          <h2>{orc.status === 'em_revisao' ? '✏️ Revisão' : '👁️ Orçamento'} — {orc.numero}</h2>
+          <h2>{orc.status === 'em_revisao' ? <><Pencil size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Revisão</> : <><Eye size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Orçamento</>} — {orc.numero}</h2>
           <div className="modal-header-btns">
             <span className={`badge ${STATUS_ORC_META[orc.status]?.cls || 'orc-aguardando'}`}>
               {STATUS_ORC_META[orc.status]?.label || ''}
             </span>
             {orc.status === 'aprovado' && !orc.os_vinculada && (
-              <button className="btn-sm btn-ok" onClick={() => abrirConverterOS(orc)}>🚀 Converter em OS</button>
+              <button className="btn-sm btn-ok" onClick={() => abrirConverterOS(orc)}><Rocket size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Converter em OS</button>
             )}
             {(orc.status === 'aprovado' || orc.status === 'executado') && (
-              <button className="btn-sm btn-pdf" onClick={() => handlePDFCliente(orc)}>📄 PDF Cliente</button>
+              <button className="btn-sm btn-pdf" onClick={() => handlePDFCliente(orc)}><FileText size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />PDF Cliente</button>
             )}
             {orc.total_seguradora > 0 && (
-              <button className="btn-sm btn-pdf" style={{ background:'#6c3483' }} onClick={() => handlePDFSeguradora(orc)}>📋 PDF Seg.</button>
+              <button className="btn-sm btn-pdf" style={{ background:'#6c3483' }} onClick={() => handlePDFSeguradora(orc)}><ClipboardList size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />PDF Seg.</button>
             )}
-            <button className="btn-sm" style={{ background:'rgba(255,255,255,.15)', color:'#fff' }} onClick={onClose}>✕</button>
+            <button className="btn-sm" style={{ background:'rgba(255,255,255,.15)', color:'#fff' }} onClick={onClose}><X size={14} strokeWidth={2} /></button>
           </div>
         </div>
         <div className="modal-body">
@@ -132,16 +136,18 @@ export default function RevisarOrcamentoModal({ orc: initialOrc, onClose }) {
           {/* Banner aprovado */}
           {orc.status === 'aguardando_tecnico' && (
             <div className="link-tecnico-box">
-              <div className="ltb-title">👷 Link do Técnico</div>
+              <div className="ltb-title"><HardHat size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Link do Técnico</div>
               <div className="ltb-url">{buildLinkTecnicoOrc(orc.id)}</div>
               <div className="ltb-btns">
                 <button className="btn-copy" onClick={() => copyOrcLink(buildLinkTecnicoOrc(orc.id))}>
-                  {copied ? '✅ Copiado!' : '📋 Copiar link'}
+                  {copied
+                    ? <><CheckCircle2 size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Copiado!</>
+                    : <><ClipboardList size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Copiar link</>}
                 </button>
                 {orc.tecnico_tel && (
                   <a className="btn-whatsapp" target="_blank" rel="noopener noreferrer"
                     href={`https://wa.me/55${orc.tecnico_tel.replace(/\D/g,'')}?text=${encodeURIComponent(`Olá ${orc.tecnico_nome||'Técnico'}! 👷\nNovo orçamento para avaliar no local:\n🔗 ${buildLinkTecnicoOrc(orc.id)}`)}`}>
-                    📲 WhatsApp
+                    <Send size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />WhatsApp
                   </a>
                 )}
               </div>
@@ -150,14 +156,14 @@ export default function RevisarOrcamentoModal({ orc: initialOrc, onClose }) {
 
           {orc.status === 'aprovado' && (
             <div className="orc-aprovado-banner">
-              <h3>🎉 Aprovado por {orc.aprovado_por}!</h3>
+              <h3><PartyPopper size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Aprovado por {orc.aprovado_por}!</h3>
               <p>Assinado em: {fmtDate(orc.aprovado_em)}</p>
             </div>
           )}
 
           {/* Dados do cliente */}
           <div className="md-section">
-            <h3>👤 Cliente</h3>
+            <h3><User size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Cliente</h3>
             <div className="md-grid">
               <div className="md-field"><label>Nome</label><p>{orc.nome_cliente || '—'}</p></div>
               <div className="md-field"><label>Telefone</label><p>{orc.tel_cliente || '—'}</p></div>
@@ -169,14 +175,14 @@ export default function RevisarOrcamentoModal({ orc: initialOrc, onClose }) {
           {/* Diagnóstico do técnico */}
           {orc.diagnostico && (
             <div className="md-section">
-              <h3>🔍 Diagnóstico do Técnico</h3>
+              <h3><Search size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Diagnóstico do Técnico</h3>
               <div className="md-text">{orc.diagnostico}</div>
             </div>
           )}
 
           {/* Itens (editável se em_revisao) */}
           <div className="md-section">
-            <h3>📋 Itens</h3>
+            <h3><ClipboardList size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Itens</h3>
             <div style={{ overflowX:'auto' }}>
               <table className="itens-table">
                 <thead>
@@ -208,7 +214,7 @@ export default function RevisarOrcamentoModal({ orc: initialOrc, onClose }) {
                       </td>
                       <td style={{ fontWeight:700 }}>{fmtBRL(it.valor_total || (parseFloat(it.valor_unit)||0) * (parseInt(it.quantidade)||1))}</td>
                       {orc.status === 'em_revisao' && (
-                        <td><button className="btn-remove-item" onClick={() => removeItemRevisar(it.id)}>✕</button></td>
+                        <td><button className="btn-remove-item" onClick={() => removeItemRevisar(it.id)}><X size={13} strokeWidth={2} /></button></td>
                       )}
                     </tr>
                   ))}
@@ -228,7 +234,7 @@ export default function RevisarOrcamentoModal({ orc: initialOrc, onClose }) {
           {/* Divisão seguradora/cliente (se cenario != particular) */}
           {orc.status === 'em_revisao' && orc.cenario && orc.cenario !== 'particular' && revisarItens.length > 0 && (
             <div className="md-section">
-              <h3>💰 Divisão de Responsabilidade</h3>
+              <h3><Wallet size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Divisão de Responsabilidade</h3>
               <div style={{ overflowX:'auto' }}>
                 <table className="divisao-table">
                   <thead>
@@ -280,7 +286,7 @@ export default function RevisarOrcamentoModal({ orc: initialOrc, onClose }) {
 
           {/* Condições */}
           <div className="md-section">
-            <h3>📋 Condições</h3>
+            <h3><ClipboardList size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Condições</h3>
             <div className="md-grid">
               <div className="md-field"><label>Garantia</label><p>{orc.garantia || '—'}</p></div>
               <div className="md-field"><label>Prazo</label><p>{orc.prazo_execucao || '—'}</p></div>
@@ -292,7 +298,7 @@ export default function RevisarOrcamentoModal({ orc: initialOrc, onClose }) {
           {/* Nota de garantia (editável) */}
           {orc.status === 'em_revisao' && (
             <div className="md-section">
-              <h3>📝 Nota de Garantia</h3>
+              <h3><StickyNote size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Nota de Garantia</h3>
               <div className="field">
                 <label>Texto que aparecerá no PDF para o cliente</label>
                 <textarea rows={3} value={orcGarantiaObs} onChange={e => setOrcGarantiaObs(e.target.value)}
@@ -308,13 +314,15 @@ export default function RevisarOrcamentoModal({ orc: initialOrc, onClose }) {
           {orc.status === 'em_revisao' && (
             <>
               <button className="btn-sm btn-view" onClick={saveRevisarOrcamento} disabled={savingRevisar}>
-                {savingRevisar ? '⏳...' : '💾 Salvar'}
+                {savingRevisar
+                  ? <Hourglass size={14} strokeWidth={2} />
+                  : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Salvar</>}
               </button>
               <button className="btn-sm btn-ok" onClick={enviarLinkCliente}>
-                📲 Enviar ao Cliente
+                <Send size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Enviar ao Cliente
               </button>
               <button className="btn-sm btn-pdf" style={{ background:'#6c3483' }} onClick={() => handlePDFSeguradora(orc)}>
-                🖨️ PDF Seguradora
+                <Printer size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />PDF Seguradora
               </button>
             </>
           )}

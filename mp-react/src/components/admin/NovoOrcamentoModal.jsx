@@ -4,6 +4,9 @@
 // ============================================================
 import { useState } from 'react'
 import {
+  FileText, X, Check, Home, Zap, User, Info, HardHat, Lightbulb, Hourglass, Save,
+} from 'lucide-react'
+import {
   db, collection, addDoc, getDocs, query, orderBy, limit, serverTimestamp,
 } from '../../firebase.js'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
@@ -141,8 +144,8 @@ export default function NovoOrcamentoModal({ onClose, onCreated }) {
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box" style={{ maxWidth: 680 }}>
         <div className="modal-header">
-          <h2>📄 Novo Orçamento</h2>
-          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onClose}>✕</button>
+          <h2><FileText size={18} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Novo Orçamento</h2>
+          <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onClose}><X size={14} strokeWidth={2} /></button>
         </div>
         <div className="modal-body">
 
@@ -150,7 +153,7 @@ export default function NovoOrcamentoModal({ onClose, onCreated }) {
           <div className="etapas-nav">
             {['Tipo', 'Cliente', 'Condições'].map((lbl, idx) => (
               <div key={idx} className={`etapa-step ${orcEtapa === idx+1 ? 'ativa' : orcEtapa > idx+1 ? 'concluida' : ''}`}>
-                {orcEtapa > idx+1 ? '✓ ' : `${idx+1}. `}{lbl}
+                {orcEtapa > idx+1 ? <Check size={13} strokeWidth={2.5} style={{ verticalAlign: '-2px', marginRight: 4 }} /> : `${idx+1}. `}{lbl}
               </div>
             ))}
           </div>
@@ -161,16 +164,16 @@ export default function NovoOrcamentoModal({ onClose, onCreated }) {
               <p style={{ fontSize:'.82rem', color:'var(--muted)', marginBottom:14 }}>Selecione o tipo de atendimento:</p>
               <div className="tipo-selector">
                 {[
-                  { v:'linha_branca', icon:'🏠', label:'Linha Branca / Marrom' },
-                  { v:'emergencial',  icon:'⚡', label:'Emergencial'           },
-                  { v:'particular',   icon:'👤', label:'Particular'            },
+                  { v:'linha_branca', icon:Home, label:'Linha Branca / Marrom' },
+                  { v:'emergencial',  icon:Zap,  label:'Emergencial'           },
+                  { v:'particular',   icon:User, label:'Particular'            },
                 ].map(op => (
                   <div
                     key={op.v}
                     className={`tipo-card${orcForm.tipo === op.v ? ' selected' : ''}`}
                     onClick={() => { setOrcForm(p => ({ ...p, tipo: op.v, cenario: op.v === 'particular' ? 'particular' : '' })); setOrcErrors(p => ({ ...p, tipo: false })) }}
                   >
-                    <div className="tipo-icon">{op.icon}</div>
+                    <div className="tipo-icon"><op.icon size={22} strokeWidth={2} /></div>
                     <div className="tipo-label">{op.label}</div>
                   </div>
                 ))}
@@ -262,7 +265,7 @@ export default function NovoOrcamentoModal({ onClose, onCreated }) {
                     </div>
                   </div>
                   <div className="info-tecnico-note">
-                    ℹ️ Marca, modelo, voltagem e número de série serão preenchidos pelo técnico no local.
+                    <Info size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Marca, modelo, voltagem e número de série serão preenchidos pelo técnico no local.
                   </div>
                 </>
               )}
@@ -308,11 +311,11 @@ export default function NovoOrcamentoModal({ onClose, onCreated }) {
                 </div>
               </div>
               <div className="info-tecnico-note" style={{ marginTop:12 }}>
-                ℹ️ Prazo de execução e forma de pagamento serão definidos pelo técnico no local.
+                <Info size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Prazo de execução e forma de pagamento serão definidos pelo técnico no local.
               </div>
 
               <div className="md-section" style={{ marginTop:16 }}>
-                <h3>👷 Técnico Responsável</h3>
+                <h3><HardHat size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Técnico Responsável</h3>
                 <div className="field">
                   <label>Selecionar técnico (opcional)</label>
                   <select value={orcForm.tecnico_id} onChange={e => setOrcForm(p => ({ ...p, tecnico_id: e.target.value }))}>
@@ -321,7 +324,7 @@ export default function NovoOrcamentoModal({ onClose, onCreated }) {
                   </select>
                 </div>
                 <p style={{ fontSize:'.8rem', color:'var(--muted)', marginTop:8 }}>
-                  💡 Ao salvar, um link será gerado para o técnico preencher o diagnóstico e os valores no local.
+                  <Lightbulb size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Ao salvar, um link será gerado para o técnico preencher o diagnóstico e os valores no local.
                 </p>
               </div>
             </>
@@ -355,7 +358,9 @@ export default function NovoOrcamentoModal({ onClose, onCreated }) {
             )
             : (
               <button className="btn-primary" onClick={saveNovoOrcamento} disabled={savingOrc} style={{ padding:'9px 22px', fontSize:'.9rem' }}>
-                {savingOrc ? '⏳ Salvando...' : '💾 Criar Orçamento'}
+                {savingOrc
+                  ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Salvando...</>
+                  : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Criar Orçamento</>}
               </button>
             )
           }
