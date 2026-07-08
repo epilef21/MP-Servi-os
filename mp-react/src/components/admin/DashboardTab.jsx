@@ -6,6 +6,10 @@ import {
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { PLANOS } from '../../firebase.js'
 import { getLucro, fmtBRL, fmtDate } from '../../utils/formatters.js'
+import {
+  ClipboardList, CalendarDays, Hourglass, Wallet, TrendingUp, Clock,
+  PieChart as PieChartIcon, Package, Tag, AlertTriangle, Ban,
+} from 'lucide-react'
 
 const MESES_ABREV = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 
@@ -115,7 +119,7 @@ export default function DashboardTab() {
     })
     return Object.entries(counts)
       .filter(([, v]) => v > 0)
-      .map(([key, value]) => ({ name: badgeLabel(key).replace(/\S+ /, ''), value, color: PIE_COLORS[key] }))
+      .map(([key, value]) => ({ name: badgeLabel(key), value, color: PIE_COLORS[key] }))
   }, [reports])
 
   // Enquanto as OS não chegaram do Firestore, mostrar carregamento —
@@ -135,25 +139,25 @@ export default function DashboardTab() {
     <div className="tab-content">
       <div className="metrics-grid">
         <div className="metric-card blue">
-          <div className="metric-icon">📋</div>
+          <div className="metric-icon"><ClipboardList size={24} strokeWidth={2} /></div>
           <div className="metric-label">Total do Mês</div>
           <div className="metric-value">{stats.totalMesCount}</div>
           <div className="metric-sub">{stats.nomeMes}</div>
         </div>
         <div className="metric-card orange">
-          <div className="metric-icon">📅</div>
+          <div className="metric-icon"><CalendarDays size={24} strokeWidth={2} /></div>
           <div className="metric-label">Hoje</div>
           <div className="metric-value">{stats.hoje}</div>
           <div className="metric-sub">registradas hoje</div>
         </div>
         <div className="metric-card yellow">
-          <div className="metric-icon">⏳</div>
+          <div className="metric-icon"><Hourglass size={24} strokeWidth={2} /></div>
           <div className="metric-label">Pendentes</div>
           <div className="metric-value">{stats.pendentes}</div>
           <div className="metric-sub">aguardando revisão</div>
         </div>
         <div className="metric-card green">
-          <div className="metric-icon">💰</div>
+          <div className="metric-icon"><Wallet size={24} strokeWidth={2} /></div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div className="metric-label">Lucro do Mês</div>
             <input
@@ -172,7 +176,7 @@ export default function DashboardTab() {
 
       <div className="dashboard-grid">
         <div className="chart-card">
-          <div className="chart-card-title">📈 Atividade dos Últimos 6 Meses</div>
+          <div className="chart-card-title"><TrendingUp size={19} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Atividade dos Últimos 6 Meses</div>
           {reports.length === 0
             ? <div className="chart-empty">Nenhuma OS registrada ainda.</div>
             : (
@@ -192,7 +196,7 @@ export default function DashboardTab() {
         </div>
 
         <div className="chart-card">
-          <div className="chart-card-title">🕐 Últimas OS</div>
+          <div className="chart-card-title"><Clock size={19} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Últimas OS</div>
           {reports.length === 0
             ? <div className="chart-empty">Nenhuma OS ainda.</div>
             : (
@@ -214,7 +218,7 @@ export default function DashboardTab() {
 
       <div className="dashboard-bottom">
         <div className="chart-card">
-          <div className="chart-card-title">🍩 Distribuição por Status</div>
+          <div className="chart-card-title"><PieChartIcon size={19} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Distribuição por Status</div>
           {pieData.length === 0
             ? <div className="chart-empty">Sem dados.</div>
             : (
@@ -242,11 +246,11 @@ export default function DashboardTab() {
         </div>
 
         <div className="chart-card">
-          <div className="chart-card-title">📦 Plano Atual</div>
+          <div className="chart-card-title"><Package size={19} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Plano Atual</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <span className="plan-badge" style={{ fontSize: '.9rem', padding: '6px 16px' }}>
-                🏷️ {planoAtual.charAt(0).toUpperCase() + planoAtual.slice(1)}
+                <Tag size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />{planoAtual.charAt(0).toUpperCase() + planoAtual.slice(1)}
               </span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -273,12 +277,12 @@ export default function DashboardTab() {
             )}
             {limite.aviso && (
               <div style={{ background: '#fff8ec', borderRadius: 8, padding: '10px 14px', fontSize: '.8rem', color: 'var(--warn-text)', fontWeight: 600 }}>
-                ⚠️ {limite.restantes} OS restantes no plano
+                <AlertTriangle size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />{limite.restantes} OS restantes no plano
               </div>
             )}
             {limite.bloqueado && (
               <div style={{ background: '#fff5f5', borderRadius: 8, padding: '10px 14px', fontSize: '.8rem', color: 'var(--danger)', fontWeight: 600 }}>
-                🚫 Limite atingido — entre em contato para upgrade
+                <Ban size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Limite atingido — entre em contato para upgrade
               </div>
             )}
           </div>

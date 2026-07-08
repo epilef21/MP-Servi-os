@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { HardHat, Pencil, X, Hourglass, Save } from 'lucide-react'
 import {
   db, updateDoc, doc, collection, addDoc, serverTimestamp,
 } from '../../firebase.js'
@@ -95,7 +96,7 @@ export default function TecnicosTab() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div>
             <h2 style={{ fontFamily: 'Barlow Condensed,sans-serif', fontSize: '1.4rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '.5px' }}>
-              👷 Técnicos da Equipe
+              <HardHat size={20} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Técnicos da Equipe
             </h2>
             <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: 2 }}>{nomeEmpresa}</p>
           </div>

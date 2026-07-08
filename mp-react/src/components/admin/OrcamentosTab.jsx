@@ -1,16 +1,19 @@
 import { useState, useMemo } from 'react'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { fmtBRL, fmtDate } from '../../utils/formatters.js'
+import {
+  Search, RefreshCw, FileText, CalendarDays, HardHat, Link2, Pencil, Eye, Send, ClipboardList, Rocket, Trash2,
+} from 'lucide-react'
 
 export const STATUS_ORC_META = {
-  aguardando_tecnico: { label: '🟠 Aguardando',        cls: 'orc-aguardando' },
-  em_revisao:         { label: '🟡 Em Revisão',         cls: 'orc-revisao'    },
-  enviado_cliente:    { label: '🔵 Enviado ao Cliente',  cls: 'orc-enviado-c'  },
-  enviado_seguradora: { label: '🟣 Enviado à Seg.',      cls: 'orc-enviado-s'  },
-  aprovado:           { label: '🟢 Aprovado',            cls: 'orc-aprovado'   },
-  reprovado:          { label: '🔴 Reprovado',           cls: 'orc-reprovado'  },
-  executado:          { label: '⚫ Executado',            cls: 'orc-executado'  },
-  cancelado:          { label: '⚫ Cancelado',            cls: 'orc-cancelado'  },
+  aguardando_tecnico: { label: 'Aguardando',        cls: 'orc-aguardando' },
+  em_revisao:         { label: 'Em Revisão',         cls: 'orc-revisao'    },
+  enviado_cliente:    { label: 'Enviado ao Cliente',  cls: 'orc-enviado-c'  },
+  enviado_seguradora: { label: 'Enviado à Seg.',      cls: 'orc-enviado-s'  },
+  aprovado:           { label: 'Aprovado',            cls: 'orc-aprovado'   },
+  reprovado:          { label: 'Reprovado',           cls: 'orc-reprovado'  },
+  executado:          { label: 'Executado',            cls: 'orc-executado'  },
+  cancelado:          { label: 'Cancelado',            cls: 'orc-cancelado'  },
 }
 
 function orcCardCls(status) {

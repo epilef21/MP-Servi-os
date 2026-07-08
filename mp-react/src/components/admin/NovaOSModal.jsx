@@ -3,6 +3,7 @@
 // Formulário preenchido por telefone; gera link para o técnico.
 // ============================================================
 import { useState, useRef } from 'react'
+import { Phone, X, ClipboardList, CalendarDays, User, Wrench, HardHat, Hourglass, Save } from 'lucide-react'
 import { criarOS } from '../../firebase.js'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 
