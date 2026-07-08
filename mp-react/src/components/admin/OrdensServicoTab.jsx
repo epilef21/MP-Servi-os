@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { getLucro, fmtBRL, fmtDate } from '../../utils/formatters.js'
+import {
+  X, AlertTriangle, Inbox, Wrench, CalendarDays, HardHat, Wallet, Link2, ChevronDown, Check,
+} from 'lucide-react'
 
 import { badgeLabel, badgeCls } from './statusMeta.js'
 
@@ -38,21 +41,21 @@ export default function OrdensServicoTab() {
     <div className="tab-content">
       <div className="filter-bar" style={{ marginBottom: 20 }}>
         <span className="filter-label">Filtrar:</span>
-        <input className="filter-input flex-1" placeholder="🔍 Segurado, seguradora, cidade..."
+        <input className="filter-input flex-1" placeholder="Segurado, seguradora, cidade..."
           value={busca} onChange={e => mudarFiltro(setBusca, e.target.value)} />
         <select className="filter-input" value={filtStatus} onChange={e => mudarFiltro(setFiltStatus, e.target.value)}>
           <option value="">Todos os status</option>
-          <option value="aguardando_tecnico">🔔 Aguardando Técnico</option>
-          <option value="pendente">⏳ Pendentes</option>
-          <option value="concluido">✅ Concluídos pelo técnico</option>
-          <option value="ficou_visita">🔄 Ficou na Visita</option>
-          <option value="cliente_ausente">🚪 Cliente Ausente</option>
-          <option value="processado">📋 Processados</option>
-          <option value="enviado">📤 Enviados</option>
+          <option value="aguardando_tecnico">Aguardando Técnico</option>
+          <option value="pendente">Pendentes</option>
+          <option value="concluido">Concluídos pelo técnico</option>
+          <option value="ficou_visita">Ficou na Visita</option>
+          <option value="cliente_ausente">Cliente Ausente</option>
+          <option value="processado">Processados</option>
+          <option value="enviado">Enviados</option>
         </select>
         <input type="date" className="filter-input" value={filtData} onChange={e => mudarFiltro(setFiltData, e.target.value)} />
         {(busca || filtStatus || filtData) && (
-          <button className="btn-sm btn-view" onClick={() => { setBusca(''); setFiltStatus(''); setFiltData(''); setVisiveis(TAMANHO_PAGINA) }}>✕ Limpar</button>
+          <button className="btn-sm btn-view" onClick={() => { setBusca(''); setFiltStatus(''); setFiltData(''); setVisiveis(TAMANHO_PAGINA) }}><X size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Limpar</button>
         )}
       </div>
 
@@ -63,10 +66,10 @@ export default function OrdensServicoTab() {
       </div>
 
       {loading && <div className="loading-state"><div className="spinner" /><div className="loading-text">Carregando...</div></div>}
-      {error && !loading && <div className="err-msg">⚠️ {error}</div>}
+      {error && !loading && <div className="err-msg"><AlertTriangle size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />{error}</div>}
 
       {!loading && !error && filtered.length === 0 && (
-        <div className="empty-state"><div className="e-icon">📭</div><p>Nenhuma OS encontrada.</p></div>
+        <div className="empty-state"><div className="e-icon"><Inbox size={40} strokeWidth={2} /></div><p>Nenhuma OS encontrada.</p></div>
       )}
 
       {!loading && !error && filtered.length > 0 && (
@@ -86,12 +89,12 @@ export default function OrdensServicoTab() {
                 <div className="os-card-seg">{r.seguradora || '—'}{r.cidade ? ` · ${r.cidade}` : ''}</div>
 
                 <div className="os-card-body" style={{ marginTop: 10 }}>
-                  {r.servico && <div className="os-card-row">🔧 <strong>{r.servico}</strong></div>}
-                  {r.data_chegada && <div className="os-card-row">📅 {fmtDate(r.data_chegada)}</div>}
-                  {r.tecnico_nome && <div className="os-card-row">👷 {r.tecnico_nome}</div>}
+                  {r.servico && <div className="os-card-row"><Wrench size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} /><strong>{r.servico}</strong></div>}
+                  {r.data_chegada && <div className="os-card-row"><CalendarDays size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />{fmtDate(r.data_chegada)}</div>}
+                  {r.tecnico_nome && <div className="os-card-row"><HardHat size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />{r.tecnico_nome}</div>}
                   {lucro !== null && (
                     <div className="os-card-row">
-                      💰 <strong style={{ color: lucro >= 0 ? 'var(--success)' : 'var(--danger)' }}>{fmtBRL(lucro)}</strong>
+                      <Wallet size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} /><strong style={{ color: lucro >= 0 ? 'var(--success)' : 'var(--danger)' }}>{fmtBRL(lucro)}</strong>
                     </div>
                   )}
                 </div>
@@ -101,17 +104,17 @@ export default function OrdensServicoTab() {
                   {r.status === 'aguardando_tecnico' && (
                     <button className="btn-sm btn-link"
                       onClick={() => setGeneratedLink({ link: buildLink(r), os: r.id, nome: r.nome_segurado, seguradora: r.seguradora, num_assist: r.num_assist })}>
-                      🔗 Link
+                      <Link2 size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Link
                     </button>
                   )}
                   {(r.status === 'processado' || r.status === 'enviado') && (
                     <button className="btn-sm" style={{ background: '#1a5276', color: '#fff' }}
                       onClick={() => openLinkRelModal(r)}>
-                      🔗 Link
+                      <Link2 size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Link
                     </button>
                   )}
                   {(r.status === 'concluido' || r.status === 'pendente' || !r.status) && (
-                    <button className="btn-sm btn-ok" disabled={updating} onClick={() => changeStatus(r.id, 'processado')} title="Marcar como processado">✓</button>
+                    <button className="btn-sm btn-ok" disabled={updating} onClick={() => changeStatus(r.id, 'processado')} title="Marcar como processado"><Check size={15} strokeWidth={2.5} /></button>
                   )}
                 </div>
               </div>
@@ -124,7 +127,7 @@ export default function OrdensServicoTab() {
         <div style={{ textAlign: 'center', marginTop: 18 }}>
           <button className="btn-sm btn-view" style={{ padding: '10px 24px' }}
             onClick={() => setVisiveis(v => v + TAMANHO_PAGINA)}>
-            ▼ Mostrar mais {Math.min(TAMANHO_PAGINA, filtered.length - visiveis)} ({filtered.length - visiveis} restantes)
+            <ChevronDown size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Mostrar mais {Math.min(TAMANHO_PAGINA, filtered.length - visiveis)} ({filtered.length - visiveis} restantes)
           </button>
         </div>
       )}

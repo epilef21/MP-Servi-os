@@ -21,6 +21,12 @@ import { SEGS_COM_CODIGO, digitosCodigo } from '../../utils/faturamento.js'
 import { buildGoogleCalendarLink } from '../../utils/googleCalendarLink.js'
 import { excluirEventoOS } from '../../utils/googleCalendarApi.js'
 import { copyToClipboard } from '../../utils/clipboard.js'
+import {
+  Link2, Smartphone, Printer, CalendarDays, Trash2, X, Phone, ClipboardList, Pencil,
+  Hourglass, Save, Sunrise, Sun, Handshake, User, StickyNote, CheckCircle2, Flag, MapPin,
+  RefreshCw, DoorOpen, Settings, Building2, HardHat, Undo2, Lock, Star, ReceiptText,
+  AlertTriangle, KeyRound, Car, FileText, Package, Signature, Clock, Send, Info, Camera,
+} from 'lucide-react'
 
 export default function DetalheOSModal({ os: selected, onClose }) {
   const {
@@ -284,40 +290,40 @@ export default function DetalheOSModal({ os: selected, onClose }) {
             {selected.status === 'aguardando_tecnico' && (
               <button className="btn-sm btn-link"
                 onClick={() => setGeneratedLink({ link: buildLink(selected), os: selected.id, nome: selected.nome_segurado, seguradora: selected.seguradora, num_assist: selected.num_assist })}>
-                🔗 Reenviar Link
+                <Link2 size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Reenviar Link
               </button>
             )}
             <button className="btn-sm btn-png" disabled={genPng} onClick={() => handlePNG(selected)}>
-              {genPng ? '⏳' : '📱 PNG WhatsApp'}
+              {genPng ? <Hourglass size={15} strokeWidth={2} /> : <><Smartphone size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />PNG WhatsApp</>}
             </button>
-            <button className="btn-sm btn-pdf" onClick={() => generatePDF(selected)}>🖨️ PDF</button>
-            <button className="btn-sm" style={{ background: '#1a5276', color: '#fff' }} onClick={() => openLinkRelModal(selected)}>🔗 Link Relatório</button>
+            <button className="btn-sm btn-pdf" onClick={() => generatePDF(selected)}><Printer size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />PDF</button>
+            <button className="btn-sm" style={{ background: '#1a5276', color: '#fff' }} onClick={() => openLinkRelModal(selected)}><Link2 size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Link Relatório</button>
             {selected.data_agendada && (
               <a href={buildGoogleCalendarLink(selected, slug)} target="_blank" rel="noopener noreferrer"
                 className="btn-sm btn-calendar" style={{ fontSize: '.78rem' }}>
-                📅 Calendar
+                <CalendarDays size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Calendar
               </a>
             )}
-            <button className="btn-sm" style={{ background: 'rgba(220,38,38,.35)', color: '#fff' }} title="Excluir OS" onClick={() => excluirOS(selected)}>🗑️</button>
-            <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onClose}>✕</button>
+            <button className="btn-sm" style={{ background: 'rgba(220,38,38,.35)', color: '#fff' }} title="Excluir OS" onClick={() => excluirOS(selected)}><Trash2 size={15} strokeWidth={2} /></button>
+            <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }} onClick={onClose}><X size={15} strokeWidth={2} /></button>
           </div>
         </div>
 
         <div className="modal-body">
           {selected.origem === 'admin' && (
             <div style={{ marginBottom: 14 }}>
-              <span className="badge" style={{ background: '#f0f5ff', color: '#1a3a8c', border: '1px solid #b0c4f0' }}>📞 OS Cadastrada Manualmente</span>
+              <span className="badge" style={{ background: '#f0f5ff', color: '#1a3a8c', border: '1px solid #b0c4f0' }}><Phone size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />OS Cadastrada Manualmente</span>
             </div>
           )}
 
           <div className="md-section">
             <h3 style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-              <span>📋 Atendimento</span>
+              <span><ClipboardList size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Atendimento</span>
               {!editAtend
-                ? <button className="btn-sm" style={{ fontSize:'11px', padding:'3px 10px' }} onClick={abrirEditAtend}>✏️ Editar</button>
+                ? <button className="btn-sm" style={{ fontSize:'11px', padding:'3px 10px' }} onClick={abrirEditAtend}><Pencil size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Editar</button>
                 : <div style={{ display:'flex', gap:6 }}>
                     <button className="btn-sm" style={{ fontSize:'11px', padding:'3px 10px', background:'var(--muted)', color:'#fff' }} onClick={() => setEditAtend(false)}>Cancelar</button>
-                    <button className="btn-sm btn-ok" style={{ fontSize:'11px', padding:'3px 10px' }} disabled={savingAtend} onClick={saveAtend}>{savingAtend ? '⏳' : '💾 Salvar'}</button>
+                    <button className="btn-sm btn-ok" style={{ fontSize:'11px', padding:'3px 10px' }} disabled={savingAtend} onClick={saveAtend}>{savingAtend ? <Hourglass size={13} strokeWidth={2} /> : <><Save size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Salvar</>}</button>
                   </div>
               }
             </h3>
@@ -334,7 +340,15 @@ export default function DetalheOSModal({ os: selected, onClose }) {
                   <p>{selected.hora_chegada
                     ? `${selected.hora_chegada} → ${selected.hora_saida || '—'}`
                     : selected.faixa_horario
-                      ? ({ manha: '🌅 Manhã (08h–12h)', tarde: '☀️ Tarde (13h–17h)', dia_todo: '📅 Dia todo (08h–17h)', a_combinar: '🤝 A Combinar' }[selected.faixa_horario] || selected.faixa_horario) + (selected.faixa_horario_custom ? ` · ${selected.faixa_horario_custom}` : '')
+                      ? <>
+                          {({
+                            manha: <><Sunrise size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Manhã (08h–12h)</>,
+                            tarde: <><Sun size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Tarde (13h–17h)</>,
+                            dia_todo: <><CalendarDays size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Dia todo (08h–17h)</>,
+                            a_combinar: <><Handshake size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />A Combinar</>,
+                          }[selected.faixa_horario] || selected.faixa_horario)}
+                          {selected.faixa_horario_custom ? ` · ${selected.faixa_horario_custom}` : ''}
+                        </>
                       : '—'}</p>
                 </div>
                 <div className="md-field span-2"><label>Serviço</label><p>{selected.servico || '—'}</p></div>
@@ -347,10 +361,10 @@ export default function DetalheOSModal({ os: selected, onClose }) {
                 <div className="md-field"><label>Faixa de Horário</label>
                   <select className="inline-input" value={atendForm.faixa_horario} onChange={e => setAtendForm(p=>({...p, faixa_horario: e.target.value}))}>
                     <option value="">Selecione...</option>
-                    <option value="manha">🌅 Manhã — 08:00 às 12:00</option>
-                    <option value="tarde">☀️ Tarde — 13:00 às 17:00</option>
-                    <option value="dia_todo">📅 Manhã e Tarde — 08:00 às 17:00</option>
-                    <option value="a_combinar">🤝 A Combinar</option>
+                    <option value="manha">Manhã — 08:00 às 12:00</option>
+                    <option value="tarde">Tarde — 13:00 às 17:00</option>
+                    <option value="dia_todo">Manhã e Tarde — 08:00 às 17:00</option>
+                    <option value="a_combinar">A Combinar</option>
                   </select>
                 </div>
                 <div className="md-field"><label>Data real (DD/MM/AAAA)</label><input className="inline-input" placeholder="DD/MM/AAAA" value={atendForm.data_chegada} onChange={e => setAtendForm(p=>({...p, data_chegada: e.target.value}))} /></div>
@@ -362,7 +376,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
           </div>
 
           <div className="md-section">
-            <h3>👤 Segurado</h3>
+            <h3><User size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Segurado</h3>
             {!editAtend ? (
               <div className="md-grid">
                 <div className="md-field"><label>Nome</label><p>{selected.nome_segurado || '—'}</p></div>
@@ -385,7 +399,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
 
           {(editAtend || selected.desc_problema || selected.desc_servico) && (
             <div className="md-section">
-              <h3>📝 Descrições</h3>
+              <h3><StickyNote size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Descrições</h3>
               <div className="md-grid col-1">
                 {editAtend
                   ? <div className="md-field"><label>Descrição do Problema</label><textarea className="inline-input" rows={3} style={{ resize:'vertical', width:'100%' }} value={atendForm.desc_problema} onChange={e => setAtendForm(p=>({...p, desc_problema: e.target.value}))} placeholder="Descreva o problema..." /></div>
@@ -409,10 +423,10 @@ export default function DetalheOSModal({ os: selected, onClose }) {
 
           {selected.checkup?.length > 0 && (
             <div className="md-section">
-              <h3>✅ Chek-Up</h3>
+              <h3><CheckCircle2 size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Chek-Up</h3>
               <div className="tags-wrap">
                 {selected.checkup.map((c, i) => (
-                  <span key={i} className="tag">✅ {typeof c === 'object' ? `${c.item}${c.quant ? ` (Qtd: ${c.quant})` : ''}` : c}</span>
+                  <span key={i} className="tag"><CheckCircle2 size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />{typeof c === 'object' ? `${c.item}${c.quant ? ` (Qtd: ${c.quant})` : ''}` : c}</span>
                 ))}
               </div>
             </div>
@@ -420,7 +434,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
 
           {(selected.problema_solucionado || editAtend) && (
             <div className="md-section">
-              <h3>🏁 Conclusão</h3>
+              <h3><Flag size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Conclusão</h3>
               {!editAtend ? (
                 <div className="md-grid">
                   <div className="md-field"><label>Problema Solucionado</label><p>{fmtSN(selected.problema_solucionado)}</p></div>
@@ -465,14 +479,14 @@ export default function DetalheOSModal({ os: selected, onClose }) {
 
           {selected.resultado_visita && (
             <div className="md-section">
-              <h3>📍 Resultado da Visita</h3>
+              <h3><MapPin size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Resultado da Visita</h3>
               <div className="md-grid">
                 <div className="md-field">
                   <label>Resultado</label>
                   <p>
-                    {selected.resultado_visita === 'concluido'       && '✅ Serviço Concluído'}
-                    {selected.resultado_visita === 'ficou_visita'    && '🔄 Ficou na Visita'}
-                    {selected.resultado_visita === 'cliente_ausente' && '🚪 Cliente Ausente'}
+                    {selected.resultado_visita === 'concluido'       && <><CheckCircle2 size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Serviço Concluído</>}
+                    {selected.resultado_visita === 'ficou_visita'    && <><RefreshCw size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Ficou na Visita</>}
+                    {selected.resultado_visita === 'cliente_ausente' && <><DoorOpen size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Cliente Ausente</>}
                   </p>
                 </div>
                 {selected.data_retorno && (
@@ -491,10 +505,10 @@ export default function DetalheOSModal({ os: selected, onClose }) {
                   <div className="md-field">
                     <label>Motivo do Retorno</label>
                     <p>{{
-                      aguardando_peca:      '⚙️ Aguardando Peça',
-                      aprovacao_cliente:    '👤 Aprovação do Cliente',
-                      aprovacao_seguradora: '🏢 Aprovação da Seguradora',
-                      outro: `📝 ${selected.motivo_outro || 'Outro'}`,
+                      aguardando_peca:      <><Settings size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Aguardando Peça</>,
+                      aprovacao_cliente:    <><User size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Aprovação do Cliente</>,
+                      aprovacao_seguradora: <><Building2 size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Aprovação da Seguradora</>,
+                      outro: <><StickyNote size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />{selected.motivo_outro || 'Outro'}</>,
                     }[selected.motivo_retorno]}</p>
                   </div>
                 )}
@@ -510,7 +524,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
 
           {/* Técnico — com select integrado */}
           <div className="md-section" style={{ background: '#f5f8fc', border: '1px solid #c8d8ec', borderRadius: 8, padding: '14px 16px' }}>
-            <h3 style={{ color: '#1a3fa8', marginBottom: 12 }}>👷 Técnico Responsável</h3>
+            <h3 style={{ color: '#1a3fa8', marginBottom: 12 }}><HardHat size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Técnico Responsável</h3>
             <div className="md-grid">
               <div className="md-field">
                 <label>Nome do Técnico</label>
@@ -544,7 +558,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
                         style={{ flex: 1, padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.9rem' }}
                       />
                       {tecnicosAtivos.length > 0 && (
-                        <button className="btn-sm btn-view" onClick={() => setDetTecnicoMode('select')} type="button">↩</button>
+                        <button className="btn-sm btn-view" onClick={() => setDetTecnicoMode('select')} type="button"><Undo2 size={14} strokeWidth={2} /></button>
                       )}
                     </div>
                   )
@@ -559,12 +573,12 @@ export default function DetalheOSModal({ os: selected, onClose }) {
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
               <button className="btn-sm btn-ok" disabled={savingTecnico} onClick={saveTecnico}>
-                {savingTecnico ? '⏳ Salvando...' : '💾 Salvar Técnico'}
+                {savingTecnico ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Salvar Técnico</>}
               </button>
               {tecnicoForm.tel && tecnicoForm.nome && (
                 <a className="btn-whatsapp" href={buildWhatsAppTecnico(selected, tecnicoForm)}
                   target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', fontSize: '.82rem' }}>
-                  📲 Enviar no WhatsApp
+                  <Smartphone size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Enviar no WhatsApp
                 </a>
               )}
             </div>
@@ -573,8 +587,8 @@ export default function DetalheOSModal({ os: selected, onClose }) {
           {/* Anotações internas — visível só pelo admin, não vai ao PDF nem PNG */}
           <div className="md-section" style={{ background: '#fffbf0', border: '1.5px solid #f0d080', borderRadius: 8, padding: '14px 16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <h3 style={{ color: '#8a6a00', margin: 0 }}>📝 Anotações Internas</h3>
-              <span style={{ fontSize: '.72rem', color: '#aaa', fontWeight: 600 }}>🔒 Só você vê isso</span>
+              <h3 style={{ color: '#8a6a00', margin: 0 }}><StickyNote size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Anotações Internas</h3>
+              <span style={{ fontSize: '.72rem', color: '#aaa', fontWeight: 600 }}><Lock size={12} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 3 }} />Só você vê isso</span>
             </div>
             <textarea
               rows={4}
@@ -590,7 +604,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
             />
             <div style={{ marginTop: 10, textAlign: 'right' }}>
               <button className="btn-sm btn-ok" disabled={savingAnotacao} onClick={saveAnotacao}>
-                {savingAnotacao ? '⏳ Salvando...' : '💾 Salvar Anotação'}
+                {savingAnotacao ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Salvar Anotação</>}
               </button>
             </div>
           </div>
@@ -598,7 +612,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
           {selected.avaliacao_nota
             ? (
               <div className="md-section" style={{ background: '#fffbf0', border: '1px solid #f0d88a', borderRadius: 8, padding: '14px 16px' }}>
-                <h3 style={{ color: '#8a6a00', marginBottom: 8 }}>⭐ Avaliação do Segurado</h3>
+                <h3 style={{ color: '#8a6a00', marginBottom: 8 }}><Star size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Avaliação do Segurado</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', gap: 2 }}>
                     {[1,2,3,4,5].map(i => (
@@ -615,7 +629,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
               </div>
             ) : (
               <div className="md-section" style={{ background: '#fafafa', border: '1px solid var(--border)', borderRadius: 8, padding: '12px 16px' }}>
-                <h3 style={{ color: 'var(--muted)', marginBottom: 4 }}>⭐ Avaliação do Segurado</h3>
+                <h3 style={{ color: 'var(--muted)', marginBottom: 4 }}><Star size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Avaliação do Segurado</h3>
                 <p style={{ fontSize: '.82rem', color: 'var(--muted)' }}>Ainda não avaliado.</p>
               </div>
             )
@@ -643,7 +657,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
             const deslocLancadoEm = selected.fat_lancado_desloc_em || null
             return (
               <div className="md-section" style={{ background: '#eef3ff', border: '1.5px solid #adc5f5', borderRadius: 8, padding: '14px 16px' }}>
-                <h3 style={{ color: '#1a3fa8', marginBottom: 14 }}>🧾 Tarifação</h3>
+                <h3 style={{ color: '#1a3fa8', marginBottom: 14 }}><ReceiptText size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Tarifação</h3>
 
                 {/* ── Passo 1: Calcular ── */}
                 <p style={{ fontSize: '.73rem', fontWeight: 700, color: '#1a3fa8', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 10 }}>
@@ -701,7 +715,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
                       placeholder="Ex: 160"
                       style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 5, fontFamily: 'Barlow,sans-serif', fontSize: '.9rem' }} />
                     {km > 200 && (
-                      <span style={{ fontSize: '.75rem', color: '#e07000', fontWeight: 600 }}>⚠️ Acima de 200km — taxa {r(faixas.acima200km)}/km</span>
+                      <span style={{ fontSize: '.75rem', color: '#e07000', fontWeight: 600 }}><AlertTriangle size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Acima de 200km — taxa {r(faixas.acima200km)}/km</span>
                     )}
                   </div>
                 </div>
@@ -739,7 +753,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
                     setCopiedTarif(true); setTimeout(() => setCopiedTarif(false), 2500)
                   }}
                 >
-                  {copiedTarif ? '✅ Copiado!' : '📋 Copiar mensagem para WhatsApp'}
+                  {copiedTarif ? <><CheckCircle2 size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Copiado!</> : <><ClipboardList size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Copiar mensagem para WhatsApp</>}
                 </button>
 
                 <div style={{ borderTop: '1px solid #adc5f5', margin: '16px 0' }} />
@@ -752,11 +766,11 @@ export default function DetalheOSModal({ os: selected, onClose }) {
                   <>
                     {(selected.fat_codigo_mo || selected.fat_codigo) && (
                       <div style={{ background: '#e8f5e9', border: '1px solid #81c784', borderRadius: 6, padding: '8px 12px', marginBottom: 10, fontSize: '.88rem', display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-                        <span>🔑 Mão de obra: <strong style={{ letterSpacing: 3, fontFamily: 'monospace' }}>{selected.fat_codigo_mo || selected.fat_codigo}</strong></span>
+                        <span><KeyRound size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Mão de obra: <strong style={{ letterSpacing: 3, fontFamily: 'monospace' }}>{selected.fat_codigo_mo || selected.fat_codigo}</strong></span>
                         <span>Valor: <strong>{fmtBRL(selected.fat_valor_mo ?? selected.fat_valor_aprovado)}</strong></span>
                         {selected.fat_codigo_desloc && (
                           <>
-                            <span>🚗 Deslocamento: <strong style={{ letterSpacing: 3, fontFamily: 'monospace' }}>{selected.fat_codigo_desloc}</strong></span>
+                            <span><Car size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Deslocamento: <strong style={{ letterSpacing: 3, fontFamily: 'monospace' }}>{selected.fat_codigo_desloc}</strong></span>
                             <span>Valor: <strong>{fmtBRL(selected.fat_valor_desloc)}</strong></span>
                           </>
                         )}
@@ -808,14 +822,14 @@ export default function DetalheOSModal({ os: selected, onClose }) {
                         onClick={saveCodigos}
                         style={{ background: '#1a3fa8', color: '#fff', border: 'none', borderRadius: 7, padding: '8px 18px', fontFamily: 'Barlow Condensed,sans-serif', fontWeight: 700, fontSize: '.92rem', cursor: 'pointer', opacity: savingCodigo ? .6 : 1 }}
                       >
-                        {savingCodigo ? '⏳ Salvando...' : '💾 Salvar códigos'}
+                        {savingCodigo ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Salvar códigos</>}
                       </button>
                       <span style={{ fontSize: '.78rem', color: 'var(--muted)' }}>Deslocamento é opcional — deixe em branco se a OS não tiver</span>
                     </div>
                   </>
                 ) : (
                   <div style={{ background: '#eef3ff', border: '1px solid #adc5f5', borderRadius: 6, padding: '10px 14px', fontSize: '.86rem', color: '#1a3fa8' }}>
-                    ℹ️ {seg || 'Esta seguradora'} não usa código de faturamento. Esta OS entra automaticamente na fila de faturamento pelo nº da assistência ({selected.num_assist || '—'}).
+                    <Info size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />{seg || 'Esta seguradora'} não usa código de faturamento. Esta OS entra automaticamente na fila de faturamento pelo nº da assistência ({selected.num_assist || '—'}).
                   </div>
                 )}
 
@@ -828,28 +842,28 @@ export default function DetalheOSModal({ os: selected, onClose }) {
                 {temCodigo ? (
                   <div style={{ display: 'grid', gap: 6 }}>
                     <div style={{ background: moLancadoEm ? '#e8f5e9' : '#f5f5f5', border: `1px solid ${moLancadoEm ? '#81c784' : 'var(--border)'}`, borderRadius: 6, padding: '8px 12px' }}>
-                      Mão de obra: {moLancadoEm ? <>✅ lançada em {fmtDatetime(moLancadoEm)}</> : '⏳ ainda não lançada'}
+                      Mão de obra: {moLancadoEm ? <><CheckCircle2 size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />lançada em {fmtDatetime(moLancadoEm)}</> : <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />ainda não lançada</>}
                     </div>
                     {selected.fat_codigo_desloc && (
                       <div style={{ background: deslocLancadoEm ? '#e8f5e9' : '#f5f5f5', border: `1px solid ${deslocLancadoEm ? '#81c784' : 'var(--border)'}`, borderRadius: 6, padding: '8px 12px' }}>
-                        Deslocamento: {deslocLancadoEm ? <>✅ lançado em {fmtDatetime(deslocLancadoEm)}</> : '⏳ ainda não lançado'}
+                        Deslocamento: {deslocLancadoEm ? <><CheckCircle2 size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />lançado em {fmtDatetime(deslocLancadoEm)}</> : <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />ainda não lançado</>}
                       </div>
                     )}
                   </div>
                 ) : (
                   <div style={{ background: selected.fat_lancado_em ? '#e8f5e9' : '#f5f5f5', border: `1px solid ${selected.fat_lancado_em ? '#81c784' : 'var(--border)'}`, borderRadius: 6, padding: '8px 12px' }}>
-                    {selected.fat_lancado_em ? <>✅ Lançada em {fmtDatetime(selected.fat_lancado_em)}</> : '⏳ Ainda não lançada'}
+                    {selected.fat_lancado_em ? <><CheckCircle2 size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Lançada em {fmtDatetime(selected.fat_lancado_em)}</> : <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Ainda não lançada</>}
                   </div>
                 )}
                 <p style={{ fontSize: '.78rem', color: 'var(--muted)', marginTop: 8 }}>
-                  Para marcar como lançado, use o checklist da fila em Financeiro → 📄 Faturamento.
+                  Para marcar como lançado, use o checklist da fila em Financeiro → <FileText size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 3 }} />Faturamento.
                 </p>
               </div>
             )
           })()}
 
           <div className="md-section" style={{ background: '#f0f7f0', border: '1px solid #b8ddb8', borderRadius: 8, padding: '14px 16px' }}>
-            <h3 style={{ color: '#1e6e3e', marginBottom: 4 }}>🔒 Fechamento Financeiro Interno</h3>
+            <h3 style={{ color: '#1e6e3e', marginBottom: 4 }}><Lock size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Fechamento Financeiro Interno</h3>
             <p style={{ fontSize: '.78rem', color: 'var(--muted)', marginBottom: 12 }}>
               Esses valores não aparecem no formulário do prestador nem no PDF.
             </p>
@@ -886,7 +900,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
             {/* Campos de material */}
             <div style={{ marginTop: 14, borderTop: '1px solid #b8ddb8', paddingTop: 14 }}>
               <p style={{ fontSize: '.78rem', color: 'var(--muted)', marginBottom: 10 }}>
-                📦 Material (para o DRE da empresa)
+<Package size={13} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Material (para o DRE da empresa)
               </p>
               <div className="md-grid">
                 <div className="md-field">
@@ -922,14 +936,14 @@ export default function DetalheOSModal({ os: selected, onClose }) {
 
             <div style={{ marginTop: 12, textAlign: 'right' }}>
               <button className="btn-sm btn-ok" disabled={savingFin} onClick={saveFin}>
-                {savingFin ? '⏳ Salvando...' : '💾 Salvar Financeiro'}
+                {savingFin ? <><Hourglass size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Salvando...</> : <><Save size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Salvar Financeiro</>}
               </button>
             </div>
           </div>
 
           {selected.fotos?.length > 0 && (
             <div className="md-section">
-              <h3>📷 Fotos do Atendimento</h3>
+              <h3><Camera size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Fotos do Atendimento</h3>
               <div className="foto-viewer-grid">
                 {selected.fotos.map((url, i) => (
                   <img key={i} src={url} alt={`foto ${i + 1}`} className="foto-viewer-img"
@@ -941,7 +955,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
 
           {(selected.assinatura_prestador || selected.assinatura_segurado) && (
             <div className="md-section">
-              <h3>✍️ Assinaturas</h3>
+              <h3><Signature size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Assinaturas</h3>
               <div className="md-grid">
                 <div className="md-field"><label>Prestador</label>{selected.assinatura_prestador ? <img className="sig-img" src={selected.assinatura_prestador} alt="" /> : <p style={{ color: 'var(--muted)' }}>Não registrada</p>}</div>
                 <div className="md-field"><label>Segurado</label>{selected.assinatura_segurado ? <img className="sig-img" src={selected.assinatura_segurado} alt="" /> : <p style={{ color: 'var(--muted)' }}>Não registrada</p>}</div>
@@ -951,7 +965,7 @@ export default function DetalheOSModal({ os: selected, onClose }) {
 
           {selected.status_historico?.length > 0 && (
             <div className="md-section" style={{ background: '#f8f9fb', border: '1px solid var(--border)', borderRadius: 8, padding: '14px 16px' }}>
-              <h3 style={{ color: 'var(--text)', marginBottom: 10 }}>🕐 Histórico de Status</h3>
+              <h3 style={{ color: 'var(--text)', marginBottom: 10 }}><Clock size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Histórico de Status</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {[...selected.status_historico].reverse().map((h, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
@@ -985,29 +999,29 @@ export default function DetalheOSModal({ os: selected, onClose }) {
         <div className="modal-footer">
           <span className={`badge ${badgeCls(selected.status)}`} style={{ marginRight: 'auto' }}>{badgeLabel(selected.status)}</span>
           {(selected.status === 'concluido' || selected.status === 'pendente' || !selected.status) && (
-            <button className="btn-sm btn-ok" disabled={updating} onClick={() => changeStatus(selected.id, 'processado')}>✓ Processado</button>
+            <button className="btn-sm btn-ok" disabled={updating} onClick={() => changeStatus(selected.id, 'processado')}><CheckCircle2 size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Processado</button>
           )}
           {selected.status === 'processado' && (
-            <button className="btn-sm" style={{ background: '#1a3a8c', color: '#fff' }} disabled={updating} onClick={() => changeStatus(selected.id, 'enviado')}>📤 Enviado</button>
+            <button className="btn-sm" style={{ background: '#1a3a8c', color: '#fff' }} disabled={updating} onClick={() => changeStatus(selected.id, 'enviado')}><Send size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Enviado</button>
           )}
           {!selected.assinatura_segurado && selected.status !== 'concluido' && selected.status !== 'processado' && selected.status !== 'enviado' && (
             <button
               className="btn-sm"
               style={{ background: '#7c3aed', color: '#fff' }}
               onClick={() => setShowPreencherOS(true)}
-            >✍️ Preencher e Enviar</button>
+            ><Signature size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Preencher e Enviar</button>
           )}
           {selected.status === 'aguardando_assinatura_cliente' && (
             <button
               className="btn-sm"
               style={{ background: '#25d366', color: '#fff' }}
               onClick={() => reenviarLinkAssinatura(selected)}
-            >📱 Reenviar Link</button>
+            ><Smartphone size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Reenviar Link</button>
           )}
           <button className="btn-sm btn-png" disabled={genPng} onClick={() => handlePNG(selected)}>
-            {genPng ? '⏳ Gerando...' : '📱 PNG WhatsApp'}
+            {genPng ? <><Hourglass size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Gerando...</> : <><Smartphone size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />PNG WhatsApp</>}
           </button>
-          <button className="btn-sm btn-pdf" onClick={() => generatePDF(selected)}>🖨️ Baixar PDF</button>
+          <button className="btn-sm btn-pdf" onClick={() => generatePDF(selected)}><Printer size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Baixar PDF</button>
         </div>
       </div>
     </div>

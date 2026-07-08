@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useAdminContext } from '../../contexts/AdminContext.jsx'
 import { fmtDate } from '../../utils/formatters.js'
+import { X, Users, ChevronDown, User, ClipboardList, Folder, Star } from 'lucide-react'
 
 import { badgeLabel, badgeCls } from './statusMeta.js'
 
@@ -52,10 +53,10 @@ export default function SeguradosTab({ onSelectOS }) {
       <div className="tab-content">
         <div className="filter-bar" style={{ marginBottom: 16 }}>
           <span className="filter-label">Filtrar:</span>
-          <input className="filter-input flex-1" placeholder="🔍 Nome, telefone, cidade..."
+          <input className="filter-input flex-1" placeholder="Nome, telefone, cidade..."
             value={busca} onChange={e => mudarBusca(e.target.value)} />
           {busca && (
-            <button className="btn-sm btn-view" onClick={() => mudarBusca('')}>✕ Limpar</button>
+            <button className="btn-sm btn-view" onClick={() => mudarBusca('')}><X size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Limpar</button>
           )}
         </div>
 
@@ -67,7 +68,7 @@ export default function SeguradosTab({ onSelectOS }) {
 
         {filtrados.length === 0 && (
           <div className="empty-state">
-            <div className="e-icon">👥</div>
+            <div className="e-icon"><Users size={40} strokeWidth={2} /></div>
             <p>{busca ? `Nenhum segurado encontrado para "${busca}".` : 'Nenhum segurado encontrado.'}</p>
           </div>
         )}
@@ -112,7 +113,7 @@ export default function SeguradosTab({ onSelectOS }) {
           <div style={{ textAlign: 'center', marginTop: 18 }}>
             <button className="btn-sm btn-view" style={{ padding: '10px 24px' }}
               onClick={() => setVisiveis(v => v + TAMANHO_PAGINA)}>
-              ▼ Mostrar mais {Math.min(TAMANHO_PAGINA, filtrados.length - visiveis)} ({filtrados.length - visiveis} restantes)
+              <ChevronDown size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Mostrar mais {Math.min(TAMANHO_PAGINA, filtrados.length - visiveis)} ({filtrados.length - visiveis} restantes)
             </button>
           </div>
         )}
@@ -123,13 +124,13 @@ export default function SeguradosTab({ onSelectOS }) {
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelectedSegurado(null)}>
           <div className="modal-box">
             <div className="modal-header">
-              <h2>👤 {selectedSegurado.nome}</h2>
+              <h2><User size={19} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />{selectedSegurado.nome}</h2>
               <button className="btn-sm" style={{ background: 'rgba(255,255,255,.15)', color: '#fff' }}
-                onClick={() => setSelectedSegurado(null)}>✕</button>
+                onClick={() => setSelectedSegurado(null)}><X size={15} strokeWidth={2} /></button>
             </div>
             <div className="modal-body">
               <div className="md-section">
-                <h3>📋 Dados do Segurado</h3>
+                <h3><ClipboardList size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Dados do Segurado</h3>
                 <div className="md-grid">
                   <div className="md-field"><label>Nome</label><p>{selectedSegurado.nome}</p></div>
                   <div className="md-field"><label>Telefone</label><p>{selectedSegurado.tel || '—'}</p></div>
@@ -172,11 +173,11 @@ export default function SeguradosTab({ onSelectOS }) {
               </div>
 
               <div className="md-section" style={{ marginBottom: 0 }}>
-                <h3>📂 Histórico de Atendimentos</h3>
+                <h3><Folder size={17} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Histórico de Atendimentos</h3>
                 <table className="data-table" style={{ marginTop: 8 }}>
                   <thead>
                     <tr>
-                      <th>Data</th><th>Seguradora</th><th>Serviço</th><th>Status</th><th>⭐ Nota</th>
+                      <th>Data</th><th>Seguradora</th><th>Serviço</th><th>Status</th><th><Star size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 4 }} />Nota</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -198,7 +199,7 @@ export default function SeguradosTab({ onSelectOS }) {
                           <td data-label="Status">
                             <span className={`badge ${badgeCls(o.status)}`}>{badgeLabel(o.status)}</span>
                           </td>
-                          <td data-label="⭐ Nota" style={{ textAlign: 'center' }}>
+                          <td data-label="Nota" style={{ textAlign: 'center' }}>
                             {o.avaliacao_nota
                               ? <span style={{ color: '#f0a020', fontWeight: 700 }}>{'★'.repeat(o.avaliacao_nota)}</span>
                               : <span style={{ color: 'var(--muted)' }}>—</span>}

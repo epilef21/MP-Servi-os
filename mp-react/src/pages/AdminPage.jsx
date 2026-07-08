@@ -44,6 +44,10 @@ import {
   solicitarPermissaoENotificacao,
   escutarNotificacoesEmPrimeiroPlano,
 } from '../utils/notificacoes.js'
+import {
+  BarChart3, CalendarDays, Map, ClipboardList, FileText, Users, HardHat,
+  Settings, Wallet, AlertTriangle, Ban, DoorOpen, Menu, RefreshCw,
+} from 'lucide-react'
 
 // ── Toast component ──────────────────────────────────────────
 function Toast({ toast }) {
@@ -370,16 +374,16 @@ export default function AdminPage() {
 
         <nav className="sidebar-nav">
           {[
-            { id: 'dashboard',  icon: '📊', label: 'Dashboard'         },
-            { id: 'agenda',     icon: '📅', label: 'Agenda'            },
-            { id: 'rota',       icon: '🗺️', label: 'Rota do Dia'       },
-            { id: 'os',         icon: '📋', label: 'Ordens de Serviço' },
-            { id: 'orcamentos', icon: '📄', label: 'Orçamentos'        },
-            { id: 'segurados',  icon: '👥', label: 'Segurados'         },
-            { id: 'tecnicos',   icon: '👷', label: 'Técnicos'          },
-            { id: 'config',      icon: '⚙️', label: 'Configurações'        },
-            { id: 'relatorio',   icon: '📊', label: 'Relatório Mensal'     },
-            { id: 'financeiro',  icon: '💰', label: 'Financeiro da Empresa' },
+            { id: 'dashboard',  icon: <BarChart3 size={20} strokeWidth={2} />, label: 'Dashboard'         },
+            { id: 'agenda',     icon: <CalendarDays size={20} strokeWidth={2} />, label: 'Agenda'            },
+            { id: 'rota',       icon: <Map size={20} strokeWidth={2} />, label: 'Rota do Dia'       },
+            { id: 'os',         icon: <ClipboardList size={20} strokeWidth={2} />, label: 'Ordens de Serviço' },
+            { id: 'orcamentos', icon: <FileText size={20} strokeWidth={2} />, label: 'Orçamentos'        },
+            { id: 'segurados',  icon: <Users size={20} strokeWidth={2} />, label: 'Segurados'         },
+            { id: 'tecnicos',   icon: <HardHat size={20} strokeWidth={2} />, label: 'Técnicos'          },
+            { id: 'config',      icon: <Settings size={20} strokeWidth={2} />, label: 'Configurações'        },
+            { id: 'relatorio',   icon: <BarChart3 size={20} strokeWidth={2} />, label: 'Relatório Mensal'     },
+            { id: 'financeiro',  icon: <Wallet size={20} strokeWidth={2} />, label: 'Financeiro da Empresa' },
           ].map(item => (
             <button
               key={item.id}
@@ -414,12 +418,12 @@ export default function AdminPage() {
 
           {limite.aviso && (
             <div style={{ padding: '8px 14px', background: 'rgba(240,90,26,0.12)', borderRadius: 8, fontSize: '.75rem', color: '#ff9966', fontWeight: 600 }}>
-              ⚠️ {limite.restantes} OS restantes
+              <AlertTriangle size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />{limite.restantes} OS restantes
             </div>
           )}
           {limite.bloqueado && (
             <div style={{ padding: '8px 14px', background: 'rgba(192,57,43,0.15)', borderRadius: 8, fontSize: '.75rem', color: '#ff9090', fontWeight: 600 }}>
-              🚫 Limite atingido
+              <Ban size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Limite atingido
             </div>
           )}
         </nav>
@@ -433,7 +437,7 @@ export default function AdminPage() {
             </div>
           </div>
           <button className="sidebar-logout" onClick={handleLogout}>
-            🚪 Sair da conta
+            <DoorOpen size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Sair da conta
           </button>
         </div>
       </aside>
@@ -444,17 +448,26 @@ export default function AdminPage() {
         {/* ── PAGE HEADER ── */}
         <div className="page-header">
           <div className="page-header-left">
-            <button className="hamburger-btn" onClick={() => setSidebarOpen(o => !o)}>☰</button>
+            <button className="hamburger-btn" onClick={() => setSidebarOpen(o => !o)}><Menu size={22} strokeWidth={2} /></button>
             <div>
               <div className="page-header-title">
-                {{ dashboard: '📊 Dashboard', os: '📋 Ordens de Serviço', orcamentos: '📄 Orçamentos', segurados: '👥 Segurados', tecnicos: '👷 Técnicos', config: '⚙️ Configurações', relatorio: '📊 Relatório Mensal', financeiro: '💰 Financeiro da Empresa' }[abaAtiva]}
+                {{
+                  dashboard: <><BarChart3 size={19} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Dashboard</>,
+                  os: <><ClipboardList size={19} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Ordens de Serviço</>,
+                  orcamentos: <><FileText size={19} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Orçamentos</>,
+                  segurados: <><Users size={19} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Segurados</>,
+                  tecnicos: <><HardHat size={19} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Técnicos</>,
+                  config: <><Settings size={19} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Configurações</>,
+                  relatorio: <><BarChart3 size={19} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Relatório Mensal</>,
+                  financeiro: <><Wallet size={19} strokeWidth={2} style={{ verticalAlign: '-3px', marginRight: 6 }} />Financeiro da Empresa</>,
+                }[abaAtiva]}
               </div>
               <div className="page-header-sub">{nomeEmpresa}</div>
             </div>
           </div>
           <div className="page-header-actions">
             <button className="btn-secondary" style={{ fontSize: '.82rem', padding: '7px 14px' }} onClick={() => setRefreshKey(k => k + 1)} disabled={loading}>
-              🔄 Atualizar
+              <RefreshCw size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Atualizar
             </button>
             {abaAtiva === 'orcamentos'
               ? (
@@ -471,7 +484,7 @@ export default function AdminPage() {
                     title="Importar OS via texto — Mapfre, Juvo/Tempo, Maxpar, Mondial"
                     style={{ fontSize: '.82rem' }}
                   >
-                    📋 Importar por Texto
+                    <ClipboardList size={15} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 5 }} />Importar por Texto
                   </button>
                   <button
                     className="btn-new-os"
